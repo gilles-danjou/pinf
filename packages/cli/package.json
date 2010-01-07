@@ -1,0 +1,17 @@
+{
+    "name": "cli",
+    "uid": "http://pinf.org/cadorn.org/pinf/packages/cli",
+    "dependencies": [
+        "github.com/cadorn/wildfire/raw/master/lib-js-system"
+    ],
+    "using": {
+        "wildfire": {
+            "catalog": "http://github.com/cadorn/wildfire/raw/master/catalog.json",
+            "name": "lib-js-system"
+        },
+        "util": {
+            "catalog": "http://github.com/cadorn/util/raw/master/catalog.json",
+            "name": "lib-js"
+        }
+    }
+}

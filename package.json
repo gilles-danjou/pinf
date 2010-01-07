@@ -2,5 +2,15 @@
     "name": "pinf",
     "dependencies": [
         "narwhal"
-    ]
+    ],
+    "using": {
+        "cli": {
+            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+            "name": "cli"
+        },
+        "registry-server": {
+            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+            "name": "registry-server"
+        }
+    }
 }

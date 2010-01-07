@@ -1,0 +1,27 @@
+{
+    "name": "registry-server",
+    "type": "using",
+    "build": {
+        "defaultTarget": "dev",
+        "using": {
+            "devtools": {
+                "catalog": "http://github.com/cadorn/gae-runner/raw/master/catalog.json",
+                "name": "devtools"
+            }
+        },
+        "targets": {
+            "dev": "github.com/cadorn/gae-runner/raw/master/devtools:build/dev",
+            "dist": "github.com/cadorn/gae-runner/raw/master/devtools:build/dist",
+        }
+    },
+    "using": {
+        "util": {
+            "catalog": "http://github.com/cadorn/util/raw/master/catalog.json",
+            "name": "lib-js"
+        }
+    },
+    "appengine": {
+        "name": "cadorn-test",
+        "email": "christoph@christophdorn.com"
+    }
+}

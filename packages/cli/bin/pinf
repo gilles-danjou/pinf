@@ -1,0 +1,3 @@
+#!/usr/bin/env narwhal
+
+require("pinf", "github.com/cadorn/pinf/raw/master/cli").main(system.args);

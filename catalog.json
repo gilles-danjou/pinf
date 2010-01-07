@@ -1,4 +1,14 @@
 {
     "schema": "1.1",
-    "packages": {}
+    "location": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+    "packages": {
+        "cli": {
+            "location": "http://github.com/cadorn/pinf/zipball/master/",
+            "path": "packages/cli"
+        },
+        "registry-server": {
+            "location": "http://github.com/cadorn/pinf/zipball/master/",
+            "path": "packages/registry-server"
+        }
+    }
 }

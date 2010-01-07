@@ -1,19 +1,24 @@
+PINF Registry Server
+====================
 
-PINF
-====
+A server to track open source releases and how they are combined by users to build programs.
 
-A toolchain automation platform written in JavaScript on top of [Narwhal](http://narwhaljs.org/).
 
-**STATUS: Under development. Not functional yet!**
- 
+Dev Setup
+=========
 
-Links
-=====
+**NOTE:** *You must be using Christoph Dorn's **experimental** narwhal branch for extra tusk functionality.*
 
- * [(Python) People want CPAN :-)](http://groups.google.com/group/commonjs/browse_thread/thread/5aa78c78d6fcdd0c?hl=en)
- * [Defining Well-Known URIs](http://tools.ietf.org/html/draft-nottingham-site-meta-05)
- * [WebFingerProtocol](http://code.google.com/p/webfinger/wiki/WebFingerProtocol)
- * [Design by contract](http://en.wikipedia.org/wiki/Design_by_contract)
+    tusk package install --alias gae-devtools http://github.com/cadorn/gae-runner/raw/master/catalog.json devtools
+
+Dev Server:
+
+    gae launch --package registry-server --build --dev
+
+Deployment:
+
+    tusk package --package registry-server build dist
+
 
 License
 =======
