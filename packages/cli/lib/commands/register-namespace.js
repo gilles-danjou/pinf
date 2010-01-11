@@ -7,7 +7,7 @@ var URI = require("uri");
 var ARGS = require("args");
 var ARGS_UTIL = require("args-util", "util");
 var VALIDATOR = require("validator", "util");
-var CLIENT = require("../client");
+var CLIENT = require("../client/registry-server");
 
 var command = exports["register-namespace"] = new ARGS.Parser();
 

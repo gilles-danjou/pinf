@@ -10,25 +10,26 @@ var VALIDATOR = require("validator", "util");
 var PINF = require("../pinf");
 var CLIENT = require("../client/registry-server");
 
-var command = exports["register-package"] = new ARGS.Parser();
+var command = exports["announce-release"] = new ARGS.Parser();
 
-command.help('Register a package to a namespace');
-command.arg("Namespace", "PackageDirectory");
+command.help('Announce a new release of a package');
+command.arg("PackageDirectory");
+command.option("--branch").set().help("The branch to announce (instead of the latest tag)");
+command.option("--major").set().help("The major version to search for the latest tag");
 command.helpful();
 
 command.action(function (options) {
 
     try {
-        var namespace = VALIDATOR.validate("path", UTIL.trim(options.args[0]), {
-            "dropTrailingSlash": true
-        });
-        var directory = VALIDATOR.validate("directory", UTIL.trim(options.args[1]), {
+        var directory = VALIDATOR.validate("directory", UTIL.trim(options.args[0]), {
             "return": "FILE.Path"
         });
         
-        var client = CLIENT.Client(PINF.getDatabase().getRegistryUriForNamespace(namespace));
-        client.registerPackage({
+        var client = CLIENT.Client(PINF.getDatabase().getRegistryUriForPackage(directory));
+        client.announceRelease({
             "directory": directory,
+            "branch": options.branch || null,
+            "major": options.major || null,
             "print": command.print
         });
 

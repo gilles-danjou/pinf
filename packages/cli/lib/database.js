@@ -1,9 +1,14 @@
 
+
+function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
+
+
 var UTIL = require("util");
 var FILE = require("file");
 var JSON = require("json");
 var URI = require("uri");
 var JSON_STORE = require("json-store", "util");
+var PACKAGE_DESCRIPTOR = require("./package-descriptor");
 
 
 var Database = exports.Database = function(path) {
@@ -37,4 +42,9 @@ Database.prototype.getRegistryUriForNamespace = function(namespace) {
     }
     var registryInfo = this.getConfig("registries").get([registry]);
     return URI.parse(registryInfo.server + namespace + "/");
+}
+
+Database.prototype.getRegistryUriForPackage = function(path) {
+    var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(path.join("package.json"));
+    return URI.parse(descriptor.getRegistryUri());
 }
