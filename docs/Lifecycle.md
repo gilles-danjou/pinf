@@ -25,14 +25,14 @@ Where `<owner>` is an email address or hostname and the remaining `path` is of y
 Combined the `<owner>`/`path` make up the `namespace` which is unique to the registry server
 and your local system.
 
-!!!Email Owners
+###Email Owners
 
 If you do not have an account (for the `<owner>` email address) on the registry server
 you will receive an email with an access code. Include this access code with your first query:
 
   pinf register-namespace --authkey <AccessCode> http://registry.public.org/<owner>/public/
 
-!!!Hostname Owners
+###Hostname Owners
 
 When registering a namespace for a hostname `<owner>` you need to include a `--user`:
 	
@@ -60,26 +60,45 @@ For example:
 
 	pinf register-package <owner>/public my-package
 
-Will result in:
+Upon successful registration the `uid` property in the package's `package.json` is set to:
 
-	http://registry.public.org/<owner>/public/my-package/package.json
+	http://registry.public.org/<owner>/public/my-package/
+
+This is now the package's unique uid **FOR LIFE**.
 
 *NOTE: `my-package` is referring to the package's directory containing a package.json file.*
 
-Publishing Packages
+Announcing Releases
 -------------------
 
-Publish a package with:
+When you announce a new package release you indicate to the world that a new version/release available.
 
-	pinf announce-package my-package
+	pinf announce-release my-package
 
 *NOTE: `my-package` is referring to the package's directory containing a package.json file.*
 
-pinf (the toolchain management tool) will get the last version from the version control system (only git at this time) by looking for [SemVer](http://semver.org/) tags (e.g. `v3.1.0`) and announce this to the registry server.
+pinf will get the last version from the version control system (only git at this time) by looking for [SemVer](http://semver.org/) tags (e.g. `v3.1.0`).
 
-The resulting registry URL will be:
+You can also announce a new branch revision:
 
-	http://registry.public.org/<owner>/public/my-package/releases/v3.1.0/package.json
+    pinf announce-release --branch experimental my-package
+
+
+Viewing Package Info
+--------------------
+
+You can view information about a package in the registry via the public interface:
+
+    http://registry.public.org/<owner>/public/my-package/
+
+Namespace Catalog
+-----------------
+
+Each namespace gets it's own catalog:
+
+    http://registry.public.org/<owner>/public/catalog.json
+
+
 
 Installing Packages Directly
 ----------------------------
