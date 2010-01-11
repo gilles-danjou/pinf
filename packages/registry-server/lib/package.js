@@ -5,6 +5,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 var UTIL = require("util");
 var DB = require("google/appengine/ext/db");
 var NAMESPACE = require("./namespace");
+var DESCRIPTOR = require("./descriptor");
 var SEMVER = require("semver", "util");
 var JSON = require("json");
 
@@ -58,7 +59,7 @@ Package.prototype.getLatestVersion = function(version) {
     return SEMVER.latestForMajor(JSON.decode(this.data.versions), version);
 }
 
-Package.prototype.announceVersion = function(version) {
+Package.prototype.announceVersion = function(version, descriptor) {
     if(!this.data.versions) {
         this.data.versions = [version];
     } else {
@@ -66,6 +67,10 @@ Package.prototype.announceVersion = function(version) {
         this.data.versions.push(version);
         this.data.versions = SEMVER.latestForEachMajor(this.data.versions);
     }
+
+    // TODO: Set the descriptor in a transaction together with this.store() below
+    DESCRIPTOR.Descriptor(this.id).setForVersion(version, descriptor, this.data.versions);
+
     this.data.versions = JSON.encode(this.data.versions);
     this.store();
 }
@@ -77,13 +82,17 @@ Package.prototype.getLastRevision = function(branch) {
     return revisions[branch];
 }
 
-Package.prototype.announceRevision = function(branch, revision) {
+Package.prototype.announceRevision = function(branch, revision, descriptor) {
     if(!this.data.revisions) {
         this.data.revisions = {};
     } else {
         this.data.revisions = JSON.decode(this.data.revisions);
     }
     this.data.revisions[branch] = revision;
+    
+    // TODO: Set the descriptor in a transaction together with this.store() below
+    DESCRIPTOR.Descriptor(this.id).setForRevision(revision, descriptor, UTIL.values(this.data.revisions));
+    
     this.data.revisions = JSON.encode(this.data.revisions);
     this.store();
 }
@@ -108,4 +117,14 @@ Package.prototype.register = function(namespace) {
         "namespace": namespace.data
     });
     this.store();
+}
+
+Package.prototype.getInfo = function() {
+    var versions = {};
+    var branches = {};
+    return {
+        "name": this.getName(),
+        "versions": versions,
+        "branches": branches
+    }
 }

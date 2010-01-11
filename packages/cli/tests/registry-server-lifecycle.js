@@ -30,6 +30,9 @@ exports.testLifecycle = function() {
     initFiles();
 
     tusk.command("pinf --db " + tmpDBPath + " register-namespace http://127.0.0.1:8080/test@pinf.org/public/");
+    
+    
+    
     tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public " + filesPath.join("test-package-1").valueOf());
     
     ASSERT.deepEqual(
@@ -42,20 +45,28 @@ exports.testLifecycle = function() {
     
     file = filesPath.join("test-package-1");
     OS.command("cd " + file.valueOf() + "; git add . ; git commit -m 'registered' ; git tag v0.2.0");
-    
-    
 
-//    resetFiles();
+    tusk.command("pinf --db " + tmpDBPath + " announce-release " + filesPath.join("test-package-1").valueOf());
 
+        
+
+    file = filesPath.join("test-package-2");
+    OS.command("cd " + file.valueOf() + "; git branch test; git checkout test");
+
+    tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public " + filesPath.join("test-package-2").valueOf());
+
+    file = filesPath.join("test-package-2");
+    OS.command("cd " + file.valueOf() + "; git add . ; git commit -m 'registered'");
+    
+    tusk.command("pinf --db " + tmpDBPath + " announce-release --branch test " + filesPath.join("test-package-2").valueOf());
+
+    
 
 
 //pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --branch master /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
 //pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --branch test /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
 //pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
 //pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --major 0 /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
-
-
-//pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db register-release test@pinf.org/public /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
 
 
 }
@@ -73,6 +84,11 @@ function resetFiles() {
     
     
     file = filesPath.join("test-package-1", ".git");
+print("rm -Rf " + file.valueOf());
+    OS.command("rm -Rf " + file.valueOf());
+    
+    file = filesPath.join("test-package-2", ".git");
+print("rm -Rf " + file.valueOf());
     OS.command("rm -Rf " + file.valueOf());
     
 }
@@ -83,7 +99,9 @@ function initFiles() {
 
     file = filesPath.join("test-package-1");
     OS.command("cd " + file.valueOf() + "; git init; git add . ; git commit -m 'base' ; git tag v0.1.0");
-    
+
+    file = filesPath.join("test-package-2");
+    OS.command("cd " + file.valueOf() + "; git init; git add . ; git commit -m 'base' ; git tag v0.1.0");
 }
 
 

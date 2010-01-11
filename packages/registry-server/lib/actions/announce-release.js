@@ -14,7 +14,15 @@ exports.handle = function(request) {
             "status": "WRONG_ARGUMENTS",
             "message": "Wrong arguments: 'package' is missing."
         }
+    }    
+    if(!request.args["descriptor"]) {
+        return {
+            "status": "WRONG_ARGUMENTS",
+            "message": "Wrong arguments: 'descriptor' is missing."
+        }
     }
+    
+    // TODO: Validate descriptor
     
     var namespace = NAMESPACE.Namespace(request.namespace);
     if(!namespace.verified()) {
@@ -46,7 +54,7 @@ exports.handle = function(request) {
                 "message": "The package release has already been announced."
             }
         }
-        pkg.announceVersion(request.args["version"]);
+        pkg.announceVersion(request.args["version"], request.args["descriptor"]);
     } else
     if(request.args["branch"] && request.args["revision"]) {
         var lastRevision = pkg.getLastRevision(request.args["branch"]);
@@ -56,7 +64,7 @@ exports.handle = function(request) {
                 "message": "The package release has already been announced."
             }
         }
-        pkg.announceRevision(request.args["branch"], request.args["revision"]);
+        pkg.announceRevision(request.args["branch"], request.args["revision"], request.args["descriptor"]);
     } else {
         return {
             "status": "WRONG_ARGUMENTS",

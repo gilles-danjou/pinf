@@ -89,8 +89,8 @@ exports.authorize = function(request) {
     if(request.authkey=="__REQUEST__") {
         user.sendAuthKey();
 
-        // TODO: Only allow this in development mode
-        if(user.getEmail()=="test@pinf.org") {
+        // HACK: For non-production testing only
+        if(request.env.environment=="development" && user.getEmail()=="test@pinf.org") {
             user.validateAuthKey(user.getAuthKey());
             return {
                 "status": "AUTHORIZED"

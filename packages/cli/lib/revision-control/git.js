@@ -52,3 +52,11 @@ Git.prototype.getLatestRevisionForBranch = function(branch) {
     }
     return UTIL.trim(result);
 }
+
+Git.prototype.getFileForRef = function(revision, path) {
+    var result = this.runCommand('git show ' + revision + ':' + path);
+    if(!result) {
+        return false;
+    }
+    return result;
+}

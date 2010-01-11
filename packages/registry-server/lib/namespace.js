@@ -70,4 +70,9 @@ Namespace.prototype.register = function(user, owner) {
     this.store();
 }
 
+Namespace.prototype.getCatalog = function() {
+    return {
+        "tmp": this.id
+    }
+}
 

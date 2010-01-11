@@ -5,7 +5,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 
 var UTIL = require("util");
-var HTTP = require("http");
+var HTTP_CLIENT = require("http-client");
 var JSON = require("json");
 var PINF = require("../pinf");
 var VALIDATOR = require("validator", "util");
@@ -191,9 +191,11 @@ Client.prototype.announceRelease = function(options) {
         // announce a new branch revision
         args["branch"] = options.branch;
         args["revision"] = git.getLatestRevisionForBranch(options.branch);
+        args["descriptor"] = JSON.decode(git.getFileForRef(args["revision"], "package.json"));
     } else {
         // announce a new version tag
         args["version"] = git.getLatestVersion(options.major);
+        args["descriptor"] = JSON.decode(git.getFileForRef("v"+args["version"], "package.json"));
     }
     
     var response = makeRequest(info.url, "announce-release", args);
@@ -219,16 +221,34 @@ ClientError.prototype = new Error();
 
 
 function makeRequest(url, action, args) {
-    
-    // TODO: use "http-client" module instead of "http" module
-    //       @see http://github.com/Gozala/narwhal-xulrunner/issues/#issue/9
-    
+
+/*
+    var body = "";
+
     url += "?action=" + action;
     UTIL.every(args, function(arg) {
         url += "&" + arg[0] + "=" + arg[1];
     });
-
-    var response = HTTP.read(url);
-
-    return JSON.decode(response.decodeToString());
+*/    
+    args["action"] = action;
+    
+    var body = JSON.encode(args);
+    var response = HTTP_CLIENT.HttpClient({
+        "method": "POST",
+        "url": url,
+        "headers": {
+            "Content-Length": body.length,
+            "Content-Type": "application/json"
+        },
+        "body": [
+            JSON.encode(args)
+        ]
+    }).connect();
+    
+    var body = [];
+    response.body.forEach(function(chunk) {
+        body.push(chunk.decodeToString());
+    });
+    
+    return JSON.decode(body.join(""));
 }

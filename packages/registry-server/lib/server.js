@@ -11,10 +11,11 @@ var USER = require("./user");
 
 exports.app = function(env) {
     
-    var body,
+    var status,
+        body,
         contentType;
     
-    if(env.QUERY_STRING) {
+    if(env.REQUEST_METHOD=="POST") {
     
         var path = env.PATH_INFO.substr(1, env.PATH_INFO.length-1).split("/"),
             response;
@@ -28,7 +29,8 @@ exports.app = function(env) {
             };        
         } else {
 
-            var qs = QUERYSTRING.parseQuery(env.QUERY_STRING);
+//            var qs = QUERYSTRING.parseQuery(env.QUERY_STRING);
+            var qs = JSON.decode(env["jsgi.input"].read().decodeToString());
         
             var request = {
                 "env": env,
@@ -71,15 +73,21 @@ exports.app = function(env) {
             }
         }
     
+        status = 200;
         contentType = "application/json";
         body = JSON.encode(response, null, '  ');
     
     } else {
 
+        status = 200;
         contentType = "text/plain";
         var response = require("./responders/public").service(env);
-        body = JSON.encode(response, null, '  ');
-        
+        if(/^\d*$/.test(response.status)) {
+            status = response.status;
+            body = response.message;
+        } else {
+            body = JSON.encode(response, null, '  ');            
+        }
     }
 
     if(DEBUG) {
@@ -89,7 +97,7 @@ exports.app = function(env) {
     }
 
     return {
-        status: 200,
+        status: status,
         headers: {
             "Content-Type": contentType,
             "Content-Length": String(body.length)
