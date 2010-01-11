@@ -4,33 +4,34 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var UTIL = require("util");
 var DB = require("google/appengine/ext/db");
+var USER = require("./user");
+var OWNER = require("./owner");
 
-var Namespace = exports.Namespace = function(user, owner, namespace) {
+
+var model = new DB.Model("Namespace", {
+    "user": new DB.ReferenceProperty({
+        referenceClass: USER.getModel()
+    }),
+    "owner": new DB.ReferenceProperty({
+        referenceClass: OWNER.getModel()
+    })
+});
+
+exports.getModel = function() {
+    return model;
+}
+
+var Namespace = exports.Namespace = function(namespace) {
     if (!(this instanceof exports.Namespace))
-        return new exports.Namespace(user, owner, namespace);
+        return new exports.Namespace(namespace);
 
-    if(!user.verified()) {
-        throw new Error("User not verified");
-    }
-
-    if(!owner.verified()) {
-        throw new Error("Owner not verified");
-    }
-
-    this.user = user;
-    this.owner = owner;
     this.id = namespace;
 
-    this.model = new DB.Model("Namespace", {
-        "user":new DB.ReferenceProperty({referenceClass: user.model}),
-        "owner":new DB.ReferenceProperty({referenceClass: owner.model})
-    });
-    
     this.fetch();
 }
 
 Namespace.prototype.fetch = function() {
-    this.data = this.model.getByKeyName(this.id);
+    this.data = model.getByKeyName(this.id);
 }
 
 Namespace.prototype.store = function() {
@@ -42,11 +43,29 @@ Namespace.prototype.exists = function() {
     return true;
 }
 
-Namespace.prototype.register = function() {
-    this.data = new this.model({
+Namespace.prototype.verified = function() {
+    if(!this.exists()) return false;
+    if(!this.data.user || !this.data.owner) return false;
+    var user = USER.User(this.data.user.datastoreKey().getName());
+    var owner = OWNER.Owner(user, this.data.owner.datastoreKey().getName());
+    if(!owner.verified()) return false;
+    return true;
+}
+
+Namespace.prototype.register = function(user, owner) {
+
+    if(!user.verified()) {
+        throw new Error("User not verified");
+    }
+
+    if(!owner.verified()) {
+        throw new Error("Owner not verified");
+    }
+
+    this.data = new model({
         "keyName": this.id,
-        "user": this.user.data,
-        "owner": this.owner.data
+        "user": user.data,
+        "owner": owner.data
     });
     this.store();
 }

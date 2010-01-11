@@ -2,6 +2,7 @@
 
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
+const DEBUG = true;
 
 var UTIL = require("util");
 var JSON = require("json");
@@ -10,7 +11,8 @@ var USER = require("./user");
 
 exports.app = function(env) {
     
-    var body;
+    var body,
+        contentType;
     
     if(env.QUERY_STRING) {
     
@@ -29,6 +31,7 @@ exports.app = function(env) {
             var qs = QUERYSTRING.parseQuery(env.QUERY_STRING);
         
             var request = {
+                "env": env,
                 "action": qs["action"] || null,
                 "user": qs["user"] || null,
                 "authkey": qs["authkey"] || null,
@@ -37,7 +40,23 @@ exports.app = function(env) {
                 "path": path,
                 "args": qs
             }
-dump(request);
+            
+            if(DEBUG) {
+                print("--------- REQUEST ---------");
+                UTIL.every(request, function(item1) {
+                    if(item1[0]=="env" || item1[0]=="args") {
+                        print("  " + item1[0] + ":");
+                        UTIL.every(item1[1], function(item2) {
+                            print("    " + item2[0] + ": " + item2[1]);
+                        });
+                    } else {
+                        print("  " + item1[0] + ": " + item1[1]);
+                    }
+                });
+                
+                print("--------- REQUEST ---------");
+            }
+
             if(!request.action || !request.user || !request.authkey) {
                 response = {
                     "status": "INVALID_REQUEST",
@@ -51,23 +70,28 @@ dump(request);
                 response = require("./actions/" + qs["action"]).handle(request);
             }
         }
-print("response");
-dump(response);
     
+        contentType = "application/json";
         body = JSON.encode(response, null, '  ');
     
     } else {
-        
-        body = "Service request: " + env.PATH_INFO;
+
+        contentType = "text/plain";
+        var response = require("./responders/public").service(env);
+        body = JSON.encode(response, null, '  ');
         
     }
-    
-print("body: "+body);
-    
+
+    if(DEBUG) {
+        print("--------- RESPONSE ---------");
+        print(body);
+        print("--------- RESPONSE ---------");
+    }
+
     return {
         status: 200,
         headers: {
-            "Content-Type": "application/json",
+            "Content-Type": contentType,
             "Content-Length": String(body.length)
         },
         body: [

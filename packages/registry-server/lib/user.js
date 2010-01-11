@@ -7,22 +7,28 @@ var DB = require("google/appengine/ext/db");
 var EMAIL = require("google/appengine/api/mail");
 var UUID = require("uuid", "util");
 
+
+var model = new DB.Model("User", {
+    "authkey": new DB.StringProperty(),
+    "verified": new DB.BooleanProperty()
+});
+
+exports.getModel = function() {
+    return model;
+}
+
+
 var User = exports.User = function(email) {
     if (!(this instanceof exports.User))
         return new exports.User(email);
 
     this.id = email;
-
-    this.model = new DB.Model("User", {
-        "authkey": new DB.StringProperty(),
-        "verified": new DB.BooleanProperty()
-    });
     
     this.fetch();
 }
 
 User.prototype.fetch = function() {
-    this.data = this.model.getByKeyName(this.id);
+    this.data = model.getByKeyName(this.id);
 }
 
 User.prototype.store = function() {
@@ -50,7 +56,7 @@ User.prototype.getAuthKey = function() {
 
 User.prototype.sendAuthKey = function() {
     var authkey = UUID.uuid();
-    this.data = new this.model({
+    this.data = new model({
         "keyName": this.id,
         "authkey": authkey,
         "verified": false

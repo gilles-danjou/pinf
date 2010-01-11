@@ -4,6 +4,9 @@ var OWNER = require("../owner");
 var NAMESPACE = require("../namespace");
 
 exports.handle = function(request) {
+
+    // TODO: Check for allowed characters in namespaces
+    // TODO: Check for max namespace length
     
     var owner = OWNER.Owner(request.user, request.owner);
     if(!owner.exists()) {
@@ -27,14 +30,14 @@ exports.handle = function(request) {
         }
     }
 
-    var namespace = NAMESPACE.Namespace(request.user, owner, request.namespace);
+    var namespace = NAMESPACE.Namespace(request.namespace);
     if(namespace.exists()) {
         return {
             "status": "NAMESPACE_EXISTS",
             "message": "Namespace is already registered."
         }
     }
-    namespace.register();
+    namespace.register(request.user, owner);
 
     return {
         "status": "NAMESPACE_REGISTERED",

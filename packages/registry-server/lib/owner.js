@@ -8,6 +8,19 @@ var DB = require("google/appengine/ext/db");
 var FETCH = require("google/appengine/api/urlfetch");
 var EMAIL = require("google/appengine/api/mail");
 var UUID = require("uuid", "util");
+var USER = require("./user");
+
+var model = new DB.Model("Owner", {
+    "user":new DB.ReferenceProperty({
+        referenceClass: USER.getModel()
+    }),
+    "secret": new DB.StringProperty(),
+    "verified": new DB.BooleanProperty()
+});
+
+exports.getModel = function() {
+    return model;
+}
 
 var Owner = exports.Owner = function(user, owner) {
     if (!(this instanceof exports.Owner))
@@ -22,17 +35,11 @@ var Owner = exports.Owner = function(user, owner) {
     this.type = (VALIDATOR.validate("email", owner, {"throw": false}))?"email":"hostname",
     this.url = "http://" + this.getOwner() + "/pinf-ownership-key";
 
-    this.model = new DB.Model("Owner", {
-        "user":new DB.ReferenceProperty({referenceClass: user.model}),
-        "secret": new DB.StringProperty(),
-        "verified": new DB.BooleanProperty()
-    });
-    
     this.fetch();
 }
 
 Owner.prototype.fetch = function() {
-    this.data = this.model.getByKeyName(this.id);
+    this.data = model.getByKeyName(this.id);
 }
 
 Owner.prototype.store = function() {
@@ -64,7 +71,7 @@ Owner.prototype.getType = function() {
 
 Owner.prototype.sendSecretKey = function() {
     if(this.type=="email" && this.user.getEmail()==this.id) {
-        this.data = new this.model({
+        this.data = new model({
             "keyName": this.id,
             "user": this.user.data,
             "secret": "",
@@ -73,7 +80,7 @@ Owner.prototype.sendSecretKey = function() {
         this.store();
     } else {
         var secret = UUID.uuid();
-        this.data = new this.model({
+        this.data = new model({
             "keyName": this.id,
             "user": this.user.data,
             "secret": secret,
