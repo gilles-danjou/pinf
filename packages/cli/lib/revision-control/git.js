@@ -10,23 +10,22 @@ var SEMVER = require("semver", "util");
 var Git = exports.Git = function(path) {
     if (!(this instanceof exports.Git))
         return new exports.Git(path);
-    
+
     this.path = path;
+    this.rootPath = null;
+
+    var result = this.runCommand('git rev-parse --git-dir');
+    if(result && result.substr(0,27)!="fatal: Not a git repository") {        
+        this.rootPath = FILE.Path(result).dirname();
+    }
 }
 
 Git.prototype.initialized = function() {
-    var result = this.runCommand('git status');
-    if(!result) {
-        return false;
-    }
-    if(UTIL.trim(result).substr(0,12)=="# On branch ") {
-        return true;
-    }
-    return false;
+    return (this.rootPath!==null);
 }
 
 Git.prototype.runCommand = function(command) {
-    
+
     command = "cd " + this.path.valueOf() + "; " + command;
     
     var process = OS.popen(command);
@@ -41,6 +40,8 @@ Git.prototype.runCommand = function(command) {
 
 
 Git.prototype.getLatestVersion = function(majorVersion) {
+    if(!this.initialized()) return false;
+
     var result = this.runCommand('git tag -l "v*"');
     if(!result) {
         return false;
@@ -53,6 +54,8 @@ Git.prototype.getLatestVersion = function(majorVersion) {
 
 
 Git.prototype.getLatestRevisionForBranch = function(branch) {
+    if(!this.initialized()) return false;
+
     var result = this.runCommand('git log --no-color --pretty=format:"%H" -n 1 ' + branch);
     if(!result) {
         return false;
@@ -61,7 +64,9 @@ Git.prototype.getLatestRevisionForBranch = function(branch) {
 }
 
 Git.prototype.getFileForRef = function(revision, path) {
-    var result = this.runCommand('git show ' + revision + ':' + path);
+    if(!this.initialized()) return false;
+    var path = this.path.join(path);
+    var result = this.runCommand('git show ' + revision + ':' + this.rootPath.join(".").relative(path));
     if(!result) {
         return false;
     }
