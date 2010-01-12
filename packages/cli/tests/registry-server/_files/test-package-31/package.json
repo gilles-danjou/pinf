@@ -1,0 +1,11 @@
+{
+    "uid": "http://registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/test-package-3/",
+    "name": "test-package-3",
+    "repositories": [
+        {
+            "type": "git", 
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/cli/tests/registry-server/_files/test-package-3"
+        }
+    ]
+}
