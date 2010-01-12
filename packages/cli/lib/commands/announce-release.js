@@ -22,6 +22,7 @@ command.action(function (options) {
 
     try {
         var directory = VALIDATOR.validate("directory", UTIL.trim(options.args[0]), {
+            "checkCWD": true,
             "return": "FILE.Path"
         });
         

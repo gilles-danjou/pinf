@@ -37,9 +37,9 @@ models["Package"] = new DB.Model("Package", {
     "namespace": new DB.ReferenceProperty({
         referenceClass: models["Namespace"]
     }),
-    "versions": new DB.StringProperty(),
-    "revisions": new DB.StringProperty(),
-    "descriptors": new DB.StringProperty()
+    "versions": new DB.TextProperty(),
+    "revisions": new DB.TextProperty(),
+    "descriptors": new DB.TextProperty()
 });
 
 models["Announcement"] = new DB.Model("Announcement", {

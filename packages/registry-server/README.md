@@ -29,6 +29,7 @@ TODO
 ====
 
   * Check namespace and package strings for allowed characters (a-zA-Z0-9-._)
+  * Check max length for namespace + package uri (db field is max 500 chars)
   * Etags for public package info and catalog requests
   * Remove old entries (5min +) from "Announcement" table (via cron)
   * Realtime (via XMPP) notifications of announcements
