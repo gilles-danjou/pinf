@@ -6,13 +6,9 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 var DB = require("google/appengine/ext/db");
 var EMAIL = require("google/appengine/api/mail");
 var UUID = require("uuid", "util");
+var MODELS = require("./models");
 
-
-var model = new DB.Model("User", {
-    "authkey": new DB.StringProperty(),
-    "verified": new DB.BooleanProperty()
-});
-
+var model = MODELS.getModel("User");
 exports.getModel = function() {
     return model;
 }

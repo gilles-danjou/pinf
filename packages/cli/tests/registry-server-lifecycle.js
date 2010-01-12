@@ -8,6 +8,8 @@ var PINF = require("pinf", "github.com/cadorn/pinf/raw/master/cli");
 var JSON = require("json");
 var FILE = require("file");
 var OS = require("os");
+var HTTP = require("http");
+var GIT = require("revision-control/git", "github.com/cadorn/pinf/raw/master/cli");
 
 
 var filesPath = FILE.Path(module.path).dirname().join("_files");
@@ -59,15 +61,64 @@ exports.testLifecycle = function() {
     OS.command("cd " + file.valueOf() + "; git add . ; git commit -m 'registered'");
     
     tusk.command("pinf --db " + tmpDBPath + " announce-release --branch test " + filesPath.join("test-package-2").valueOf());
-
     
+    var rev = GIT.Git(file).getLatestRevisionForBranch("test");
+
+    ASSERT.deepEqual(
+        JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/catalog.json").decodeToString()),
+        {
+          "uid": "http://127.0.0.1:8080/test@pinf.org/public/catalog.json",
+          "packages": {
+            "test-package-1": {
+              "0": {
+                "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-1/",
+                "name": "test-package-1",
+                "version": "0.2.0"
+              }
+            },
+            "test-package-2": {
+              "test": {
+                "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-2/",
+                "name": "test-package-2",
+                "version": "0.0.0rev-" + rev
+              }
+            }
+          }
+        }
+    );
+
+    ASSERT.deepEqual(
+        JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/test-package-1/").decodeToString()),
+        {
+          "name": "test-package-1",
+          "versions": {
+            "0": {
+              "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-1/",
+              "name": "test-package-1",
+              "version": "0.2.0"
+            }
+          }
+        }
+    );
+
+    ASSERT.deepEqual(
+        JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/test-package-2/").decodeToString()),
+        {
+          "name": "test-package-2",
+          "branches": {
+            "test": {
+              "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-2/",
+              "name": "test-package-2",
+              "version": "0.0.0rev-" + rev
+            }
+          }
+        }
+    );
+
+//    resetFiles();
 
 
-//pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --branch master /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
-//pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --branch test /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
-//pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
-//pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --major 0 /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
-
+    //pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --branch master /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
 
 }
 
@@ -81,16 +132,18 @@ function resetFiles() {
     var descriptor = JSON.decode(file.read());
     delete descriptor.uid;
     file.write(JSON.encode(descriptor, null, '    '));
-    
-    
+
+    file = filesPath.join("test-package-2", "package.json");
+    var descriptor = JSON.decode(file.read());
+    delete descriptor.uid;
+    file.write(JSON.encode(descriptor, null, '    '));
+
+
     file = filesPath.join("test-package-1", ".git");
-print("rm -Rf " + file.valueOf());
     OS.command("rm -Rf " + file.valueOf());
-    
+
     file = filesPath.join("test-package-2", ".git");
-print("rm -Rf " + file.valueOf());
     OS.command("rm -Rf " + file.valueOf());
-    
 }
 
 function initFiles() {

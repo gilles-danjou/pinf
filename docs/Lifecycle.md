@@ -87,17 +87,24 @@ You can also announce a new branch revision:
 Viewing Package Info
 --------------------
 
-You can view information about a package in the registry via the public interface:
+You can view information about a package in the registry via:
 
     http://registry.public.org/<owner>/public/my-package/
 
-Namespace Catalog
------------------
+Namespace Catalogs
+------------------
 
 Each namespace gets it's own catalog:
 
     http://registry.public.org/<owner>/public/catalog.json
 
+Announcements Feed
+------------------
+
+Each release announcement is tracked and
+the feed is updated every minute and contains the data for the past 5 minutes.
+
+    http://registry.public.org/feeds/announcements.json
 
 
 Installing Packages Directly

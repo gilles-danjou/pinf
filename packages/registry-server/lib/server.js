@@ -75,19 +75,23 @@ exports.app = function(env) {
     
         status = 200;
         contentType = "application/json";
-        body = JSON.encode(response, null, '  ');
+        body = JSON.encode(response, null, "  ");
     
     } else {
 
         status = 200;
         contentType = "text/plain";
         var response = require("./responders/public").service(env);
-        if(/^\d*$/.test(response.status)) {
-            status = response.status;
-            body = response.message;
+        if(typeof response == "string") {
+            body = response;
         } else {
-            body = JSON.encode(response, null, '  ');            
-        }
+            if(/^\d*$/.test(response.status)) {
+                status = response.status;
+                body = response.message;
+            } else {
+                body = JSON.encode(response, null, "  ");            
+            }
+       }
     }
 
     if(DEBUG) {

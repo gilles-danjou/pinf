@@ -9,15 +9,9 @@ var FETCH = require("google/appengine/api/urlfetch");
 var EMAIL = require("google/appengine/api/mail");
 var UUID = require("uuid", "util");
 var USER = require("./user");
+var MODELS = require("./models");
 
-var model = new DB.Model("Owner", {
-    "user":new DB.ReferenceProperty({
-        referenceClass: USER.getModel()
-    }),
-    "secret": new DB.StringProperty(),
-    "verified": new DB.BooleanProperty()
-});
-
+var model = MODELS.getModel("Owner");
 exports.getModel = function() {
     return model;
 }

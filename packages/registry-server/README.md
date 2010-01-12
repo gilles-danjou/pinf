@@ -1,7 +1,12 @@
 PINF Registry Server
 ====================
 
-A server to track open source releases and how they are combined by users to build programs.
+A server to track package releases.
+
+Docs
+====
+
+  * [Lifecycle](http://github.com/cadorn/pinf/blob/master/docs/Lifecycle.md)
 
 
 Dev Setup
