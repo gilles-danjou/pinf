@@ -28,9 +28,11 @@ Deployment:
 TODO
 ====
 
+  * Check namespace and package strings for allowed characters (a-zA-Z0-9-._)
   * Etags for public package info and catalog requests
-  * Remove old entries (5min +) from "Announcement" table
+  * Remove old entries (5min +) from "Announcement" table (via cron)
   * Realtime (via XMPP) notifications of announcements
+  * Validate package descriptors and return error info to client
   * Backup of datastore (if google does not beat us to it)
   
 
@@ -40,7 +42,7 @@ License
 
 [MIT License](http://www.opensource.org/licenses/mit-license.php)
 
-Copyright (c) 2009 Christoph Dorn
+Copyright (c) 2009-2010 Christoph Dorn
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

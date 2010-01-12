@@ -21,7 +21,7 @@
         }
     },
     "appengine": {
-        "name": "cadorn-test",
+        "name": "pinf-registry",
         "email": "christoph@christophdorn.com"
     }
 }

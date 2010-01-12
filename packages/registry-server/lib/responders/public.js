@@ -7,9 +7,15 @@ var NAMESPACE = require("../namespace");
 var PACKAGE = require("../package");
 var MODELS = require("../models");
 var JSON = require("json");
+var FILE = require("file");
 
 exports.service = function(env) {
     
+    if(env.SERVER_NAME.substr(0,4)=="www.") {
+        
+        return FILE.Path(module.path).dirname().join("../../www/index.htm").read();
+
+    } else
     if(env.PATH_INFO=="/feeds/announcements.json") {
         
         var memcachedKey = "uri:/feeds/announcements.json";
@@ -52,37 +58,38 @@ exports.service = function(env) {
             MEMCACHED.set(memcachedKey, JSON.encode(announcements, null, "  "), 60);  // 1 minute
         }
         return announcements;
-    }
 
-
-    var parts = env.PATH_INFO.match(/^\/([^\/]*)\/((.*?)\/([^\/]*)\/?)?$/);
-    if(!parts) {
-        return {
-            "status": "INVALID_REQUEST",
-            "message": "Invalid request"
-        };
-    }
-
-    var info = {
-            "owner": parts[1],
-            "path": parts[3],
-            "package": parts[4]
-        },
-        id;
-
-    if(!info.owner || !info.path) {
-        return {
-            "status": "INVALID_REQUEST",
-            "message": "Invalid request"
-        };
-    }
-    
-    if(info["package"] && info["package"].substr(info["package"].length-12, 12)!="catalog.json") {
-        id = info["owner"] + "/" + info["path"] + ":" + info["package"];
-        return PACKAGE.serviceInfoForId(id);
     } else {
-        id = info["owner"] + "/" + info["path"];
-    }
+
+        var parts = env.PATH_INFO.match(/^\/([^\/]*)\/((.*?)\/([^\/]*)\/?)?$/);
+        if(!parts) {
+            return {
+                "status": "INVALID_REQUEST",
+                "message": "Invalid request"
+            };
+        }
     
-    return NAMESPACE.serviceCatalogForId(env, id);
+        var info = {
+                "owner": parts[1],
+                "path": parts[3],
+                "package": parts[4]
+            },
+            id;
+    
+        if(!info.owner || !info.path) {
+            return {
+                "status": "INVALID_REQUEST",
+                "message": "Invalid request"
+            };
+        }
+        
+        if(info["package"] && info["package"].substr(info["package"].length-12, 12)!="catalog.json") {
+            id = info["owner"] + "/" + info["path"] + ":" + info["package"];
+            return PACKAGE.serviceInfoForId(id);
+        } else {
+            id = info["owner"] + "/" + info["path"];
+        }
+        
+        return NAMESPACE.serviceCatalogForId(env, id);
+    }
 }

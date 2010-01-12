@@ -51,6 +51,7 @@ User.prototype.getAuthKey = function() {
 }
 
 User.prototype.sendAuthKey = function() {
+    if(this.verified()) return false;
     var authkey = UUID.uuid();
     this.data = new model({
         "keyName": this.id,
@@ -59,11 +60,12 @@ User.prototype.sendAuthKey = function() {
     });
     this.store();
     var email = new EMAIL.EmailMessage({
-        sender: '"PINF Registry Server" <registry-server@pinf.org>',
-        to: this.getEmail(),
-        subject: "User Registration Email",
+        "sender": '"PINF Registry Server" <registry-server@pinf.org>',
+        "to": '"' + this.getEmail() + '" <' + this.getEmail() + '>',
+        "subject": "User Registration Email",
         body: "Your access code is: " + authkey + "\n\nTo confirm your account run:\n\n  pinf register-namespace --authkey " + authkey + " <URL>\n\nYou do not need to include --authkey in subsequent commands."
     }).send();
+    return true;
 }
 
 User.prototype.validateAuthKey = function(authkey) {
@@ -77,12 +79,20 @@ User.prototype.validateAuthKey = function(authkey) {
 
 
 exports.authorize = function(request) {
-    
+
     var user = User(request.user);
 
     request.user = user;
-    
+
     if(request.authkey=="__REQUEST__") {
+
+        if(user.verified()) {
+            return {
+                "status": "USER_ALREADY_REGISTERED",
+                "message": "A user with the same email address has already been registered."
+            }
+        }
+        
         user.sendAuthKey();
 
         // HACK: For non-production testing only

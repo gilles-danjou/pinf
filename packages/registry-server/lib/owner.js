@@ -83,7 +83,7 @@ Owner.prototype.sendSecretKey = function() {
         this.store();
         var email = new EMAIL.EmailMessage({
             sender: '"PINF Registry Server" <registry-server@pinf.org>',
-            to: this.user.getEmail(),
+            to: '"' + this.user.getEmail() + '" <' + this.user.getEmail() + '>',
             subject: "Owner Registration Email",
             body: "Place this '" + secret + "' into a file at '"+ this.url +"'.\n\nTo confirm your ownership re-run:\n\n  pinf register-namespace --user <User> <URL>"
         }).send();

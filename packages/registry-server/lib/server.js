@@ -2,7 +2,7 @@
 
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
-const DEBUG = true;
+var DEBUG = false;
 
 var UTIL = require("util");
 var JSON = require("json");
@@ -10,7 +10,11 @@ var QUERYSTRING = require("jack/querystring");
 var USER = require("./user");
 
 exports.app = function(env) {
-    
+
+    if(env.environment == "development") {
+        DEBUG = true;
+    }
+
     var status,
         body,
         contentType;
@@ -55,7 +59,6 @@ exports.app = function(env) {
                         print("  " + item1[0] + ": " + item1[1]);
                     }
                 });
-                
                 print("--------- REQUEST ---------");
             }
 
@@ -79,11 +82,22 @@ exports.app = function(env) {
     
     } else {
 
+        if(DEBUG) {
+            print("--------- REQUEST ---------");
+            UTIL.every(env, function(item2) {
+                print("    " + item2[0] + ": " + item2[1]);
+            });
+            print("--------- REQUEST ---------");
+        }
+
         status = 200;
         contentType = "text/plain";
         var response = require("./responders/public").service(env);
         if(typeof response == "string") {
             body = response;
+            if(/^<html>/g.test(body)) {
+                contentType = "text/html";
+            }
         } else {
             if(/^\d*$/.test(response.status)) {
                 status = response.status;
