@@ -22,8 +22,8 @@ exports.service = function(env) {
             };
     
             var model = MODELS.getModel("Announcement");
-            var result = model.all().filter("triggered >=", since).
-                            order("triggered").fetch();
+            var result = model.all().filter("created >=", since).
+                            order("created").fetch();
             if(result) {
     
                 var url = [
@@ -37,7 +37,7 @@ exports.service = function(env) {
                 
                 result.forEach(function(event) {
                     var info = {
-                        "time": ""+event.triggered,
+                        "created": ""+event.created,
                         "uid": url + "/" + (""+event["package"].datastoreKey().getName()).replace(/:/g, "/") + "/"
                     }
                     if(event.version) {
@@ -49,7 +49,7 @@ exports.service = function(env) {
                     announcements.announcements.push(info);
                 });
             }
-            MEMCACHED.set(memcachedKey, JSON.encode(announcements, null, "    "), 60);  // 1 minute
+            MEMCACHED.set(memcachedKey, JSON.encode(announcements, null, "  "), 60);  // 1 minute
         }
         return announcements;
     }

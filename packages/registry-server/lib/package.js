@@ -113,14 +113,18 @@ Package.prototype.announceVersion = function(version, descriptor) {
     }
     descriptor.version = version;
     this.descriptors.versions[version] = descriptor;
-    this.store();
+    var self = this;
+    DB.runInTransaction(function() {
+        self.store();
 
-    var model = MODELS.getModel("Announcement");
-    var announcement = new model({
-        "package": this.data,
-        "version": version
+        var announcementModel = MODELS.getModel("Announcement");
+        var announcement = new announcementModel({
+            "parent": self.data,
+            "package": self.data,
+            "version": version
+        });
+        announcement.put();
     });
-    announcement.put();
 }
 
 Package.prototype.getLastRevision = function(branch) {
@@ -141,14 +145,18 @@ Package.prototype.announceRevision = function(branch, revision, descriptor) {
     this.revisions[branch] = revision;
     descriptor.version = "0.0.0rev-" + revision;
     this.descriptors.revisions[revision] = descriptor;
-    this.store();
+    var self = this;
+    DB.runInTransaction(function() {
+        self.store();
 
-    var model = MODELS.getModel("Announcement");
-    var announcement = new model({
-        "package": this.data,
-        "revision": revision
+        var announcementModel = MODELS.getModel("Announcement");
+        var announcement = new announcementModel({
+            "parent": self.data,
+            "package": self.data,
+            "revision": revision
+        });
+        announcement.put();
     });
-    announcement.put();
 }
 
 Package.prototype.getDescriptorForRevision = function(revision) {

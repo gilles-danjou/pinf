@@ -25,6 +25,16 @@ Deployment:
     tusk package --package registry-server build dist
 
 
+TODO
+====
+
+  * Etags for public package info and catalog requests
+  * Remove old entries (5min +) from "Announcement" table
+  * Realtime (via XMPP) notifications of announcements
+  * Backup of datastore (if google does not beat us to it)
+  
+
+
 License
 =======
 

@@ -4,11 +4,15 @@ var DB = require("google/appengine/ext/db");
 var models = {};
 
 models["User"] = new DB.Model("User", {
+    "created": new DB.DateTimeProperty({"autoNowAdd": true}),
+    "updated": new DB.DateTimeProperty({"autoNow": true}),
     "authkey": new DB.StringProperty(),
     "verified": new DB.BooleanProperty()
 });
 
 models["Owner"] = new DB.Model("Owner", {
+    "created": new DB.DateTimeProperty({"autoNowAdd": true}),
+    "updated": new DB.DateTimeProperty({"autoNow": true}),
     "user":new DB.ReferenceProperty({
         referenceClass: models["User"]
     }),
@@ -17,6 +21,8 @@ models["Owner"] = new DB.Model("Owner", {
 });
 
 models["Namespace"] = new DB.Model("Namespace", {
+    "created": new DB.DateTimeProperty({"autoNowAdd": true}),
+    "updated": new DB.DateTimeProperty({"autoNow": true}),
     "user": new DB.ReferenceProperty({
         referenceClass: models["User"]
     }),
@@ -26,6 +32,8 @@ models["Namespace"] = new DB.Model("Namespace", {
 });
 
 models["Package"] = new DB.Model("Package", {
+    "created": new DB.DateTimeProperty({"autoNowAdd": true}),
+    "updated": new DB.DateTimeProperty({"autoNow": true}),
     "namespace": new DB.ReferenceProperty({
         referenceClass: models["Namespace"]
     }),
@@ -35,7 +43,7 @@ models["Package"] = new DB.Model("Package", {
 });
 
 models["Announcement"] = new DB.Model("Announcement", {
-    "triggered": new DB.DateTimeProperty({"autoNowAdd": true}),
+    "created": new DB.DateTimeProperty({"autoNowAdd": true}),
     "package": new DB.ReferenceProperty({
         referenceClass: models["Package"]
     }),
