@@ -15,7 +15,14 @@ var Git = exports.Git = function(path) {
 }
 
 Git.prototype.initialized = function() {
-    return this.path.join(".git").isDirectory();
+    var result = this.runCommand('git status');
+    if(!result) {
+        return false;
+    }
+    if(UTIL.trim(result).substr(0,12)=="# On branch ") {
+        return true;
+    }
+    return false;
 }
 
 Git.prototype.runCommand = function(command) {
@@ -24,12 +31,12 @@ Git.prototype.runCommand = function(command) {
     
     var process = OS.popen(command);
     var result = process.communicate();
-    if (result.status !== 0) {
-        //result.stderr.read()
-        throw new Error("Error running command '"+command+"'");
+    var stdout = result.stdout.read();
+    var stderr = result.stderr.read();
+    if (result.status === 0 || (result.status==1 && !stderr)) {
+        return UTIL.trim(stdout);
     }
-
-    return UTIL.trim(result.stdout.read());
+    throw new Error("Error running command (status: "+result.status+") '"+command+"' : "+stderr);
 }
 
 

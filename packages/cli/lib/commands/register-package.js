@@ -23,6 +23,7 @@ command.action(function (options) {
             "dropTrailingSlash": true
         });
         var directory = VALIDATOR.validate("directory", UTIL.trim(options.args[1]), {
+            "makeAbsolute": true,
             "return": "FILE.Path"
         });
         
