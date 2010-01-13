@@ -8,6 +8,9 @@ var UTIL = require("util");
 var JSON = require("json");
 var QUERYSTRING = require("jack/querystring");
 var USER = require("./user");
+var CACHE = require("./cache");
+
+CACHE.setSeed("1");
 
 exports.app = function(env) {
 

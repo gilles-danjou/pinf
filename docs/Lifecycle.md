@@ -1,25 +1,17 @@
 The PINF Lifecycle
 ==================
 
-Assumptions
------------
+Notes:
 
-Registry Servers:
-
-  * http://registry.public.org/ - *public read, public write*
-  * http://registry.private.org/ - *public read, private write*
-  * http://registry.private.com/ - *private read, private write*
-
-*NOTE: The registry does not host package archives, only package and catalog descriptors.*
+  * The registry does not host package archives, only package descriptors.
+  * Putting things into the registry is a **ONE WAY TRIP**. Once it is there it can never be removed or modified.
 
 Setup
 -----
 
-Register namespaces to your system with:
+Register a namespace to your system with:
 
-    pinf register-namespace http://registry.public.org/<owner>/public/
-    pinf register-namespace http://registry.private.org/<owner>/company/
-    pinf register-namespace http://registry.private.com/<owner>/private/
+    pinf register-namespace http://registry.pinf.org/<owner>/public/
 
 Where `<owner>` is an email address or hostname and the remaining `path` is of your choosing.
 Combined the `<owner>`/`path` make up the `namespace` which is unique to the registry server
@@ -30,13 +22,13 @@ and your local system.
 If you do not have an account (for the `<owner>` email address) on the registry server
 you will receive an email with an access code. Include this access code with your first query:
 
-  pinf register-namespace --authkey <AccessCode> http://registry.public.org/<owner>/public/
+  pinf register-namespace --authkey <AccessCode> http://registry.pinf.org/<owner>/public/
 
 ###Hostname Owners
 
 When registering a namespace for a hostname `<owner>` you need to include a `--user`:
 	
-    pinf register-namespace --user <Email> http://registry.public.org/<owner>/public/
+    pinf register-namespace --user <Email> http://registry.pinf.org/<owner>/public/
 	
 If you do not have an account (for the `--user`) on the registry server
 you will receive an email with an access code.
@@ -62,11 +54,19 @@ For example:
 
 Upon successful registration the `uid` property in the package's `package.json` is set to:
 
-	http://registry.public.org/<owner>/public/my-package/
+	http://registry.pinf.org/<owner>/public/my-package/
 
 This is now the package's unique uid **FOR LIFE**.
 
 *NOTE: `my-package` is referring to the package's directory containing a package.json file.*
+
+Mapping Packages
+----------------
+
+You can map an existing package in the registry to your namespace with:
+
+    pinf register-package <Namespace> <PackageUid>
+
 
 Announcing Releases
 -------------------
@@ -89,14 +89,14 @@ Viewing Package Info
 
 You can view information about a package in the registry via:
 
-    http://registry.public.org/<owner>/public/my-package/
+    http://registry.pinf.org/<owner>/public/my-package/
 
 Namespace Catalogs
 ------------------
 
 Each namespace gets it's own catalog:
 
-    http://registry.public.org/<owner>/public/catalog.json
+    http://registry.pinf.org/<owner>/public/catalog.json
 
 Announcements Feed
 ------------------
@@ -104,7 +104,7 @@ Announcements Feed
 Each release announcement is tracked and
 the feed is updated every minute and contains the data for the past 5 minutes.
 
-    http://registry.public.org/feeds/announcements.json
+    http://registry.pinf.org/feeds/announcements.json
 
 
 Installing Packages Directly

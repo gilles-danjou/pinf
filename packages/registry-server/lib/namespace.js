@@ -8,7 +8,7 @@ var USER = require("./user");
 var OWNER = require("./owner");
 var SEMVER = require("semver", "util");
 var MODELS = require("./models");
-var MEMCACHED = require("google/appengine/api/memcache");
+var CACHE = require("./cache");
 
 var model = MODELS.getModel("Namespace");
 exports.getModel = function() {
@@ -31,7 +31,7 @@ Namespace.prototype.fetch = function() {
 
 Namespace.prototype.store = function() {
     this.data.put();
-    MEMCACHED.remove("namespace:" + this.id);
+    CACHE.remove("namespace:" + this.id);
 }
 
 Namespace.prototype.exists = function() {
@@ -107,7 +107,7 @@ Namespace.prototype.getCatalog = function(env) {
 
 exports.serviceCatalogForId = function(env, id) {
     var key = "namespace:"+id,
-        data = MEMCACHED.get(key);
+        data = CACHE.get(key);
     if(!data) {
         var namespace = Namespace(id);
         if(!namespace.exists()) {
@@ -117,7 +117,7 @@ exports.serviceCatalogForId = function(env, id) {
             };
         }
         data = namespace.getCatalog(env);
-        MEMCACHED.set(key, JSON.encode(data, null, "  "));
+        CACHE.set(key, JSON.encode(data, null, "  "));
     }
     return data;    
 }

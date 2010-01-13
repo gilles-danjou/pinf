@@ -8,7 +8,7 @@ var NAMESPACE = require("./namespace");
 var SEMVER = require("semver", "util");
 var JSON = require("json");
 var MODELS = require("./models");
-var MEMCACHED = require("google/appengine/api/memcache");
+var CACHE = require("./cache");
 var PACKAGE_DESCRIPTOR = require("package-descriptor", "common");
 
 
@@ -84,8 +84,15 @@ Package.prototype.store = function() {
         this.data.descriptors = JSON.encode(this.descriptors);
     }
     this.data.put();
-    MEMCACHED.remove("package:" + this.id);
-    MEMCACHED.remove("namespace:" + this.getNamespace());
+    CACHE.remove("package:" + this.id);
+    CACHE.remove("namespace:" + this.getNamespace());
+    var result = model.all().filter("source =", this.id).fetch();
+    if(result) {
+        result.forEach(function(data) {
+            CACHE.remove("package:" + data.datastoreKey().getName());
+            CACHE.remove("namespace:" + data.namespace.datastoreKey().getName());
+        });
+    }
 }
 
 Package.prototype.exists = function() {
@@ -244,7 +251,7 @@ exports.getForNamespace = function(namespace) {
 
 exports.serviceInfoForId = function(id) {
     var key = "package:"+id,
-        data = MEMCACHED.get(key);
+        data = CACHE.get(key);
     if(!data) {
         var pkg = Package(id);
         if(!pkg.exists()) {
@@ -254,7 +261,7 @@ exports.serviceInfoForId = function(id) {
             };
         }
         data = pkg.getInfo();
-        MEMCACHED.set(key, JSON.encode(data, null, "  "));
+        CACHE.set(key, JSON.encode(data, null, "  "));
     }
     return data;    
 }

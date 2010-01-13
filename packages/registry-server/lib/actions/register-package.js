@@ -41,13 +41,17 @@ exports.handle = function(request) {
         }).split("/");
         id = id.slice(0,id.length-1).join("/") + ":" + id.pop();
 
-print("ID: ["+id+"]");
-
         var sourcePkg = PACKAGE.Package(id);
         if(!sourcePkg.exists()) {
             return {
                 "status": "SOURCE_PACKAGE_DOES_NOT_EXIST",
                 "message": "Source package does not exist."
+            }
+        }
+        if(sourcePkg.data.source) {
+            return {
+                "status": "SOURCE_PACKAGE_NOT_HARD",
+                "message": "Source package is not a hard package (it is a source package itself)."
             }
         }
 

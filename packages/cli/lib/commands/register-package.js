@@ -22,7 +22,7 @@ command.action(function (options) {
         var namespace = VALIDATOR.validate("path", UTIL.trim(options.args[0]), {
             "dropTrailingSlash": true
         });
-        
+
         var directory = VALIDATOR.validate("url", UTIL.trim(options.args[1]), {
             "throw": false
         });

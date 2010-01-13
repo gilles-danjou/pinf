@@ -2,7 +2,7 @@
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var DB = require("google/appengine/ext/db");
-var MEMCACHED = require("google/appengine/api/memcache");
+var CACHE = require("../cache");
 var NAMESPACE = require("../namespace");
 var PACKAGE = require("../package");
 var MODELS = require("../models");
@@ -19,7 +19,7 @@ exports.service = function(env) {
     if(env.PATH_INFO=="/feeds/announcements.json") {
         
         var memcachedKey = "uri:/feeds/announcements.json";
-        var announcements = MEMCACHED.get(memcachedKey);
+        var announcements = CACHE.get(memcachedKey);
         if(!announcements) {
             var since = new java.util.Date(new Date().getTime() - 60*5*1000);   // 5 minutes
             announcements = {
@@ -55,7 +55,7 @@ exports.service = function(env) {
                     announcements.announcements.push(info);
                 });
             }
-            MEMCACHED.set(memcachedKey, JSON.encode(announcements, null, "  "), 60);  // 1 minute
+            CACHE.set(memcachedKey, JSON.encode(announcements, null, "  "), 60);  // 1 minute
         }
         return announcements;
 
