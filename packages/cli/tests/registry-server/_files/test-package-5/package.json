@@ -1,0 +1,11 @@
+{
+    "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-5/",
+    "name": "test-package-5",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/cli/tests/registry-server/_files/test-package-5"
+        }
+    ]
+}
