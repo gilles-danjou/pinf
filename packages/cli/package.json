@@ -9,6 +9,10 @@
             "catalog": "http://github.com/cadorn/wildfire/raw/master/catalog.json",
             "name": "lib-js-system"
         },
+        "common": {
+            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+            "name": "common"
+        },
         "util": {
             "catalog": "http://github.com/cadorn/util/raw/master/catalog.json",
             "name": "lib-js"

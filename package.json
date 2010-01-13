@@ -11,6 +11,10 @@
         "registry-server": {
             "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
             "name": "registry-server"
+        },
+        "common": {
+            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+            "name": "common"
         }
     }
 }

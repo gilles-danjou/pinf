@@ -18,6 +18,10 @@
         "util": {
             "catalog": "http://github.com/cadorn/util/raw/master/catalog.json",
             "name": "lib-js"
+        },
+        "common": {
+            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+            "name": "common"
         }
     },
     "appengine": {

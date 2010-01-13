@@ -9,7 +9,7 @@ var HTTP_CLIENT = require("http-client");
 var JSON = require("json");
 var PINF = require("../pinf");
 var VALIDATOR = require("validator", "util");
-var PACKAGE_DESCRIPTOR = require("../package-descriptor");
+var PACKAGE_DESCRIPTOR = require("package-descriptor", "common");
 var GIT = require("../revision-control/git");
 
 
@@ -174,6 +174,14 @@ Client.prototype.announceRelease = function(options) {
     if(!descriptor.hasUid()) {
         throw new ClientError("Cannot announce release. The 'uid' property is missing in the package descriptor found at: " + options.directory.join("package.json").valueOf());
     }
+    
+    var descriptorValidationOptions = {
+        "print": options.print,
+        "revisionControl": git
+    };
+    if(!descriptor.validate(descriptorValidationOptions)) {
+        throw new ClientError("Package descriptor from working copy not valid");
+    }
 
     var info = this.getUriInfo(options, true);
 
@@ -196,6 +204,10 @@ Client.prototype.announceRelease = function(options) {
         // announce a new version tag
         args["version"] = git.getLatestVersion(options.major);
         args["descriptor"] = JSON.decode(git.getFileForRef("v"+args["version"], "package.json"));
+    }
+    
+    if(!PACKAGE_DESCRIPTOR.validate(args["descriptor"], descriptorValidationOptions)) {
+        throw new ClientError("Package descriptor from repository not valid");
     }
     
     var response = makeRequest(info.url, "announce-release", args);

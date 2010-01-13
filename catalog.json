@@ -9,6 +9,10 @@
         "registry-server": {
             "location": "http://github.com/cadorn/pinf/zipball/master/",
             "path": "packages/registry-server"
+        },
+        "common": {
+            "location": "http://github.com/cadorn/pinf/zipball/master/",
+            "path": "packages/common"
         }
     }
 }

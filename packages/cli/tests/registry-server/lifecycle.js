@@ -26,7 +26,8 @@ exports.testLifecycle = function() {
     }
     tmpDBPath.mkdirs();
     
-    var file;
+    var file,
+        rev
     
     resetFiles();
     initFiles();
@@ -48,7 +49,7 @@ exports.testLifecycle = function() {
     file = filesPath.join("test-package-1");
     OS.command("cd " + file.valueOf() + "; git add . ; git commit -m 'registered' ; git tag v0.2.0");
 
-    tusk.command("pinf --db " + tmpDBPath + " announce-release " + filesPath.join("test-package-1").valueOf());
+    tusk.command("pinf --db " + tmpDBPath + " announce-release " + file.valueOf());
 
         
 
@@ -60,9 +61,9 @@ exports.testLifecycle = function() {
     file = filesPath.join("test-package-2");
     OS.command("cd " + file.valueOf() + "; git add . ; git commit -m 'registered'");
     
-    tusk.command("pinf --db " + tmpDBPath + " announce-release --branch test " + filesPath.join("test-package-2").valueOf());
+    tusk.command("pinf --db " + tmpDBPath + " announce-release --branch test " + file.valueOf());
     
-    var rev = GIT.Git(file).getLatestRevisionForBranch("test");
+    rev = GIT.Git(file).getLatestRevisionForBranch("test");
 
     ASSERT.deepEqual(
         JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/catalog.json").decodeToString()),
@@ -114,6 +115,40 @@ exports.testLifecycle = function() {
           }
         }
     );
+    
+
+    file = filesPath.join("test-package-5");
+    
+    tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public " + file.valueOf());
+    tusk.command("pinf --db " + tmpDBPath + " announce-release --branch master " + file.valueOf());
+
+    rev = GIT.Git(file).getLatestRevisionForBranch("master");
+
+    ASSERT.deepEqual(
+        JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/test-package-5/").decodeToString()),
+        {
+          "name": "test-package-5",
+          "branches": {
+            "master": {
+              "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-5/",
+              "name": "test-package-5",
+              "repositories": [
+                  {
+                      "type": "git", 
+                      "url": "git://github.com/cadorn/pinf.git",
+                      "path": "packages/cli/tests/registry-server/_files/test-package-5",
+                      "raw": "http://github.com/cadorn/pinf/raw/{rev}/packages/cli/tests/registry-server/_files/test-package-5/{path}",
+                      "download": {
+                        "type": "zip",
+                        "url": "http://github.com/cadorn/pinf/zipball/{rev}/"
+                      }
+                  }
+              ],
+              "version": "0.0.0rev-" + rev
+            }
+          }
+        }
+    );
 
 //    resetFiles();
 
@@ -134,6 +169,11 @@ function resetFiles() {
     file.write(JSON.encode(descriptor, null, '    '));
 
     file = filesPath.join("test-package-2", "package.json");
+    var descriptor = JSON.decode(file.read());
+    delete descriptor.uid;
+    file.write(JSON.encode(descriptor, null, '    '));
+
+    file = filesPath.join("test-package-5", "package.json");
     var descriptor = JSON.decode(file.read());
     delete descriptor.uid;
     file.write(JSON.encode(descriptor, null, '    '));

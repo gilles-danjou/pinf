@@ -8,7 +8,7 @@ var FILE = require("file");
 var JSON = require("json");
 var URI = require("uri");
 var JSON_STORE = require("json-store", "util");
-var PACKAGE_DESCRIPTOR = require("./package-descriptor");
+var PACKAGE_DESCRIPTOR = require("package-descriptor", "common");
 
 
 var Database = exports.Database = function(path) {

@@ -9,6 +9,7 @@ var SEMVER = require("semver", "util");
 var JSON = require("json");
 var MODELS = require("./models");
 var MEMCACHED = require("google/appengine/api/memcache");
+var PACKAGE_DESCRIPTOR = require("package-descriptor", "common");
 
 
 var model = MODELS.getModel("Package");
@@ -162,13 +163,15 @@ Package.prototype.announceRevision = function(branch, revision, descriptor) {
 Package.prototype.getDescriptorForRevision = function(revision) {
     if(!this.descriptors || !this.descriptors.revisions) return false;
     if(!this.descriptors.revisions[revision]) return false;
-    return this.descriptors.revisions[revision];
+    var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(this.descriptors.revisions[revision]);
+    return descriptor.getCompleted();
 }
 
 Package.prototype.getDescriptorForVersion = function(version) {
     if(!this.descriptors || !this.descriptors.versions) return false;
     if(!this.descriptors.versions[version]) return false;
-    return this.descriptors.versions[version];
+    var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(this.descriptors.versions[version]);
+    return descriptor.getCompleted();
 }
 
 Package.prototype.getUid = function(env) {
