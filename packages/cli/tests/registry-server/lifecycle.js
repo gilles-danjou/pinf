@@ -149,6 +149,39 @@ exports.testLifecycle = function() {
           }
         }
     );
+    
+    
+    tusk.command("pinf --db " + tmpDBPath + " register-namespace http://127.0.0.1:8080/test@pinf.org/public/subset/");
+
+    tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public/subset http://127.0.0.1:8080/test@pinf.org/public/test-package-5/");
+    
+    ASSERT.deepEqual(
+        JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/subset/catalog.json").decodeToString()),
+        {
+          "uid": "http://127.0.0.1:8080/test@pinf.org/public/subset/catalog.json",
+          "packages": {
+            "test-package-5": {
+              "master": {
+                "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-5/",
+                "name": "test-package-5",
+                "repositories": [
+                  {
+                    "type": "git",
+                    "url": "git://github.com/cadorn/pinf.git",
+                    "path": "packages/cli/tests/registry-server/_files/test-package-5",
+                    "raw": "http://github.com/cadorn/pinf/raw/{rev}/packages/cli/tests/registry-server/_files/test-package-5/{path}",
+                    "download": {
+                      "type": "zip",
+                      "url": "http://github.com/cadorn/pinf/zipball/{rev}/"
+                    }
+                  }
+                ],
+                "version": "0.0.0rev-" + rev
+              }
+            }
+          }
+        }
+    );
 
 //    resetFiles();
 

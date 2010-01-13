@@ -39,7 +39,8 @@ models["Package"] = new DB.Model("Package", {
     }),
     "versions": new DB.TextProperty(),
     "revisions": new DB.TextProperty(),
-    "descriptors": new DB.TextProperty()
+    "descriptors": new DB.TextProperty(),
+    "source": new DB.StringProperty()
 });
 
 models["Announcement"] = new DB.Model("Announcement", {

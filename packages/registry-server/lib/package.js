@@ -22,7 +22,7 @@ var Package = exports.Package = function(pkg, data) {
         return new exports.Package(pkg, data);
 
     this.id = pkg;
-
+    this.frozen = false;
     this.fetch(data);
 }
 
@@ -36,6 +36,11 @@ Package.prototype.fetch = function(data) {
         this.data = new model({
             "keyName": this.id
         });
+    } else {
+        if(this.data.source) {
+            this.data = model.getByKeyName(this.data.source);
+            this.frozen = true;
+        }
     }
     if(this.data.versions) {
         this.versions = JSON.decode(this.data.versions);
@@ -49,6 +54,9 @@ Package.prototype.fetch = function(data) {
 }
 
 Package.prototype.store = function() {
+    if(this.frozen) {
+        throw new Error("Cannot store package as it is frozen");
+    }
     if(this.revisions) {
         this.data.revisions = JSON.encode(this.revisions);
     }
@@ -188,8 +196,11 @@ Package.prototype.getUid = function(env) {
     return url.join("");
 }
 
-Package.prototype.register = function(namespace) {
+Package.prototype.register = function(namespace, sourcePackage) {
     this.data.namespace = namespace.data
+    if(sourcePackage) {
+        this.data.source = sourcePackage.id;
+    }
     this.store();
 }
 
@@ -247,5 +258,4 @@ exports.serviceInfoForId = function(id) {
     }
     return data;    
 }
-
 

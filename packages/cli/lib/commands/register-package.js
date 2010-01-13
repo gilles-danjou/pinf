@@ -22,11 +22,17 @@ command.action(function (options) {
         var namespace = VALIDATOR.validate("path", UTIL.trim(options.args[0]), {
             "dropTrailingSlash": true
         });
-        var directory = VALIDATOR.validate("directory", UTIL.trim(options.args[1]), {
-            "makeAbsolute": true,
-            "return": "FILE.Path"
-        });
         
+        var directory = VALIDATOR.validate("url", UTIL.trim(options.args[1]), {
+            "throw": false
+        });
+        if(directory===false) {
+            directory = VALIDATOR.validate("directory", UTIL.trim(options.args[1]), {
+                "makeAbsolute": true,
+                "return": "FILE.Path"
+            });
+        }
+
         var client = CLIENT.Client(PINF.getDatabase().getRegistryUriForNamespace(namespace));
         client.registerPackage({
             "directory": directory,

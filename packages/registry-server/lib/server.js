@@ -47,6 +47,16 @@ exports.app = function(env) {
                 "args": qs
             }
             
+            var url = [
+                "http://"
+            ];
+            url.push(env.SERVER_NAME);
+            if(env.SERVER_PORT && env.SERVER_PORT!="80") {
+                url.push(":" + env.SERVER_PORT);
+            }
+            url.push("/");
+            request.baseUrl = url.join("");
+            
             if(DEBUG) {
                 print("--------- REQUEST ---------");
                 UTIL.every(request, function(item1) {
