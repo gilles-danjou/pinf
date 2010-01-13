@@ -28,65 +28,59 @@ exports.app = function(env) {
             response;
 
         if(!path[path.length-1]) path.pop();
+
+//            var qs = QUERYSTRING.parseQuery(env.QUERY_STRING);
+        var qs = JSON.decode(env["jsgi.input"].read().decodeToString());
+    
+        var request = {
+            "env": env,
+            "action": qs["action"] || null,
+            "user": qs["user"] || null,
+            "authkey": qs["authkey"] || null,
+            "namespace": path.join("/"),
+            "owner": path.shift(),
+            "path": path,
+            "args": qs
+        }
         
-        if(path.length==1) {
+        var url = [
+            "http://"
+        ];
+        url.push(env.SERVER_NAME);
+        if(env.SERVER_PORT && env.SERVER_PORT!="80") {
+            url.push(":" + env.SERVER_PORT);
+        }
+        url.push("/");
+        request.baseUrl = url.join("");
+        
+        if(DEBUG) {
+            print("--------- REQUEST ---------");
+            UTIL.every(request, function(item1) {
+                if(item1[0]=="env" || item1[0]=="args") {
+                    print("  " + item1[0] + ":");
+                    UTIL.every(item1[1], function(item2) {
+                        print("    " + item2[0] + ": " + item2[1]);
+                    });
+                } else {
+                    print("  " + item1[0] + ": " + item1[1]);
+                }
+            });
+            print("--------- REQUEST ---------");
+        }
+
+        if(!request.action || !request.user || !request.authkey) {
             response = {
                 "status": "INVALID_REQUEST",
                 "message": "Invalid request"
             };        
-        } else {
+        }
 
-//            var qs = QUERYSTRING.parseQuery(env.QUERY_STRING);
-            var qs = JSON.decode(env["jsgi.input"].read().decodeToString());
-        
-            var request = {
-                "env": env,
-                "action": qs["action"] || null,
-                "user": qs["user"] || null,
-                "authkey": qs["authkey"] || null,
-                "namespace": path.join("/"),
-                "owner": path.shift(),
-                "path": path,
-                "args": qs
-            }
+        response = USER.authorize(request);
+
+        if(response.status=="AUTHORIZED") {
             
-            var url = [
-                "http://"
-            ];
-            url.push(env.SERVER_NAME);
-            if(env.SERVER_PORT && env.SERVER_PORT!="80") {
-                url.push(":" + env.SERVER_PORT);
-            }
-            url.push("/");
-            request.baseUrl = url.join("");
-            
-            if(DEBUG) {
-                print("--------- REQUEST ---------");
-                UTIL.every(request, function(item1) {
-                    if(item1[0]=="env" || item1[0]=="args") {
-                        print("  " + item1[0] + ":");
-                        UTIL.every(item1[1], function(item2) {
-                            print("    " + item2[0] + ": " + item2[1]);
-                        });
-                    } else {
-                        print("  " + item1[0] + ": " + item1[1]);
-                    }
-                });
-                print("--------- REQUEST ---------");
-            }
-
-            if(!request.action || !request.user || !request.authkey) {
-                response = {
-                    "status": "INVALID_REQUEST",
-                    "message": "Invalid request"
-                };        
-            }
-
-            response = USER.authorize(request);
-    
-            if(response.status=="AUTHORIZED") {
-                response = require("./actions/" + qs["action"]).handle(request);
-            }
+            // user is authorized - handle action
+            response = require("./actions/" + qs["action"]).handle(request);
         }
     
         status = 200;

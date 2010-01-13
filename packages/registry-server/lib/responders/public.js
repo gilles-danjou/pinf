@@ -61,22 +61,23 @@ exports.service = function(env) {
 
     } else {
 
-        var parts = env.PATH_INFO.match(/^\/([^\/]*)\/((.*?)\/([^\/]*)\/?)?$/);
+        var parts = env.PATH_INFO.match(/^\/([^\/]*)\/(.*?)(\/([^\/]*)\/?)?$/);
+
         if(!parts) {
             return {
                 "status": "INVALID_REQUEST",
                 "message": "Invalid request"
             };
         }
-    
+
         var info = {
                 "owner": parts[1],
-                "path": parts[3],
-                "package": parts[4]
+                "path": (parts[4])?parts[2]:null,
+                "package": (parts[4])?parts[4]:parts[2]
             },
             id;
     
-        if(!info.owner || !info.path) {
+        if(!info.owner || !info["package"]) {
             return {
                 "status": "INVALID_REQUEST",
                 "message": "Invalid request"
@@ -84,10 +85,10 @@ exports.service = function(env) {
         }
         
         if(info["package"] && info["package"].substr(info["package"].length-12, 12)!="catalog.json") {
-            id = info["owner"] + "/" + info["path"] + ":" + info["package"];
+            id = info["owner"] + ((info["path"])?"/" + info["path"]:"") + ":" + info["package"];
             return PACKAGE.serviceInfoForId(id);
         } else {
-            id = info["owner"] + "/" + info["path"];
+            id = info["owner"] + ((info["path"])?"/" + info["path"]:"");
         }
         
         return NAMESPACE.serviceCatalogForId(env, id);

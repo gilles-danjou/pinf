@@ -58,7 +58,7 @@ Client.prototype.getUriInfo = function(options, useAccount) {
     };
     info["ownerType"] = (VALIDATOR.validate("email", info["owner"], {"throw": false}))?"email":"hostname";
     info["path"] = this.uri.directories.slice(1).join("/");
-    info["namespace"] = info["owner"] + "/" + info["path"];
+    info["namespace"] = info["owner"] + ((info["path"])?"/" + info["path"]:"");
     info["user"] = options["user"] || null;
     info["authkey"] = options["authkey"] || null;
     
@@ -71,9 +71,14 @@ Client.prototype.getUriInfo = function(options, useAccount) {
         }
     } else
     if(info["ownerType"]=="hostname") {
-        throw new ClientError("TODO: LOOKUP REGISTRY IN NAMESPACE");
+        if(!info["user"]) {
+            if(!namespacesConfig.has([info["namespace"]])) {
+                throw new ClientError("Cannot determine user. Namespace not found. User required.");
+            }
+            info["registry"] = namespacesConfig.get([info["namespace"], "registry"]);
+        }
     }
-    
+
     if(!info["registry"]) {
         info["registry"] = [info["server"], ":", info["user"]].join("");
     }
@@ -251,14 +256,6 @@ ClientError.prototype = new Error();
 
 function makeRequest(url, action, args) {
 
-/*
-    var body = "";
-
-    url += "?action=" + action;
-    UTIL.every(args, function(arg) {
-        url += "&" + arg[0] + "=" + arg[1];
-    });
-*/    
     args["action"] = action;
     
     var body = JSON.encode(args);
