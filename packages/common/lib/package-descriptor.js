@@ -143,7 +143,7 @@ exports.validate = function(descriptor, options) {
                     feedback.push("'repositories["+index+"].url' property ("+repository.url+") does not match: " + options.revisionControl.getRepositories());
                     return;
                 }
-                if(options.revisionControl.getPathPrefix()) {
+                if(options.revisionControl.getPathPrefix().valueOf()!="") {
                     if(!repository.path) {
                         feedback.push("Missing 'repositories["+index+"].path' property");
                         return;
