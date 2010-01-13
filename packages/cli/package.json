@@ -1,6 +1,6 @@
 {
+    "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/cli/",
     "name": "cli",
-    "uid": "http://pinf.org/cadorn.org/pinf/packages/cli",
     "dependencies": [
         "github.com/cadorn/wildfire/raw/master/lib-js-system"
     ],
@@ -17,5 +17,12 @@
             "catalog": "http://github.com/cadorn/util/raw/master/catalog.json",
             "name": "lib-js"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/cli"
+        }
+    ]
 }

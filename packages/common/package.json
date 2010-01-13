@@ -1,4 +1,5 @@
 {
+    "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/",
     "name": "common",
     "type": "using",
     "using": {
@@ -6,5 +7,12 @@
             "catalog": "http://github.com/cadorn/util/raw/master/catalog.json",
             "name": "lib-js"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/common"
+        }
+    ]
 }

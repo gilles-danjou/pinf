@@ -1,4 +1,5 @@
 {
+    "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/registry-server/",
     "name": "registry-server",
     "type": "using",
     "build": {
@@ -11,7 +12,7 @@
         },
         "targets": {
             "dev": "github.com/cadorn/gae-runner/raw/master/devtools:build/dev",
-            "dist": "github.com/cadorn/gae-runner/raw/master/devtools:build/dist",
+            "dist": "github.com/cadorn/gae-runner/raw/master/devtools:build/dist"
         }
     },
     "using": {
@@ -24,6 +25,13 @@
             "name": "common"
         }
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/registry-server"
+        }
+    ]
     "appengine": {
         "name": "pinf-registry",
         "email": "christoph@christophdorn.com"
