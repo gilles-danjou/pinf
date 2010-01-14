@@ -9,7 +9,7 @@ var HTTP_CLIENT = require("http-client");
 var JSON = require("json");
 var PINF = require("../pinf");
 var VALIDATOR = require("validator", "util");
-var PACKAGE_DESCRIPTOR = require("package-descriptor", "common");
+var PACKAGE_DESCRIPTOR = require("package/descriptor", "common");
 var GIT = require("../revision-control/git");
 
 
@@ -227,7 +227,7 @@ Client.prototype.announceRelease = function(options) {
         args["version"] = git.getLatestVersion(options.major);
         args["descriptor"] = JSON.decode(git.getFileForRef("v"+args["version"], "package.json"));
     }
-    
+
     if(!PACKAGE_DESCRIPTOR.validate(args["descriptor"], descriptorValidationOptions)) {
         throw new ClientError("Package descriptor from repository not valid");
     }

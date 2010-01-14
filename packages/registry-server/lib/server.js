@@ -16,6 +16,7 @@ exports.app = function(env) {
 
     if(env.environment == "development") {
         DEBUG = true;
+        CACHE.setEnabled(false);
     }
 
     var status,

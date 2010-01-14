@@ -9,7 +9,7 @@ var SEMVER = require("semver", "util");
 var JSON = require("json");
 var MODELS = require("./models");
 var CACHE = require("./cache");
-var PACKAGE_DESCRIPTOR = require("package-descriptor", "common");
+var PACKAGE_DESCRIPTOR = require("package/descriptor", "common");
 
 
 var model = MODELS.getModel("Package");
@@ -119,7 +119,7 @@ Package.prototype.announceVersion = function(version, descriptor) {
         this.versions = [version];
     } else {
         this.versions.push(version);
-        this.versions = SEMVER.latestForEachMajor(this.versions);
+        this.versions = SEMVER.latestForEachMajor(this.versions, true);
     }
     if(!this.descriptors) {
         this.descriptors = {};
@@ -222,7 +222,7 @@ Package.prototype.getInfo = function() {
     if(this.versions) {
         info["versions"] = {};
         this.versions.forEach(function(version) {
-            info.versions[SEMVER.getMajor(version)] = self.getDescriptorForVersion(version);
+            info.versions[SEMVER.getMajor(version, true)] = self.getDescriptorForVersion(version);
         });
     }
     if(this.revisions) {

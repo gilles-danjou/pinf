@@ -183,6 +183,32 @@ exports.testLifecycle = function() {
         }
     );
 
+
+    file = filesPath.join("test-package-1");
+    OS.command("cd " + file.valueOf() + "; git tag v0.2.1rc1");
+
+    tusk.command("pinf --db " + tmpDBPath + " announce-release " + file.valueOf());
+
+    ASSERT.deepEqual(
+        JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/test-package-1/").decodeToString()),
+        {
+          "name": "test-package-1",
+          "versions": {
+            "0": {
+              "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-1/",
+              "name": "test-package-1",
+              "version": "0.2.0"
+            },
+            "0.2.1rc": {
+              "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-1/",
+              "name": "test-package-1",
+              "version": "0.2.1rc1"
+            }
+          }
+        }
+    );
+
+
 //    resetFiles();
 
 

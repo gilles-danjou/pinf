@@ -5,3 +5,4 @@
 /build/
 /local/
 /.narwhal/
+.tmp/

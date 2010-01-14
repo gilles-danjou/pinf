@@ -8,6 +8,7 @@ var FILE = require("file");
 var JSON = require("json");
 var URI = require("uri");
 var VALIDATOR = require("validator", "util");
+var SEMVER = require("semver", "util");
 
 
 var PackageDescriptor = exports.PackageDescriptor = function(path) {
@@ -20,15 +21,15 @@ var PackageDescriptor = exports.PackageDescriptor = function(path) {
         if(!path.exists()) {
             throw new Error("No package descriptor found at: " + path);
         }
-        this.descriptor = JSON.decode(path.read());
+        this.spec = JSON.decode(path.read());
     } else {
-        this.descriptor = path;
+        this.spec = path;
     }
     
-    if(!this.descriptor) {
+    if(!this.spec) {
         throw new Error("Error parsing package descriptor"+(this.path)?" at: " + this.path:"");
     }
-    if(!this.descriptor.name) {
+    if(!this.spec.name) {
         throw new Error("No 'name' property in package descriptor"+(this.path)?" at: " + this.path:"");
     }
 }
@@ -37,39 +38,43 @@ PackageDescriptor.prototype.save = function() {
     if(!this.path) {
         throw new Error("Cannot save package descriptor");
     }
-    this.path.write(JSON.encode(this.descriptor, null, "    "));
+    this.path.write(JSON.encode(this.spec, null, "    "));
 }
 
 PackageDescriptor.prototype.getName = function() {
-    return this.descriptor.name;
+    return this.spec.name;
+}
+
+PackageDescriptor.prototype.getVersion = function() {
+    return this.spec.version;
 }
 
 PackageDescriptor.prototype.hasUid = function() {
-    if(!this.descriptor.uid) return false;
+    if(!this.spec.uid) return false;
     return true;
 }
 
 PackageDescriptor.prototype.getUid = function() {
-    if(!this.descriptor.uid) {
+    if(!this.spec.uid) {
         throw new Error("No 'uid' property in package descriptor"+(this.path)?" at: " + this.path:"");
     }
-    var uri = VALIDATOR.validate("url", this.descriptor.uid, {
+    var uri = VALIDATOR.validate("url", this.spec.uid, {
         "require": [
             ["path", {"trailingSlash": true}]
         ],
         "return": "uri"
     });
-    if(uri.directories[uri.directories.length-1]!=this.descriptor.name) {
+    if(uri.directories[uri.directories.length-1]!=this.spec.name) {
         throw new Error("The 'uid' property does not have the 'name' property at the end of the URI in package descriptor"+(this.path)?" at: " + this.path:"");
     }
-    return this.descriptor.uid;
+    return this.spec.uid;
 }
 
 PackageDescriptor.prototype.setUid = function(uid) {
     // insert 'uid' at the top of the package descriptor
-    this.descriptor = UTIL.complete({
+    this.spec = UTIL.complete({
         "uid": uid
-    }, this.descriptor);
+    }, this.spec);
     this.save();
 }
 
@@ -81,12 +86,12 @@ PackageDescriptor.prototype.getRegistryUri = function() {
 
 PackageDescriptor.prototype.validate = function(options) {
     options.path = this.path || null;
-    return exports.validate(this.descriptor, options);
+    return exports.validate(this.spec, options);
 }
 
 PackageDescriptor.prototype.getCompleted = function() {
     
-    var descriptor = UTIL.copy(this.descriptor);
+    var descriptor = UTIL.copy(this.spec);
     
     // repositories
     if(descriptor.repositories) {
@@ -107,7 +112,44 @@ PackageDescriptor.prototype.getCompleted = function() {
     return descriptor;
 }
 
-
+PackageDescriptor.prototype.getDownloadInfo = function() {
+    if(!this.spec.repositories) {
+        throw new Error("No 'repositories' property");
+    }
+    // TODO: Option to use alternate repositories instead of just repositories[0]
+    var repository = this.spec.repositories[0];
+    if(!repository.download) {
+        throw new Error("No 'repositories[0].download' property");
+    }
+    if(!repository.download.url) {
+        throw new Error("No 'repositories[0].download.url' property");
+    }
+    var uri = URI.parse(repository.download.url),
+        rev,
+        type = repository.download.type || false,
+        m;
+    if(SEMVER.validate(this.spec.version, {"numericOnly": true})) {
+        rev = "v" + this.spec.version;
+    } else
+    if(m = this.spec.version.match(/^0\.0\.0rev-(.*)$/)) {
+        rev = m[1];
+    } else {
+        throw new Error("Invalid version format: " + this.spec.version);
+    }
+    if(!type) {
+        if(!uri.file) {
+            throw new Error("Cannot guess archive type. No 'file' component in download url.");
+        }
+        var ext = FILE.Path(uri.file).extension;
+        throw new Error("Guess archive type for extension: " + ext);
+    }
+    var url = uri.url;
+    url = url.replace(/\{rev\}/g, rev);
+    return {
+        "type": type,
+        "url": url
+    }
+}
 
 
 exports.validate = function(descriptor, options) {
