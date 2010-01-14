@@ -53,7 +53,7 @@ exports.testPopulate = function() {
     file = store.get(LOCATOR.PackageLocator({
         "catalog": "http://registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/catalog.json",
         "name": "test-package-3",
-        "revision": "0.1.0alpha"
+        "revision": "0.1.3rc1"
     }));
 
     ASSERT.equal(file.dirname().valueOf(), storePath.join("packages/registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/test-package-3").valueOf());

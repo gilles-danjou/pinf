@@ -43,7 +43,6 @@ PackageStore.prototype.get = function(locator) {
     if(packagePath.exists())
         return packagePath;
     if(!this.downloads.has(downloadInfo.url)) {
-print("downloadInfo.url: "+downloadInfo.url);        
         this.downloads.download(downloadInfo.url);
     }
     var file = this.downloads.get(downloadInfo.url);

@@ -134,7 +134,7 @@ PackageDescriptor.prototype.getDownloadInfo = function() {
     if(m = this.spec.version.match(/^0\.0\.0rev-(.*)$/)) {
         rev = m[1];
     } else {
-        throw new Error("Invalid version format: " + this.spec.version);
+        rev = "v" + this.spec.version;
     }
     if(!type) {
         if(!uri.file) {

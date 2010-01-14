@@ -94,7 +94,7 @@ Namespace.prototype.getCatalog = function(env) {
             }
             if(pkg[1].versions) {
                 pkg[1].versions.forEach(function(version) {
-                    catalog.packages[pkg[1].getName()][SEMVER.getMajor(version)] = pkg[1].getDescriptorForVersion(version);
+                    catalog.packages[pkg[1].getName()][SEMVER.getMajor(version, true)] = pkg[1].getDescriptorForVersion(version);
                 });
             }
             if(UTIL.len(catalog.packages[pkg[1].getName()])==0) {

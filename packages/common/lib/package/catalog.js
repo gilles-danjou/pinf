@@ -52,10 +52,10 @@ PackageCatalog.prototype.getDescriptor = function(locator) {
     } else
     if(SEMVER.validate(desiredRevision)) {
         // we have a semver with an alphanumeric suffix. this declares a major version compatibility for >=revision
-        // semvers with alphanumeric suffixes are considered (these are release candidates)
-        revision = SEMVER.getMajor(desiredRevision) + "rc";
+        // semvers with alphanumeric suffixes are considered
+        revision = SEMVER.getMajor(desiredRevision, true);
         if(!revisions[revision]) {
-            // no release candidates in catalog - default to full version
+            // default to full version
             revision = SEMVER.getMajor(desiredRevision);
         }
     } else {

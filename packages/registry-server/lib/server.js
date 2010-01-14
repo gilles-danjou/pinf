@@ -10,7 +10,7 @@ var QUERYSTRING = require("jack/querystring");
 var USER = require("./user");
 var CACHE = require("./cache");
 
-CACHE.setSeed("1");
+CACHE.setSeed("2");
 
 exports.app = function(env) {
 
