@@ -15,6 +15,28 @@ exports.handle = function(request) {
             "message": "Wrong arguments: 'package' is missing."
         }
     }
+
+    if(!request.namespace) {
+        return {
+            "status": "WRONG_ARGUMENTS",
+            "message": "Wrong arguments: 'namespace' is missing."
+        }
+    }
+
+    if(!/^[a-z0-9-_\.@\/]*$/.test(request.namespace)) {
+        return {
+            "status": "WRONG_ARGUMENT_FORMAT",
+            "message": "Wrong argument format: 'namespace' does not match [a-z0-9-_\.@\/]."
+        }
+    }
+
+    if(request.namespace.length>100) {
+        return {
+            "status": "WRONG_ARGUMENT_FORMAT",
+            "message": "Wrong argument format: 'namespace' is longer than 100 characters."
+        }
+    }
+
     
     var namespace = NAMESPACE.Namespace(request.namespace);
     if(!namespace.verified()) {
@@ -27,7 +49,7 @@ exports.handle = function(request) {
     var pkg;
 
     if(VALIDATOR.validate("url", request.args["package"], {"throw": false})!==false) {
-        
+
         if(request.args["package"].substr(0,request.baseUrl.length)!=request.baseUrl) {
             // TODO: Allow external registry server URLs
             return {
@@ -66,6 +88,20 @@ exports.handle = function(request) {
         pkg.register(namespace, sourcePkg);
 
     } else {
+
+        if(!/^[a-z0-9-_\.]*$/.test(request.args["package"])) {
+            return {
+                "status": "WRONG_ARGUMENT_FORMAT",
+                "message": "Wrong argument format: 'package' does not match [a-z0-9-_\.]."
+            }
+        }
+    
+        if(request.args["package"].length>50) {
+            return {
+                "status": "WRONG_ARGUMENT_FORMAT",
+                "message": "Wrong argument format: 'package' is longer than 50 characters."
+            }
+        }
 
         if(request.args["name"]) {
             return {

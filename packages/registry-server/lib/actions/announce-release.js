@@ -14,7 +14,22 @@ exports.handle = function(request) {
             "status": "WRONG_ARGUMENTS",
             "message": "Wrong arguments: 'package' is missing."
         }
-    }    
+    }
+
+    if(!/^[a-z0-9-_\.]*$/.test(request.args["package"])) {
+        return {
+            "status": "WRONG_ARGUMENT_FORMAT",
+            "message": "Wrong argument format: 'package' does not match [a-z0-9-_\.]."
+        }
+    }
+
+    if(request.args["package"].length>100) {
+        return {
+            "status": "WRONG_ARGUMENT_FORMAT",
+            "message": "Wrong argument format: 'package' is longer than 50 characters."
+        }
+    }
+
     if(!request.args["descriptor"]) {
         return {
             "status": "WRONG_ARGUMENTS",

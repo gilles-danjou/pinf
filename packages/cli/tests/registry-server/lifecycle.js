@@ -7,7 +7,6 @@ var TUSK = require("narwhal/tusk/tusk");
 var PINF = require("pinf", "github.com/cadorn/pinf/raw/master/cli");
 var JSON = require("json");
 var FILE = require("file");
-var OS = require("os");
 var HTTP = require("http");
 var GIT = require("revision-control/git", "github.com/cadorn/pinf/raw/master/cli");
 
@@ -33,7 +32,7 @@ initFiles();
 exports.testBasicRegistration = function() {
     
     var file,
-        rev
+        rev;
 
     tusk.command("pinf --db " + tmpDBPath + " register-namespace http://127.0.0.1:8080/test@pinf.org/public/");
     
@@ -211,44 +210,49 @@ exports.testBasicRegistration = function() {
         }
     );
 
-//    resetFiles();
+    resetFiles({"skipUIDRemoval": true});
 }
 
 
-exports.testProgramCreation = function() {
-    
-    var file,
-        rev
-    
+exports.testProgram = function() {
+
+    var file;
+
     file = filesPath.join("test-package-6");
 
     tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public " + file.valueOf());
     tusk.command("pinf --db " + tmpDBPath + " announce-release --branch master " + file.valueOf());
 
-    
-    
+
+    // program tests reside in external file to allow isolated running once
+    // test ENV is setup by exports._testBasicRegistration()
+    require("test").run(require("./lifecycle-program"));
 }
 
 
 
-function resetFiles() {
+function resetFiles(options) {
+    
+    options = options || {};
 
     var file,
         descriptor;
 
     // delete 'uid' property from test package descriptors
-    [
-        "test-package-1",
-        "test-package-2",
-        "test-package-5",
-        "test-package-6"
-    ].forEach(function(name) {
-        file = filesPath.join(name, "package.json");
-        var descriptor = JSON.decode(file.read());
-        delete descriptor.uid;
-        file.write(JSON.encode(descriptor, null, '    '));
-    });
-
+    if(!options.skipUIDRemoval) {
+        [
+            "test-package-1",
+            "test-package-2",
+            "test-package-5",
+            "test-package-6"
+        ].forEach(function(name) {
+            file = filesPath.join(name, "package.json");
+            var descriptor = JSON.decode(file.read());
+            delete descriptor.uid;
+            file.write(JSON.encode(descriptor, null, '    '));
+        });
+    }
+    
     // delete .git repositores for test packages
     [
         "test-package-1",
