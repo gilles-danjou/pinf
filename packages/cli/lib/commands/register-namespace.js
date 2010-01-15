@@ -21,14 +21,14 @@ command.helpful();
 command.action(function (options) {
 
     try {
-        var uri = VALIDATOR.validate("url", UTIL.trim(options.args[0]), {
+        var uri = VALIDATOR.validate("url", options.args[0], {
             "require": [
                 ["path", {"trailingSlash": true}]
             ],
             "return": "uri"
         });
-        var user = (options.user)?VALIDATOR.validate("email", UTIL.trim(options.user)):null;
-        var authkey = (options.authkey)?UTIL.trim(options.authkey):null;
+        var user = (options.user)?VALIDATOR.validate("email", options.user):null;
+        var authkey = (options.authkey)?VALIDATOR.validate("string", options.authkey):null;
 
         var client = CLIENT.Client(uri);    
         client.registerNamespace({

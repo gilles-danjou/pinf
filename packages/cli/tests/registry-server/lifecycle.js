@@ -15,22 +15,25 @@ var GIT = require("revision-control/git", "github.com/cadorn/pinf/raw/master/cli
 var filesPath = FILE.Path(module.path).dirname().join("_files");
 
 
-exports.testLifecycle = function() {
-    
-    var tusk = TUSK.Tusk().activate(),
-        seaPath = tusk.getSea().getPath();
-    
-    var tmpDBPath = seaPath.join("build", "cli", "test", "db");
-    if(tmpDBPath.exists()) {
-        OS.command("rm -Rf " + tmpDBPath);
-    }
-    tmpDBPath.mkdirs();
+// setup
+
+var tusk = TUSK.Tusk().activate(),
+    seaPath = tusk.getSea().getPath();
+
+var tmpDBPath = seaPath.join("build", "cli", "test", "db");
+if(tmpDBPath.exists()) {
+    OS.command("rm -Rf " + tmpDBPath);
+}
+tmpDBPath.mkdirs();
+
+resetFiles();
+initFiles();
+
+
+exports.testBasicRegistration = function() {
     
     var file,
         rev
-    
-    resetFiles();
-    initFiles();
 
     tusk.command("pinf --db " + tmpDBPath + " register-namespace http://127.0.0.1:8080/test@pinf.org/public/");
     
@@ -153,14 +156,14 @@ exports.testLifecycle = function() {
     
     tusk.command("pinf --db " + tmpDBPath + " register-namespace http://127.0.0.1:8080/test@pinf.org/public/subset/");
 
-    tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public/subset http://127.0.0.1:8080/test@pinf.org/public/test-package-5/");
+    tusk.command("pinf --db " + tmpDBPath + " register-package --name renamed-test-package-5 test@pinf.org/public/subset http://127.0.0.1:8080/test@pinf.org/public/test-package-5/");
     
     ASSERT.deepEqual(
         JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/subset/catalog.json").decodeToString()),
         {
           "uid": "http://127.0.0.1:8080/test@pinf.org/public/subset/catalog.json",
           "packages": {
-            "test-package-5": {
+            "renamed-test-package-5": {
               "master": {
                 "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-5/",
                 "name": "test-package-5",
@@ -208,46 +211,59 @@ exports.testLifecycle = function() {
         }
     );
 
-
 //    resetFiles();
-
-
-    //pinf --db /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/build/cli/test/db announce-release --branch master /pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf/packages/cli/tests/_files/test-package-1
-
 }
+
+
+exports.testProgramCreation = function() {
+    
+    var file,
+        rev
+    
+    file = filesPath.join("test-package-6");
+
+    tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public " + file.valueOf());
+    tusk.command("pinf --db " + tmpDBPath + " announce-release --branch master " + file.valueOf());
+
+    
+    
+}
+
 
 
 function resetFiles() {
 
-    var file;
+    var file,
+        descriptor;
 
-    // delete 'uid' property from test package descriptor
-    file = filesPath.join("test-package-1", "package.json");
-    var descriptor = JSON.decode(file.read());
-    delete descriptor.uid;
-    file.write(JSON.encode(descriptor, null, '    '));
+    // delete 'uid' property from test package descriptors
+    [
+        "test-package-1",
+        "test-package-2",
+        "test-package-5",
+        "test-package-6"
+    ].forEach(function(name) {
+        file = filesPath.join(name, "package.json");
+        var descriptor = JSON.decode(file.read());
+        delete descriptor.uid;
+        file.write(JSON.encode(descriptor, null, '    '));
+    });
 
-    file = filesPath.join("test-package-2", "package.json");
-    var descriptor = JSON.decode(file.read());
-    delete descriptor.uid;
-    file.write(JSON.encode(descriptor, null, '    '));
-
-    file = filesPath.join("test-package-5", "package.json");
-    var descriptor = JSON.decode(file.read());
-    delete descriptor.uid;
-    file.write(JSON.encode(descriptor, null, '    '));
-
-
-    file = filesPath.join("test-package-1", ".git");
-    OS.command("rm -Rf " + file.valueOf());
-
-    file = filesPath.join("test-package-2", ".git");
-    OS.command("rm -Rf " + file.valueOf());
+    // delete .git repositores for test packages
+    [
+        "test-package-1",
+        "test-package-2"
+    ].forEach(function(name) {
+        file = filesPath.join(name, ".git");
+        OS.command("rm -Rf " + file.valueOf());
+    });
 }
 
 function initFiles() {
     
     var file;
+    
+    // initial setup of .git repositories for test packages
 
     file = filesPath.join("test-package-1");
     OS.command("cd " + file.valueOf() + "; git init; git add . ; git commit -m 'base' ; git tag v0.1.0");

@@ -54,8 +54,8 @@ exports.handle = function(request) {
                 "message": "Source package is not a hard package (it is a source package itself)."
             }
         }
-
-        pkg = PACKAGE.Package(namespace.id + ":" + sourcePkg.getName());
+        
+        pkg = PACKAGE.Package(namespace.id + ":" + (request.args["name"] || sourcePkg.getName()));
         if(pkg.exists()) {
             return {
                 "status": "PACKAGE_EXISTS",
@@ -66,6 +66,13 @@ exports.handle = function(request) {
         pkg.register(namespace, sourcePkg);
 
     } else {
+
+        if(request.args["name"]) {
+            return {
+                "status": "WRONG_ARGUMENTS",
+                "message": "Wrong arguments: 'name' can only be used with UID URL for 'package'."
+            }
+        }
 
         pkg = PACKAGE.Package(namespace.id + ":" + request.args["package"]);
         if(pkg.exists()) {

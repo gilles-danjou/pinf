@@ -1,0 +1,1 @@
+For local testing with isolated git repository

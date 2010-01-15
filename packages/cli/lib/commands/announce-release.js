@@ -21,7 +21,7 @@ command.helpful();
 command.action(function (options) {
 
     try {
-        var directory = VALIDATOR.validate("directory", UTIL.trim(options.args[0]), {
+        var directory = VALIDATOR.validate("directory", options.args[0], {
             "makeAbsolute": true,
             "return": "FILE.Path"
         });

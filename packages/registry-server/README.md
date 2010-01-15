@@ -8,7 +8,6 @@ Docs
 
   * [Lifecycle](http://github.com/cadorn/pinf/blob/master/docs/Lifecycle.md)
 
-
 Dev Setup
 =========
 
@@ -24,10 +23,31 @@ Deployment:
 
     tusk package --package registry-server build dist
 
+Supported
+=========
+
+Commands via [cli](http://github.com/cadorn/pinf/tree/master/packages/cli/):
+
+    pinf register-namespace http://registry.pinf.org/<owner>/<path>/
+    pinf register-package <owner>/<path> <PackageDirectory>
+    pinf register-package <owner>/<path> <PackageUID>
+    pinf announce-release <PackageDirectory>
+
+Public URLs:
+
+    http://registry.pinf.org/<owner>/<path>/<PackageName>/
+    http://registry.pinf.org/<owner>/<path>/catalog.json
+    http://registry.pinf.org/feeds/announcements.json
 
 TODO
 ====
 
+  * Filter announcements feed based on various criteria
+    * `http://registry.pinf.org/feeds/announcements.json?...`
+  * @meta support for packages
+    * `http://registry.pinf.org/<owner>/<path>/<PackageName>/@meta/<MetaPath>`
+  * implements support
+    * `http://registry.pinf.org/implements/<ImplementsID>`
   * Webhook for github post-commit
   * Check namespace and package strings for allowed characters (a-zA-Z0-9-._)
   * Check max length for namespace + package uri (db field is max 500 chars)
@@ -36,7 +56,6 @@ TODO
   * Realtime (via XMPP) notifications of announcements
   * Validate package descriptors and return error info to client
   * Backup of datastore (if google does not beat us to it)
-  
 
 
 License

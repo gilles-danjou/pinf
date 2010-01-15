@@ -22,7 +22,7 @@ and your local system.
 If you do not have an account (for the `<owner>` email address) on the registry server
 you will receive an email with an access code. Include this access code with your first query:
 
-  pinf register-namespace --authkey <AccessCode> http://registry.pinf.org/<owner>/public/
+    pinf register-namespace --authkey <AccessCode> http://registry.pinf.org/<owner>/public/
 
 ###Hostname Owners
 
@@ -67,6 +67,11 @@ You can map an existing package in the registry to your namespace with:
 
     pinf register-package <Namespace> <PackageUid>
 
+If you want to rename the package (to give it a new name in the catalog) use:
+
+    pinf register-package --name <Name> <Namespace> <PackageUid>
+
+*NOTE: Renaming packages is only supported when mapping existing packages by `<packageUID>`.*
 
 Announcing Releases
 -------------------

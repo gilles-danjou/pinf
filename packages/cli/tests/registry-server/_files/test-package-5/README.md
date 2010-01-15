@@ -1,0 +1,1 @@
+For local testing of 'repositories' property using pinf git repository

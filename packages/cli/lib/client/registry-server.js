@@ -145,19 +145,24 @@ Client.prototype.registerPackage = function(options) {
     var info = this.getUriInfo(options, true);
     
     if(VALIDATOR.validate("url", options.directory, {"throw": false})!==false) {
-        
+
         var args = {
             "user": info.user,
             "authkey": info.authkey,
-            "package": options.directory
+            "package": options.directory,
+            "name": options.name || null
         };
-    
+
         var response = makeRequest(info.url, "register-package", args);
     
         if(response.status=="PACKAGE_REGISTERED") {
         }
         
     } else {
+
+        if(options.name) {
+            throw new Error("'name' can only be used if pointing to package with UID URL");
+        }
 
         var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(options.directory.join("package.json"));
     
