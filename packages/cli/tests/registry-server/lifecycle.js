@@ -223,6 +223,11 @@ exports.testProgram = function() {
     tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public " + file.valueOf());
     tusk.command("pinf --db " + tmpDBPath + " announce-release --branch master " + file.valueOf());
 
+    file = filesPath.join("test-program-1");
+
+    tusk.command("pinf --db " + tmpDBPath + " register-package test@pinf.org/public " + file.valueOf());
+    tusk.command("pinf --db " + tmpDBPath + " announce-release --branch master " + file.valueOf());
+
 
     // program tests reside in external file to allow isolated running once
     // test ENV is setup by exports._testBasicRegistration()

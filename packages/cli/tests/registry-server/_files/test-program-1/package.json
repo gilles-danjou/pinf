@@ -1,4 +1,5 @@
 {
+    "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-program-1/",
     "name": "test-program-1",
     "repositories": [
         {
@@ -12,6 +13,6 @@
             "catalog": "http://127.0.0.1:8080/test@pinf.org/public/catalog.json",
             "name": "test-package-6",
             "revision": "master"
-        }    
+        }
     }
 }
