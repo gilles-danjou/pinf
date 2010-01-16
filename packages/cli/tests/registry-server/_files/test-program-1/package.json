@@ -1,0 +1,17 @@
+{
+    "name": "test-program-1",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/cli/tests/registry-server/_files/test-program-1"
+        }
+    ],
+    "using": {
+        "program-package": {
+            "catalog": "http://127.0.0.1:8080/test@pinf.org/public/catalog.json",
+            "name": "test-package-6",
+            "revision": "master"
+        }    
+    }
+}

@@ -20,11 +20,10 @@ var tmpDBPath = seaPath.join("build", "cli", "test", "db");
 
 
 
-
 exports.testProgramCreation = function() {
     
-    var file,
-        rev
+    
+        
 
 
 
