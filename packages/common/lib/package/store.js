@@ -5,8 +5,10 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var UTIL = require("util");
 var FILE = require("file");
+var JSON = require("json");
 var FS_STORE = require("http/fs-store");
 var CATALOG = require("./catalog");
+var PACKAGE = require("../package");
 var ZIP = require("zip");
 
 
@@ -24,24 +26,27 @@ PackageStore.prototype.exists = function() {
     return this.path.exists();
 }
 
+PackageStore.prototype.getPackagesPath = function() {
+    return this.path.join("packages");
+}
+
 PackageStore.prototype.get = function(locator) {
     var descriptor,
         downloadInfo;
     if(locator.isCatalog()) {
-        var url = url = locator.getUrl();
+        var url = locator.getUrl();
         if(!this.catalogs.has(url)) {
             this.catalogs.download(url);
         }
-        descriptor = CATALOG.PackageCatalog(this.catalogs.get(url)).
-            getDescriptor(locator);
+        descriptor = CATALOG.PackageCatalog(this.catalogs.get(url)).getDescriptor(locator);
         downloadInfo = descriptor.getDownloadInfo();
     } else
     if(locator.isDirect()) {
         throw new Error("Direct package locators are not supported!");
     }
-    var packagePath = this.path.join("packages").join(locator.getFsPath(), descriptor.getVersion());    
+    var packagePath = this.getPackagesPath().join(locator.getFsPath(), descriptor.getVersion());    
     if(packagePath.exists())
-        return packagePath;
+        return PACKAGE.Package(packagePath);
     if(!this.downloads.has(downloadInfo.url)) {
         this.downloads.download(downloadInfo.url);
     }
@@ -70,6 +75,17 @@ PackageStore.prototype.get = function(locator) {
         }
     }
     packagePath.dirname().mkdirs();
-    extractionPath.move(packagePath);
-    return packagePath;
+    if(downloadInfo.path) {
+        extractionPath.join(downloadInfo.path).move(packagePath);
+        extractionPath.rmtree();
+    } else {
+        extractionPath.move(packagePath);
+    }
+    // now that the package is extracted we over-write the package.json file with the one from the catalog
+    // but only if the catalog descriptor contains a version (this excludes the generic/arbitraty descriptor for a package)
+    var spec = descriptor.getCompletedSpec();
+    if(spec.version) {
+        packagePath.join("package.json").write(JSON.encode(spec, null, "  "));
+    }
+    return PACKAGE.Package(packagePath);
 }

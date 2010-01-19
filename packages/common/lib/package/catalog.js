@@ -24,9 +24,10 @@ PackageCatalog.prototype.getDescriptor = function(locator) {
         throw new Error("Package with name '"+locator.getName()+"' not found in catalog");
     }
     var self = this,
-        desiredRevision = locator.getRevision(),
+        desiredRevision = locator.getPinnedVersion() || locator.getRevision(),
         revisions = this.spec.packages[locator.getName()],
         revision;
+
     if(!desiredRevision) {
         var majorVersion = -1;
         // look for largest major version
@@ -58,15 +59,24 @@ PackageCatalog.prototype.getDescriptor = function(locator) {
             // default to full version
             revision = SEMVER.getMajor(desiredRevision);
         }
+    } else
+    if(/^0\.0\.0rev-(.*)$/.test(desiredRevision)) {
+        revision = "*";
     } else {
         // we have a string representing a branch/code train
         revision = desiredRevision;
     }
     if(!revisions[revision]) {
-        throw new Error("No package release found matching: " + desiredRevision);
+        throw new Error("No package release found matching '" + desiredRevision + "' looking for key '"+revision+"'");
     }
     
-    // TODO: ensure final version is >= desired (revisions[revision].version >= desiredRevision) if applicable
-    
-    return DESCRIPTOR.PackageDescriptor(revisions[revision]);
+    var spec = revisions[revision];
+
+    // if locator has a pinned version we set this in the descriptor
+    if(locator.getPinnedVersion()) {
+        spec.version = locator.getPinnedVersion();
+    }
+
+    // TODO: ensure final version is >= desired (revisions[revision].version >= desiredRevision) if applicable?
+    return DESCRIPTOR.PackageDescriptor(spec);
 }

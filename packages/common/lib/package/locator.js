@@ -45,11 +45,23 @@ PackageLocator.prototype.getRevision = function() {
     return this.spec.revision || false;
 }
 
+PackageLocator.prototype.getModule = function() {
+    return this.spec.module || false;
+}
+
 PackageLocator.prototype.getName = function() {
     if(!this.spec.name) throw new Error("No 'name' property");
     return this.spec.name;
 }
 
-PackageLocator.prototype.getFsPath = function(basePath) {
+PackageLocator.prototype.getFsPath = function() {
     return PACKAGES.normalizePackageDescriptor(this.spec);
+}
+
+PackageLocator.prototype.pinAtVersion = function(version) {
+    this.version = version;
+}
+
+PackageLocator.prototype.getPinnedVersion = function() {
+    return this.version || false;
 }

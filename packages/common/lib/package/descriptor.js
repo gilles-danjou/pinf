@@ -9,6 +9,7 @@ var JSON = require("json");
 var URI = require("uri");
 var VALIDATOR = require("validator", "util");
 var SEMVER = require("semver", "util");
+var LOCATOR = require("./locator");
 
 
 var PackageDescriptor = exports.PackageDescriptor = function(path) {
@@ -42,11 +43,19 @@ PackageDescriptor.prototype.save = function() {
 }
 
 PackageDescriptor.prototype.getName = function() {
-    return this.spec.name;
+    return this.spec.name || false;
 }
 
 PackageDescriptor.prototype.getVersion = function() {
-    return this.spec.version;
+    return this.spec.version || false;
+}
+
+PackageDescriptor.prototype.getPinfSpec = function() {
+    return this.spec.pinf || false;
+}
+
+PackageDescriptor.prototype.getTopLevelId = function() {
+
 }
 
 PackageDescriptor.prototype.hasUid = function() {
@@ -89,7 +98,7 @@ PackageDescriptor.prototype.validate = function(options) {
     return exports.validate(this.spec, options);
 }
 
-PackageDescriptor.prototype.getCompleted = function() {
+PackageDescriptor.prototype.getCompletedSpec = function() {
     
     var descriptor = UTIL.copy(this.spec);
     
@@ -112,6 +121,46 @@ PackageDescriptor.prototype.getCompleted = function() {
     return descriptor;
 }
 
+PackageDescriptor.prototype.everyUsing = function(callback) {
+    if(!this.spec.using) {
+        return false;
+    }
+    UTIL.every(this.spec.using, function(item) {
+        callback(item[0], LOCATOR.PackageLocator(item[1]));
+    });
+    return true;
+}
+
+PackageDescriptor.prototype.traverseEveryUsing = function(callback, options, visited, stacks) {
+    if(!options || !options.packageStore) {
+        throw new Error("options.packageStore not provided");
+    }
+    if(!options || !options["package"]) {
+        throw new Error("options.package not provided");
+    }
+    if(!this.spec.using) {
+        return false;
+    }
+    visited = visited || {};
+    stacks = stacks || {"names": []};
+    if(visited[this.getUid()]) {
+        return false;
+    }
+    var locator,
+        self = this,
+        itemOptions = UTIL.copy(options);
+    UTIL.every(this.spec.using, function(item) {
+        locator = LOCATOR.PackageLocator(item[1]);
+        locator = callback(options["package"], item[0], locator, stacks) || locator;
+        visited[self.getUid()] = true;
+        itemOptions["package"] = options.packageStore.get(locator);
+        stacks.names.push(item[0]);
+        itemOptions["package"].getDescriptor().traverseEveryUsing(callback, itemOptions, visited, stacks);
+        stacks.names.pop();
+    });
+    return true;
+}
+
 PackageDescriptor.prototype.getDownloadInfo = function() {
     if(!this.spec.repositories) {
         throw new Error("No 'repositories' property");
@@ -127,14 +176,15 @@ PackageDescriptor.prototype.getDownloadInfo = function() {
     var uri = URI.parse(repository.download.url),
         rev,
         type = repository.download.type || false,
+        version = this.spec.version,
         m;
-    if(SEMVER.validate(this.spec.version, {"numericOnly": true})) {
-        rev = "v" + this.spec.version;
+    if(SEMVER.validate(version, {"numericOnly": true})) {
+        rev = "v" + version;
     } else
-    if(m = this.spec.version.match(/^0\.0\.0rev-(.*)$/)) {
+    if(m = version.match(/^0\.0\.0rev-(.*)$/)) {
         rev = m[1];
     } else {
-        rev = "v" + this.spec.version;
+        rev = "v" + version;
     }
     if(!type) {
         if(!uri.file) {
@@ -147,7 +197,8 @@ PackageDescriptor.prototype.getDownloadInfo = function() {
     url = url.replace(/\{rev\}/g, rev);
     return {
         "type": type,
-        "url": url
+        "url": url,
+        "path": repository.path || null
     }
 }
 
