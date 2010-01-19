@@ -40,7 +40,8 @@ models["Package"] = new DB.Model("Package", {
     "versions": new DB.TextProperty(),
     "revisions": new DB.TextProperty(),
     "descriptors": new DB.TextProperty(),
-    "source": new DB.StringProperty()
+    "source": new DB.StringProperty(),
+    "descriptor": new DB.TextProperty()
 });
 
 models["Announcement"] = new DB.Model("Announcement", {

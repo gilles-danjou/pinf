@@ -129,6 +129,7 @@ Package.prototype.announceVersion = function(version, descriptor) {
     }
     descriptor.version = version;
     this.descriptors.versions[version] = descriptor;
+    this.data.descriptor = JSON.encode(descriptor);
     var self = this;
     DB.runInTransaction(function() {
         self.store();
@@ -161,6 +162,7 @@ Package.prototype.announceRevision = function(branch, revision, descriptor) {
     this.revisions[branch] = revision;
     descriptor.version = "0.0.0rev-" + revision;
     this.descriptors.revisions[revision] = descriptor;
+    this.data.descriptor = JSON.encode(descriptor);
     var self = this;
     DB.runInTransaction(function() {
         self.store();
@@ -179,14 +181,27 @@ Package.prototype.getDescriptorForRevision = function(revision) {
     if(!this.descriptors || !this.descriptors.revisions) return false;
     if(!this.descriptors.revisions[revision]) return false;
     var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(this.descriptors.revisions[revision]);
-    return descriptor.getCompleted();
+    return descriptor.getCompletedSpec();
 }
 
 Package.prototype.getDescriptorForVersion = function(version) {
     if(!this.descriptors || !this.descriptors.versions) return false;
     if(!this.descriptors.versions[version]) return false;
     var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(this.descriptors.versions[version]);
-    return descriptor.getCompleted();
+    return descriptor.getCompletedSpec();
+}
+
+Package.prototype.getArbitraryDescriptor = function() {
+    if(!this.data.descriptor) return false;
+    var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(JSON.decode(this.data.descriptor));
+    var spec = descriptor.getCompletedSpec();
+    if(!spec.repositories) {
+        return false;
+    }
+    return {
+        "name": spec.name,
+        "repositories": spec.repositories
+    }
 }
 
 Package.prototype.getUid = function(env) {

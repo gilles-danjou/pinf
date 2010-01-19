@@ -87,6 +87,10 @@ Namespace.prototype.getCatalog = function(env) {
     if(packages) {
         UTIL.every(packages, function(pkg) {
             catalog.packages[pkg[1].getName()] = {};
+            var spec = pkg[1].getArbitraryDescriptor();
+            if(spec) {
+                catalog.packages[pkg[1].getName()]["*"] = spec;
+            }
             if(pkg[1].revisions) {
                 UTIL.every(pkg[1].revisions, function(revision) {
                     catalog.packages[pkg[1].getName()][revision[0]] = pkg[1].getDescriptorForRevision(revision[1]);
