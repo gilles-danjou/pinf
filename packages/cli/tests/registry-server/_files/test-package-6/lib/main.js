@@ -1,6 +1,6 @@
 
-if (require.main == module) {
+exports.main = function() {
 
-print("running main");
-
+    print("running main of test-package-6");
+    
 }

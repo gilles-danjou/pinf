@@ -14,5 +14,10 @@
             "name": "test-package-6",
             "revision": "master"
         }
+    },
+    "pinf": {
+        "builder": {
+            "module": "builder.js"
+        }
     }
 }

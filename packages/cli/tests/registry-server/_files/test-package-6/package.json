@@ -14,5 +14,10 @@
             "name": "renamed-test-package-5",
             "revision": "master"
         }
+    },
+    "pinf": {
+        "commands": {
+            "cmd": "cmd"
+        }
     }
 }

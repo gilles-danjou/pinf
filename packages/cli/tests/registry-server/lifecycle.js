@@ -163,6 +163,21 @@ exports.testBasicRegistration = function() {
           "uid": "http://127.0.0.1:8080/test@pinf.org/public/subset/catalog.json",
           "packages": {
             "renamed-test-package-5": {
+              "*": {
+                "name": "test-package-5",
+                "repositories": [
+                   {
+                      "type": "git",
+                      "url": "git://github.com/cadorn/pinf.git",
+                      "path": "packages/cli/tests/registry-server/_files/test-package-5",
+                      "raw": "http://github.com/cadorn/pinf/raw/{rev}/packages/cli/tests/registry-server/_files/test-package-5/{path}",
+                      "download": {
+                         "type": "zip",
+                         "url": "http://github.com/cadorn/pinf/zipball/{rev}/"
+                      }
+                   }
+                ]
+              },
               "master": {
                 "uid": "http://127.0.0.1:8080/test@pinf.org/public/test-package-5/",
                 "name": "test-package-5",
@@ -249,7 +264,8 @@ function resetFiles(options) {
             "test-package-1",
             "test-package-2",
             "test-package-5",
-            "test-package-6"
+            "test-package-6",
+            "test-program-1"
         ].forEach(function(name) {
             file = filesPath.join(name, "package.json");
             var descriptor = JSON.decode(file.read());
