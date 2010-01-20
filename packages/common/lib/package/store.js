@@ -40,7 +40,7 @@ PackageStore.prototype.get = function(locator) {
     if(locator.isCatalog()) {
         if(this.sources && (descriptor = this.sources.getDescriptor(locator))) {
             // link package
-            var packagePath = this.getPackagesPath().join(locator.getFsPath(), locator.getRevision());
+            var packagePath = this.getPackagesPath().join(locator.getTopLevelId());
             if(packagePath.exists()) {
                 if(!packagePath.isLink()) {
                     throw new Error("Found hard directory instead of link at: " + packagePath);
@@ -49,7 +49,7 @@ PackageStore.prototype.get = function(locator) {
                 packagePath.dirname().mkdirs();
                 descriptor.getPath().dirname().symlink(packagePath);
             }
-            return PACKAGE.Package(packagePath);
+            return PACKAGE.Package(packagePath, locator);
         }
         var url = locator.getUrl();
         if(!this.catalogs.has(url)) {
@@ -63,12 +63,12 @@ PackageStore.prototype.get = function(locator) {
     } else {
         throw new Error("You should never reach this!");
     }
-    var packagePath = this.getPackagesPath().join(locator.getFsPath(), descriptor.getVersion());    
+    var packagePath = this.getPackagesPath().join(locator.getTopLevelId());    
     if(packagePath.exists()) {
         if(packagePath.isLink()) {
             throw new Error("Found link instead of hard directory at: " + packagePath);
         }
-        return PACKAGE.Package(packagePath);
+        return PACKAGE.Package(packagePath, locator);
     }
     if(!this.downloads.has(downloadInfo.url)) {
         this.downloads.download(downloadInfo.url);
@@ -110,5 +110,5 @@ PackageStore.prototype.get = function(locator) {
     if(spec.version) {
         packagePath.join("package.json").write(JSON.encode(spec, null, "  "));
     }
-    return PACKAGE.Package(packagePath);
+    return PACKAGE.Package(packagePath, locator);
 }

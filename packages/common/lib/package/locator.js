@@ -58,6 +58,24 @@ PackageLocator.prototype.getFsPath = function() {
     return PACKAGES.normalizePackageDescriptor(this.spec);
 }
 
+PackageLocator.prototype.getTopLevelId = function() {
+    var id = this.getFsPath().split("/");
+
+    // normalize ID by removing revision if set in spec to allow
+    // more fine-grained revision/version selection below
+    if(this.getRevision()) {
+        id.pop();
+    }
+
+    if(this.hasPinnedVersion()) {
+        id.push(this.getPinnedVersion())
+    } else
+    if(this.getRevision()) {
+        id.push(this.getRevision());
+    }
+    return id.join("/");
+}
+
 PackageLocator.prototype.pinAtVersion = function(version) {
     this.version = version;
 }

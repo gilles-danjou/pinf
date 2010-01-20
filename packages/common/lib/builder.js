@@ -19,7 +19,7 @@ Builder.prototype.construct = function(pkg, options) {
     this.options = options;
 }
 
-Builder.prototype.build = function(program) {
+Builder.prototype.triggerBuild = function(program) {
 
     var descriptor = this.pkg.getDescriptor(),
         spec = descriptor.getPinfSpec(),
@@ -29,15 +29,10 @@ Builder.prototype.build = function(program) {
     descriptor.everyUsing(function(name, locator) {
         var pkg = self.options.packageStore.get(locator);
         var builder = pkg.getBuilder(self.options);
-        builder.build(program);        
+        builder.triggerBuild(program);        
     });
-
-    print("build package: " + this.pkg.getPath());
-
-
-dump(spec);            
     
-    // link all declared commands
+    // copy all declared commands
     if(spec.commands) {
         var sourcePath,
             targetPath;
@@ -48,10 +43,26 @@ dump(spec);
             }
             targetPath = program.getPath().join(".build", "bin", command[0]);
             targetPath.dirname().mkdirs();
-            sourcePath.symlink(targetPath);
+            targetPath.write(self.expandMacros(program, sourcePath.read()));
+            targetPath.chmod(0755);
         });
     }
-    
-    
 
+    this.build(program);
+}
+
+Builder.prototype.build = function(program) {
+    // to be overwritten
+}
+
+Builder.prototype.expandMacros = function(program, code) {
+
+    code = code.replace(/\/\*PINF_MACRO\[LoadCommandEnvironment\]\*\//g, [
+        "//<PINF_MACRO[LoadCommandEnvironment]>",
+        "system.sea = \""+ program.getPath().join(".build").valueOf() +"\";",
+        "require(\"packages\").main();",
+        "//</PINF_MACRO>"
+    ].join("\n"));
+
+    return code;
 }

@@ -34,11 +34,7 @@ Program.prototype.setPackageStore = function(store) {
 Program.prototype.clean = function() {
     var path = this.getPath();
     [
-//        ".dependencies",
-//        ".using",
         ".build"
-//        ".tmp",
-//        ".narwhal"
     ].forEach(function(dir) {
         OS.command("rm -Rf " + path.join(dir));
     });
@@ -69,9 +65,12 @@ Program.prototype.build = function() {
         }
 
         var usingPackage = self.packageStore.get(locator);
-        locator.pinAtVersion(usingPackage.getVersion());
+        // linked packages do not contain 'version' properties
+        if(usingPackage.getVersion()) {
+            locator.pinAtVersion(usingPackage.getVersion());
+        }
 
-        path = self.getPath().join(".build", "using", locator.getFsPath(), usingPackage.getVersion());
+        path = self.getPath().join(".build", "using", usingPackage.getTopLevelId());
         path.dirname().mkdirs();
         usingPackage.getPath().symlink(path);
 
@@ -92,6 +91,6 @@ TODO: Move this to Program.prototype.freeze()
         "packageStore": this.packageStore
     });
 
-    builder.build(this);
+    builder.triggerBuild(this);
 }
 

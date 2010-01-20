@@ -1,6 +1,10 @@
 
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
+/**
+ * NOTE: These tests depend on packages/cli/tests/registry-server/lifecycle.js
+ */
+
 var ASSERT = require("assert");
 var FILE = require("file");
 var UTIL = require("util");
@@ -12,6 +16,11 @@ var SOURCES = require("package/sources", "http://registry.pinf.org/cadorn.org/gi
 var SEMVER = require("semver", "github.com/cadorn/util/raw/master/lib-js");
 
 exports.testBuild = function() {
+    
+    
+}
+
+exports.testBuildWithSourcesOverlay = function() {
 
     var packageStorePath = FILE.Path(module.path).dirname().join("../../.tmp/package-store"),
         programStorePath = FILE.Path(module.path).dirname().join("../../.tmp/program-store");
@@ -49,7 +58,7 @@ exports.testBuild = function() {
             }
         }
     }, null, "  "));
-//    packageStore.setSources(SOURCES.PackageSources(sourcesPath));
+    packageStore.setSources(SOURCES.PackageSources(sourcesPath));
 
     var programStore = PROGRAM_STORE.ProgramStore(programStorePath);
     
@@ -63,21 +72,31 @@ exports.testBuild = function() {
     }));
 
     program.build();
-
-
-
-
-
-/*
-    file = programStore.get(LOCATOR.PackageLocator({
-        "catalog": "http://registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/catalog.json",
-        "name": "test-package-3"
-    }));
     
-    ASSERT.equal(file.dirname().valueOf(), storePath.join("packages/registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/test-package-3").valueOf());
-    basename = file.basename().valueOf();
-    ASSERT.ok(!!SEMVER.validate(basename, {"numericOnly":false}));
-*/
+    ASSERT.deepEqual(
+        JSON.decode(OS.command(program.getPath().join(".build", "bin", "cmd"))),
+        {
+           "local": {
+              "module": {
+                 "id": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/test-package-6/master/lib/module").valueOf(),
+                 "path": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/test-package-6/master/lib/module.js").valueOf(),
+                 "package": "127.0.0.1/test@pinf.org/public/test-package-6/master",
+                 "using": {
+                    "test-package": "127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master"
+                 }
+              }
+           },
+           "external": {
+              "module": {
+                 "id": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master/lib/module").valueOf(),
+                 "path": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master/lib/module.js").valueOf(),
+                 "package": "127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master",
+                 "using": {}
+              }
+           },
+           "memo": "This is the memo written by the builder"
+        }
+    );
 
 }
 

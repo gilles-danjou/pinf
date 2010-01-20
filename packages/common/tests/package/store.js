@@ -1,6 +1,10 @@
 
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
+/**
+ * NOTE: These tests depend on packages/cli/tests/registry-server/lifecycle.js
+ */
+
 var ASSERT = require("assert");
 var FILE = require("file");
 var OS = require("os");

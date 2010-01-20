@@ -1,3 +1,5 @@
 #!/usr/bin/env narwhal
 
+/*PINF_MACRO[LoadCommandEnvironment]*/
+
 require("main", "http://127.0.0.1:8080/test@pinf.org/public/test-package-6/").main(system.args);

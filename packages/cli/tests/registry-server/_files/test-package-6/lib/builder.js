@@ -11,3 +11,13 @@ var Builder = exports.Builder = function(pkg, options) {
 }
 
 Builder.prototype = BUILDER.Builder();
+
+
+
+Builder.prototype.build = function(program) {
+
+    var memoPath = program.getPath().join(".build", "memo.txt");
+
+    memoPath.write("This is the memo written by the builder");
+
+}

@@ -34,15 +34,16 @@ Package.prototype.getUid = function() {
 }
 
 Package.prototype.getTopLevelId = function() {
-    var uri = URI.parse(this.getUid()),
-        version = this.getVersion();
-    if(version) {
-        return uri.domain + uri.path + this.getVersion();
-    } else
     if(this.locator) {
-        return uri.domain + uri.path + this.locator.getRevision();
+        return this.locator.getTopLevelId();
     } else {
-        return uri.domain + "/" + uri.directories.join("/");
+        var uri = URI.parse(this.getUid()),
+            version = this.getVersion();
+        if(version) {
+            return uri.domain + uri.path + this.getVersion();
+        } else {
+            return uri.domain + "/" + uri.directories.join("/");
+        }
     }
 }
 

@@ -18,6 +18,9 @@
     "pinf": {
         "commands": {
             "cmd": "cmd"
+        },
+        "builder": {
+            "module": "builder.js"
         }
     }
 }
