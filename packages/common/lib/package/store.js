@@ -56,6 +56,7 @@ PackageStore.prototype.get = function(locator) {
             this.catalogs.download(url);
         }
         descriptor = CATALOG.PackageCatalog(this.catalogs.get(url)).getDescriptor(locator);
+        locator.pinAtVersion(descriptor.getVersion());
         downloadInfo = descriptor.getDownloadInfo();
     } else
     if(locator.isDirect()) {

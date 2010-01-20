@@ -2,7 +2,7 @@
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 /**
- * NOTE: These tests depend on packages/cli/tests/registry-server/lifecycle.js
+ * NOTE: These tests depend on packages/cli/tests/registry-server/lifecycle.js running first
  */
 
 var ASSERT = require("assert");
@@ -31,7 +31,6 @@ exports.testPopulate = function() {
         "catalog": "http://registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/catalog.json",
         "name": "test-package-3"
     }));
-
     ASSERT.equal(pkg.getPath().dirname().valueOf(), storePath.join("packages/registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/test-package-3").valueOf());
     basename = pkg.getPath().basename().valueOf();
     ASSERT.ok(!!SEMVER.validate(basename, {"numericOnly":false}));
@@ -108,13 +107,18 @@ exports.testPopulate = function() {
     );
 
 
-    var sourcesPath = storePath.join("sources.json"),
-        path = FILE.Path(module.path).dirname().join("../../../cli/tests/registry-server/_files/test-package-3").valueOf();
+
+    // some cleanup before the next test.
+    // the same package was already extracted above. below we use a link instead.
+    // the package store will not auto-delete existing packages if switching between hard directories and links
+    storePath.join("packages/registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/test-package-3/0.1.3rc1").rmtree();
+    
+    var sourcesPath = storePath.join("sources.json");
     sourcesPath.write(JSON.encode({
         "http://registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/catalog.json": {
             "test-package-3": {
                 "0.1.3rc": {
-                    "path": path
+                    "path": FILE.Path(module.path).dirname().join("../../../cli/tests/registry-server/_files/test-package-3").valueOf()
                 }
             }
         }
@@ -126,8 +130,7 @@ exports.testPopulate = function() {
         "name": "test-package-3",
         "revision": "0.1.3rc1"
     }));
-
-    ASSERT.equal(pkg.getPath().valueOf(), path);
+    ASSERT.equal(pkg.getPath().valueOf(), storePath.join("packages/registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/test-package-3/0.1.3rc1").valueOf());
     ASSERT.deepEqual(
         JSON.decode(pkg.getPath().join("package.json").read()),
         {

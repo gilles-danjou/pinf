@@ -4,6 +4,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 
 var UTIL = require("util");
+var FILE = require("file");
 var OS = require("os");
 var JSON_STORE = require("json-store", "util");
 var PACKAGE = require("./package");
@@ -54,6 +55,7 @@ Program.prototype.build = function() {
     this.getPath().join("package.json").symlink(path);
 
     // link all using packages to desired versions
+    var usingLocatorRewriteInfo = [];
     descriptor.traverseEveryUsing(function(pkg, name, locator, stacks) {
 
         var key = ["config", "using"].concat(stacks.names).concat([name, "$"]);
@@ -72,7 +74,21 @@ Program.prototype.build = function() {
 
         path = self.getPath().join(".build", "using", usingPackage.getTopLevelId());
         path.dirname().mkdirs();
-        usingPackage.getPath().symlink(path);
+        
+        
+        // if package has a version we need to copy it, otherwise we can link it (as it is likely a sources overlay)
+        if(usingPackage.getVersion()) {
+            FILE.copyTree(usingPackage.getPath(), path);
+            // since we copied it to a specific version we need to update all using package locators
+            // to include the exact version
+            usingLocatorRewriteInfo.push({
+                "id": pkg.getTopLevelId(),
+                "name": name,
+                "version": usingPackage.getVersion()
+            });
+        } else {
+            usingPackage.getPath().symlink(path);
+        }
 
 /*
 TODO: Move this to Program.prototype.freeze()
@@ -86,6 +102,16 @@ TODO: Move this to Program.prototype.freeze()
         "packageStore": this.packageStore,
         "package": this
     });
+    
+    usingLocatorRewriteInfo.forEach(function(info) {
+        if(info.id==self.getTopLevelId()) {
+            path = self.getPath();
+        } else {
+            path = self.getPath().join(".build", "using", info.id);
+        }
+        JSON_STORE.JsonStore(path.join("package.json")).set(["using", info.name, "revision"], info.version);
+    });
+
 
     var builder = this.getBuilder({
         "packageStore": this.packageStore

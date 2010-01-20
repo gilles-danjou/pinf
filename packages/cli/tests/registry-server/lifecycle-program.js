@@ -22,11 +22,7 @@ var tmpDBPath = seaPath.join("build", "cli", "test", "db");
 
 exports.testProgramCreation = function() {
     
-    
-        
-
-
-
+    // TODO @see pinf/packages/common/tests/program/store.js
 
 }
 

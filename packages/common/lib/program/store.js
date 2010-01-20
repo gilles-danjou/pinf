@@ -27,21 +27,16 @@ ProgramStore.prototype.setPackageStore = function(store) {
 ProgramStore.prototype.get = function(locator) {
 
     var pkg = this.packageStore.get(locator);
-    var programPath = FS_STORE.get(this.path.join("programs"), pkg.getDescriptor().getUid());
+    var programPath = this.path.join("programs", locator.getTopLevelId());
 
-    if(programPath.exists() && programPath.canonical().valueOf()==pkg.getPath().valueOf()) {
-        var program = PROGRAM.Program(programPath, locator);
-        program.setPackageStore(this.packageStore);
-        return program;
+    programPath.dirname().mkdirs();
+
+    if(pkg.getVersion()) {
+        FILE.copyTree(pkg.getPath(), programPath);
+    } else
+    if(!programPath.exists()) {
+        pkg.getPath().symlink(programPath);
     }
-
-    if(programPath.exists()) {
-        programPath.remove();
-    } else {
-        programPath.dirname().mkdirs();
-    }
-
-    pkg.getPath().symlink(programPath);
 
     var program = PROGRAM.Program(programPath, locator);
     program.setPackageStore(this.packageStore);

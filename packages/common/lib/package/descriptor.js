@@ -185,7 +185,7 @@ PackageDescriptor.prototype.getDownloadInfo = function() {
     if(SEMVER.validate(version, {"numericOnly": true})) {
         rev = "v" + version;
     } else
-    if(m = version.match(/^0\.0\.0rev-(.*)$/)) {
+    if(version && (m = version.match(/^0\.0\.0rev-(.*)$/))) {
         rev = m[1];
     } else {
         rev = "v" + version;
