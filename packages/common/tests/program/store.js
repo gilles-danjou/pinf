@@ -27,14 +27,14 @@ exports.testBuild = function() {
     var programStore = PROGRAM_STORE.ProgramStore(programStorePath);
     
     programStore.setPackageStore(packageStore);
-    
-    
+
+
     var program = programStore.get(LOCATOR.PackageLocator({
         "catalog": "http://127.0.0.1:8080/test@pinf.org/public/catalog.json",
         "name": "test-program-1",
         "revision": "master"
     }));
-    
+
     program.build();
 
 

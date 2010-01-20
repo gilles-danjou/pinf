@@ -10,7 +10,7 @@ A pinf registry server tracks package releases for the purpose of organizing the
 
 A package may be tracked if it contains a `package.json` file as specified [here](http://wiki.commonjs.org/wiki/Packages/1.0).
 
-You can host your own registry server or use [http://registry.pinf.org/](http://www.pinf.org/] which operates as
+You can host your own registry server or use [http://registry.pinf.org/](http://www.pinf.org/) which operates as
 a free public infrastructure service.
 
 

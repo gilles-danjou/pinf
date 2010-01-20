@@ -14,6 +14,7 @@ Links
  * [Defining Well-Known URIs](http://tools.ietf.org/html/draft-nottingham-site-meta-05)
  * [WebFingerProtocol](http://code.google.com/p/webfinger/wiki/WebFingerProtocol)
  * [Design by contract](http://en.wikipedia.org/wiki/Design_by_contract)
+ * [Personal Package Archives for Ubuntu](https://launchpad.net/ubuntu/+ppas)
 
 License
 =======

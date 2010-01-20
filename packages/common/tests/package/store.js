@@ -49,7 +49,7 @@ exports.testPopulate = function() {
           "version": "0.1.2"
         }
     );
-    
+
     pkg = store.get(LOCATOR.PackageLocator({
         "catalog": "http://registry.pinf.org/christoph@christophdorn.com/pinf-registry-test/catalog.json",
         "name": "test-package-3",
