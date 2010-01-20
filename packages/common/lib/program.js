@@ -9,11 +9,12 @@ var JSON_STORE = require("json-store", "util");
 var PACKAGE = require("./package");
 
 
-var Program = exports.Program = function(path) {
+var Program = exports.Program = function(path, locator) {
     if (!(this instanceof exports.Program))
-        return new exports.Program(path);
+        return new exports.Program(path, locator);
         
     this.path = path;
+    this.locator = locator;
     
     if(!this.path.join("program.json").exists()) {
         throw new Error("Program descriptor file not found at: " + this.path.join("program.json"));
@@ -73,12 +74,14 @@ Program.prototype.build = function() {
         path = self.getPath().join(".build", "using", locator.getFsPath(), usingPackage.getVersion());
         path.dirname().mkdirs();
         usingPackage.getPath().symlink(path);
-        
+
+/*
+TODO: Move this to Program.prototype.freeze()
         self.spec.set(key, {
             "uid": usingPackage.getUid(),
             "version": locator.getPinnedVersion()
         });
-
+*/
         return locator;
     }, {
         "packageStore": this.packageStore,

@@ -30,11 +30,11 @@ ProgramStore.prototype.get = function(locator) {
     var programPath = FS_STORE.get(this.path.join("programs"), pkg.getDescriptor().getUid());
 
     if(programPath.exists() && programPath.canonical().valueOf()==pkg.getPath().valueOf()) {
-        var program = PROGRAM.Program(programPath);
+        var program = PROGRAM.Program(programPath, locator);
         program.setPackageStore(this.packageStore);
         return program;
     }
-    
+
     if(programPath.exists()) {
         programPath.remove();
     } else {
@@ -43,7 +43,7 @@ ProgramStore.prototype.get = function(locator) {
 
     pkg.getPath().symlink(programPath);
 
-    var program = PROGRAM.Program(programPath);
+    var program = PROGRAM.Program(programPath, locator);
     program.setPackageStore(this.packageStore);
     return program;
 }

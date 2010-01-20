@@ -245,7 +245,7 @@ exports.testProgram = function() {
 
 
     // program tests reside in external file to allow isolated running once
-    // test ENV is setup by exports._testBasicRegistration()
+    // test ENV is setup by exports.testBasicRegistration()
     require("test").run(require("./lifecycle-program"));
 }
 

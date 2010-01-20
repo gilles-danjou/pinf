@@ -69,7 +69,7 @@ PackageCatalog.prototype.getDescriptor = function(locator) {
     if(!revisions[revision]) {
         throw new Error("No package release found matching '" + desiredRevision + "' looking for key '"+revision+"'");
     }
-    
+
     var spec = revisions[revision];
 
     // if locator has a pinned version we set this in the descriptor

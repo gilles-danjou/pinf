@@ -14,7 +14,7 @@ exports.testPopulate = function() {
     
     var storePath = FILE.Path(module.path).dirname().join("../../.tmp/package-store");
     if(storePath.exists()) {
-//        OS.command("rm -Rf " + storePath);
+        OS.command("rm -Rf " + storePath);
     }
 
     var store = STORE.PackageStore(storePath),

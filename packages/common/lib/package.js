@@ -13,15 +13,20 @@ var PUBLISHER = require("./publisher");
 var PACKAGES = require("packages");
 
 
-var Package = exports.Package = function(path) {
+var Package = exports.Package = function(path, locator) {
     if (!(this instanceof exports.Package))
-        return new exports.Package(path);
+        return new exports.Package(path, locator);
         
     this.path = path;
+    this.locator = locator;
 }
 
 Package.prototype.getPath = function() {
     return this.path;
+}
+
+Package.prototype.getLocator = function() {
+    return this.locator;
 }
 
 Package.prototype.getUid = function() {
@@ -29,8 +34,16 @@ Package.prototype.getUid = function() {
 }
 
 Package.prototype.getTopLevelId = function() {
-    var uri = URI.parse(this.getUid());
-    return uri.domain + uri.path + this.getVersion();
+    var uri = URI.parse(this.getUid()),
+        version = this.getVersion();
+    if(version) {
+        return uri.domain + uri.path + this.getVersion();
+    } else
+    if(this.locator) {
+        return uri.domain + uri.path + this.locator.getRevision();
+    } else {
+        return uri.domain + "/" + uri.directories.join("/");
+    }
 }
 
 Package.prototype.getVersion = function() {
@@ -68,7 +81,7 @@ Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyNa
     }
     var descriptor = this.getDescriptor(),
         pinf = descriptor.getPinfSpec();
-        
+
     if(pinf[propertyName]) {
         var locator = LOCATOR.PackageLocator(pinf[propertyName]),
             pkg = this;
@@ -82,8 +95,7 @@ Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyNa
         // we need to add the package as a using package to our
         // current PACKAGES to be able to enter it and load a module from it.
         // TODO: Refactor to require(<module>, locator) once require supports arbitrary locators
-        PACKAGES.registerUsingPackage(options.packageStore.getPackagesPath(), pkg.getPath().canonical());
-        
+        PACKAGES.registerUsingPackage(options.packageStore.getPackagesPath(), FILE.Path(pkg.getTopLevelId()));
         return require(locator.getModule(), pkg.getTopLevelId());
     }
     return false;

@@ -8,6 +8,7 @@ var OS = require("os");
 var PACKAGE_STORE = require("package/store", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
 var PROGRAM_STORE = require("program/store", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
 var LOCATOR = require("package/locator", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
+var SOURCES = require("package/sources", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
 var SEMVER = require("semver", "github.com/cadorn/util/raw/master/lib-js");
 
 exports.testBuild = function() {
@@ -16,13 +17,39 @@ exports.testBuild = function() {
         programStorePath = FILE.Path(module.path).dirname().join("../../.tmp/program-store");
 
     if(packageStorePath.exists()) {
-//        OS.command("rm -Rf " + packageStorePath);
+        OS.command("rm -Rf " + packageStorePath);
     }
     if(programStorePath.exists()) {
-//        OS.command("rm -Rf " + programStorePath);
+        OS.command("rm -Rf " + programStorePath);
     }
+    packageStorePath.mkdirs();
 
     var packageStore = PACKAGE_STORE.PackageStore(packageStorePath);
+
+    var sourcesPath = packageStorePath.join("sources.json"),
+        packagesBasePath = FILE.Path(module.path).dirname().join("../../../cli/tests/registry-server/_files/");
+    sourcesPath.write(JSON.encode({
+        "http://127.0.0.1:8080/test@pinf.org/public/catalog.json": {
+            "test-program-1": {
+                "master": {
+                    "path": packagesBasePath.join("test-program-1").valueOf()
+                }
+            },
+            "test-package-6": {
+                "master": {
+                    "path": packagesBasePath.join("test-package-6").valueOf()
+                }
+            }
+        },
+        "http://127.0.0.1:8080/test@pinf.org/public/subset/catalog.json": {
+            "renamed-test-package-5": {
+                "master": {
+                    "path": packagesBasePath.join("test-package-5").valueOf()
+                }
+            }
+        }
+    }, null, "  "));
+//    packageStore.setSources(SOURCES.PackageSources(sourcesPath));
 
     var programStore = PROGRAM_STORE.ProgramStore(programStorePath);
     

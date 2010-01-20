@@ -23,10 +23,14 @@ PackageSources.prototype.getDescriptor = function(locator) {
         throw new Error("Cannot use a locator with a pinned version");
     }
     var info;
-    // check for mapping with alpha suffix
-    info = this.spec.get([locator.getUrl(), locator.getName(), SEMVER.getMajor(locator.getRevision(), true)]);    
+    // check for exact revision mapping
+    info = this.spec.get([locator.getUrl(), locator.getName(), locator.getRevision()]);    
     if(!info) {
-        // check for mapping with major version only
+        // check for semver with alpha suffix
+        info = this.spec.get([locator.getUrl(), locator.getName(), SEMVER.getMajor(locator.getRevision(), true)]);    
+    }
+    if(!info) {
+        // check for semver with major version only
         info = this.spec.get([locator.getUrl(), locator.getName(), SEMVER.getMajor(locator.getRevision())]);    
     }
     if(!info) {
