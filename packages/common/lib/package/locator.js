@@ -62,6 +62,10 @@ PackageLocator.prototype.pinAtVersion = function(version) {
     this.version = version;
 }
 
+PackageLocator.prototype.hasPinnedVersion = function() {
+    return (!!this.version);
+}
+
 PackageLocator.prototype.getPinnedVersion = function() {
     return this.version || false;
 }

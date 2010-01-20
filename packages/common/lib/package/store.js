@@ -30,10 +30,17 @@ PackageStore.prototype.getPackagesPath = function() {
     return this.path.join("packages");
 }
 
+PackageStore.prototype.setSources = function(sources) {
+    this.sources = sources;
+}
+
 PackageStore.prototype.get = function(locator) {
     var descriptor,
         downloadInfo;
     if(locator.isCatalog()) {
+        if(this.sources && (descriptor = this.sources.getDescriptor(locator))) {
+            return PACKAGE.Package(descriptor.getPath().dirname());
+        }
         var url = locator.getUrl();
         if(!this.catalogs.has(url)) {
             this.catalogs.download(url);
@@ -43,6 +50,8 @@ PackageStore.prototype.get = function(locator) {
     } else
     if(locator.isDirect()) {
         throw new Error("Direct package locators are not supported!");
+    } else {
+        throw new Error("You should never reach this!");
     }
     var packagePath = this.getPackagesPath().join(locator.getFsPath(), descriptor.getVersion());    
     if(packagePath.exists())

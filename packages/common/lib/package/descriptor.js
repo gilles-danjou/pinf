@@ -42,6 +42,10 @@ PackageDescriptor.prototype.save = function() {
     this.path.write(JSON.encode(this.spec, null, "    "));
 }
 
+PackageDescriptor.prototype.getPath = function() {
+    return this.path || false;
+}
+
 PackageDescriptor.prototype.getName = function() {
     return this.spec.name || false;
 }
