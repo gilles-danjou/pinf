@@ -21,12 +21,12 @@ exports.app = function(env) {
 
     var status,
         body,
-        contentType;
-    
-    if(env.REQUEST_METHOD=="POST") {
-    
-        var path = env.PATH_INFO.substr(1, env.PATH_INFO.length-1).split("/"),
-            response;
+        contentType,
+        response;
+
+    if(env.REQUEST_METHOD=="POST" && env.PATH_INFO.substr(0,2)!="/@") {
+
+        var path = env.PATH_INFO.substr(1, env.PATH_INFO.length-1).split("/");
 
         if(!path[path.length-1]) path.pop();
 
@@ -100,7 +100,18 @@ exports.app = function(env) {
 
         status = 200;
         contentType = "text/plain";
-        var response = require("./responders/public").service(env);
+        
+        if(env.SERVER_NAME.substr(0,4)=="www.") {
+            response = require("./responders/www").service(env);
+        } else
+        if(env.PATH_INFO.substr(0,8)=="/@feeds/") {
+            response = require("./responders/feeds").service(env);
+        } else
+        if(env.PATH_INFO.substr(0,11)=="/@webhooks/") {
+            response = require("./responders/webhooks").service(env);
+        } else {
+            response = require("./responders/public").service(env);
+        }
         if(typeof response == "string") {
             body = response;
             if(/^<html>/g.test(body)) {
