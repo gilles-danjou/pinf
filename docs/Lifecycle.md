@@ -60,6 +60,19 @@ This is now the package's unique uid **FOR LIFE**.
 
 *NOTE: `my-package` is referring to the package's directory containing a package.json file.*
 
+For best results the `package.json` descriptor should contain the following minimum properties:
+
+    {
+        "name": "...",
+        "repositories": [
+            {
+                "type": "git", 
+                "url": "git://github.com/.../....git"
+            }
+        ]
+    } 
+
+
 Mapping Packages
 ----------------
 
