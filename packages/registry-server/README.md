@@ -48,7 +48,8 @@ Public URLs:
 
     http://registry.pinf.org/<owner>/<path>/<PackageName>/
     http://registry.pinf.org/<owner>/<path>/catalog.json
-    http://registry.pinf.org/feeds/announcements.json
+    http://registry.pinf.org/@feeds/announcements.json
+    http://registry.pinf.org/@webhooks/post-commit
 
 TODO
 ====
