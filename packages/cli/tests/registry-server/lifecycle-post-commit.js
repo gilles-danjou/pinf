@@ -32,7 +32,14 @@ exports.testPostCommit = function() {
             "url": "http://github.com/cadorn/pinf"
         },
         "after": rev,
-        "ref": "refs/heads/master"
+        "ref": "refs/heads/master",
+        "commits": [
+            {
+                "modified": [
+                    "packages/cli/tests/registry-server/_files/test-package-5/package.json"
+                ]
+            }
+        ]
     }
 
     var data = "payload=" + escape(JSON.encode(payload));

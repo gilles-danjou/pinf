@@ -5,6 +5,8 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var UTIL = require("util");
 var HTTP = require("http");
+var JSON = require("json");
+var FILE = require("file");
 
 
 exports.validateRepositoryUrl = function(url, options) {
@@ -101,6 +103,49 @@ exports.downloadInfoForRepository = function(repository) {
     }
     
     return false;
+}
+
+
+exports.normalizeCommitInfo = function(vendor, data) {
+
+    if(vendor=="github.com") {
+
+        var payload = JSON.decode(data.payload.replace(/\\"/g, '"'));
+        if(!payload) {
+            throw new Error("no 'payload'");
+        }
+
+        var paths = {};
+        payload.commits.forEach(function(commit) {
+            if(commit.added) {
+                commit.added.forEach(function(path) {
+                    paths[FILE.Path(path).dirname().valueOf()] = true;
+                });
+            }
+            if(commit.removed) {
+                commit.removed.forEach(function(path) {
+                    paths[FILE.Path(path).dirname().valueOf()] = true;
+                });
+            }
+            if(commit.modified) {
+                commit.modified.forEach(function(path) {
+                    paths[FILE.Path(path).dirname().valueOf()] = true;
+                });
+            }
+        });
+        paths = UTIL.keys(paths);
+
+        return {
+            "repository": exports.normalizeRepositoryUrl(payload.repository.url, true),
+            "rev": payload.after,
+            "branch": payload.ref.split("/").pop(),
+            "paths": JSON.encode(paths)
+        };
+        
+    } else {
+        throw new Error("Vendor not supported: " + vendor);
+    }
+    
 }
 
 

@@ -6,6 +6,8 @@ var QUERYSTRING = require("jack/querystring");
 var JSON = require("json");
 var TASKQUEUE = require("google/appengine/api/labs/taskqueue");
 var VENDOR = require("vendor", "common");
+var FILE = require("file");
+var UTIL = require("util");
 
 exports.service = function(env) {
 
@@ -20,35 +22,16 @@ exports.service = function(env) {
 
     try {
 
-        if(source=="github.com") {
+        var input = env["jsgi.input"].read().decodeToString();
 
-            var input = env["jsgi.input"].read().decodeToString();
-            var payload = JSON.decode(QUERYSTRING.parseQuery(input).payload.replace(/\\"/g, '"'));
-            if(!payload) {
-                return {
-                    "status": "INVALID_REQUEST",
-                    "message": "Invalid request: payload missing"
-                };
-            }
+        new TASKQUEUE.Task({
+            "url": "/.tasks/package-check-for-updates",
+            "method": "GET",
+            "params": VENDOR.normalizeCommitInfo(source, QUERYSTRING.parseQuery(input))
+        }).add("github-api");
 
-            new TASKQUEUE.Task({
-                "url": "/.tasks/package-check-for-updates",
-                "method": "GET",
-                "params": {
-                    "repository": VENDOR.normalizeRepositoryUrl(payload.repository.url, true),
-                    "rev": payload.after,
-                    "branch": payload.ref.split("/").pop()
-                }
-            }).add("github-api");
+        return "OK";
 
-            return "OK";
-            
-        } else {
-            return {
-                "status": "INVALID_REQUEST",
-                "message": "Invalid request: Source not supported"
-            };
-        }
     } catch(e) {
         if(env.environment == "development") {
             throw e;
