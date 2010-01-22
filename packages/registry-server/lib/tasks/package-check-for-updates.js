@@ -13,6 +13,8 @@ exports.service = function(env) {
 
     var qs = QUERYSTRING.parseQuery(env.QUERY_STRING);
 
+dump(qs);
+
     // lookup all packages with the same repository
     var packages = MODELS.getModel("Package").all().filter("repositories IN", [qs.repository]).fetch();
     if(!packages) return "OK";
@@ -26,6 +28,7 @@ exports.service = function(env) {
     // latest version
     var version = tags.pop();
 
+print("version: " + version);
 
     packages.forEach(function(data) {
 
@@ -34,6 +37,7 @@ exports.service = function(env) {
 
             var url = VENDOR.rawUrlForRepository(pkg.getRepositoryInfo()).
                         replace(/{rev}/, "v"+version).replace(/{path}/, "package.json");
+print("url: " + url);
 
             var descriptor = UTIL.trim(HTTP.read(url).decodeToString());
             if(descriptor && descriptor.substr(0,1)=="{") {
@@ -49,6 +53,8 @@ exports.service = function(env) {
 
             var url = VENDOR.rawUrlForRepository(pkg.getRepositoryInfo()).
                         replace(/{rev}/, qs.rev).replace(/{path}/, "package.json");
+
+print("url: " + url);
 
             var descriptor = UTIL.trim(HTTP.read(url).decodeToString());
             if(descriptor && descriptor.substr(0,1)=="{") {
