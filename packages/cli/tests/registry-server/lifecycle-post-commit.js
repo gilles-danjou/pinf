@@ -61,6 +61,11 @@ exports.testPostCommit = function() {
     });
     
     ASSERT.equal(body.join(""), "OK");
+    
+    
+    // NOTE: The assertion below will likely fail due to a timing issue as the update process is handled via a
+    //       queued event on appengine which does not execute right away
+    // TODO: Wait for a bit until we request the catalog
 
     ASSERT.deepEqual(
         JSON.decode(HTTP.read("http://127.0.0.1:8080/test@pinf.org/public/test-package-5/").decodeToString()),

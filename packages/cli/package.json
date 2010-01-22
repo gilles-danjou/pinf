@@ -24,5 +24,15 @@
             "url": "git://github.com/cadorn/pinf.git",
             "path": "packages/cli"
         }
-    ]
+    ],
+    "pinf": {
+        "commands": {
+            "pinf": "pinf"
+        },
+        "builder": {
+            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+            "name": "extras",
+            "module": "builders/tusk-package.js"
+        }
+    }
 }

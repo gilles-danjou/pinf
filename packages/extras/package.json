@@ -1,0 +1,11 @@
+{
+    "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/extras/",
+    "name": "extras",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/extras"
+        }
+    ]
+}

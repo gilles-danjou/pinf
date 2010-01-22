@@ -13,6 +13,10 @@
         "common": {
             "location": "http://github.com/cadorn/pinf/zipball/master/",
             "path": "packages/common"
+        },
+        "extras": {
+            "location": "http://github.com/cadorn/pinf/zipball/master/",
+            "path": "packages/extras"
         }
     }
 }

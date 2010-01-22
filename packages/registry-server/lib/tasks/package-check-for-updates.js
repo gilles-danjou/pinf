@@ -52,11 +52,11 @@ exports.service = function(env) {
     // latest version
     var version = tags.pop();
 
-
     packages.forEach(function(pkg) {
 
         var ver = pkg.getLatestVersion(version);
-        if(ver && ver!=version) {
+        // check for updates even if there is no prior release
+        if(ver!=version) {
 
             var url = VENDOR.rawUrlForRepository(pkg.getRepositoryInfo()).
                         replace(/{rev}/, "v"+version).replace(/{path}/, "package.json");
@@ -73,6 +73,7 @@ exports.service = function(env) {
         }
 
         var rev = pkg.getLastRevision(qs.branch);
+        // only check for updates if there is a prior release
         if(rev && rev!=qs.rev) {
 
             var url = VENDOR.rawUrlForRepository(pkg.getRepositoryInfo()).

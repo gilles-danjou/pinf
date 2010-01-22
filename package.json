@@ -16,6 +16,10 @@
         "common": {
             "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
             "name": "common"
+        },
+        "extras": {
+            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
+            "name": "extras"
         }
     },
     "repositories": [
