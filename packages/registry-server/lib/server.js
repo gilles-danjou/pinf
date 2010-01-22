@@ -10,6 +10,7 @@ var QUERYSTRING = require("jack/querystring");
 var USER = require("./user");
 var CACHE = require("./cache");
 
+
 CACHE.setSeed("2");
 
 exports.app = function(env) {
@@ -24,6 +25,32 @@ exports.app = function(env) {
         contentType,
         response;
 
+    if(env.PATH_INFO.substr(0,8)=="/.tasks/") {
+
+        if(DEBUG) {
+            print("--------- REQUEST ---------");
+            UTIL.every(env, function(item2) {
+                print("    " + item2[0] + ": " + item2[1]);
+            });
+            print("--------- REQUEST ---------");
+        }
+
+        status = 200;
+        contentType = "text/plain";
+        response = require("./tasks/" + env.PATH_INFO.substr(8)).service(env);
+        if(response == "OK") {
+            body = response;
+        } else {
+            if(/^\d*$/.test(response.status)) {
+                status = response.status;
+                body = response.message;
+            } else {
+                status = 501;
+                body = JSON.encode(response, null, "  ");            
+            }
+       }
+
+    } else
     if(env.REQUEST_METHOD=="POST" && env.PATH_INFO.substr(0,2)!="/@") {
 
         var path = env.PATH_INFO.substr(1, env.PATH_INFO.length-1).split("/");

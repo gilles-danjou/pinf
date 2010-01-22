@@ -228,6 +228,12 @@ exports.testBasicRegistration = function() {
     resetFiles({"skipUIDRemoval": true});
 }
 
+exports.testPostCommit = function() {
+
+    // post commit tests reside in external file to allow isolated running once
+    // test ENV is setup by exports.testBasicRegistration()
+    require("test").run(require("./lifecycle-post-commit"));
+}
 
 exports.testProgram = function() {
 

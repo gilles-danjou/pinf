@@ -272,7 +272,7 @@ function makeRequest(url, action, args) {
             "Content-Type": "application/json"
         },
         "body": [
-            JSON.encode(args)
+            body
         ]
     }).connect();
     

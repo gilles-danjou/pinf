@@ -10,6 +10,7 @@ var JSON = require("json");
 var MODELS = require("./models");
 var CACHE = require("./cache");
 var PACKAGE_DESCRIPTOR = require("package/descriptor", "common");
+var VENDOR = require("vendor", "common");
 
 
 var model = MODELS.getModel("Package");
@@ -21,7 +22,15 @@ var Package = exports.Package = function(pkg, data) {
     if (!(this instanceof exports.Package))
         return new exports.Package(pkg, data);
 
-    this.id = pkg;
+    var parts = pkg.split(":");
+    if(parts.length==1) {
+        parts = parts[0].split("/");
+        parts = [parts.slice(0, parts.length-1).join("/"), parts.pop()];
+    }
+    if(parts.length!=2) {
+        throw new Error("Invalid Package ID");
+    }
+    this.id = parts.join(":");
     this.frozen = false;
     this.fetch(data);
 }
@@ -54,6 +63,7 @@ Package.prototype.fetch = function(data) {
 }
 
 Package.prototype.store = function() {
+    var self = this;
     if(this.frozen) {
         throw new Error("Cannot store package as it is frozen");
     }
@@ -82,6 +92,15 @@ Package.prototype.store = function() {
             }
         }
         this.data.descriptors = JSON.encode(this.descriptors);
+    }
+    if(this.data.descriptor) {
+        this.data.repositories = [];
+        var spec = JSON.decode(this.data.descriptor);
+        if(spec.repositories) {
+            spec.repositories.forEach(function(repository) {
+                self.data.repositories.push(VENDOR.normalizeRepositoryUrl(repository.url, true));
+            });
+        }
     }
     this.data.put();
     CACHE.remove("package:" + this.id);
@@ -204,6 +223,16 @@ Package.prototype.getArbitraryDescriptor = function() {
     }
 }
 
+Package.prototype.getRepositoryInfo = function() {
+    if(!this.data.descriptor) return false;
+    var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(JSON.decode(this.data.descriptor));
+    var spec = descriptor.getCompletedSpec();
+    if(!spec.repositories) {
+        return false;
+    }
+    return spec.repositories[0];
+}
+
 Package.prototype.getUid = function(env) {
     var url = [
         "http://"
@@ -249,7 +278,6 @@ Package.prototype.getInfo = function() {
     
     return info;
 }
-
 
 
 exports.getForNamespace = function(namespace) {

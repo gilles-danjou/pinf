@@ -18,6 +18,7 @@ Docs
 ====
 
   * [Lifecycle](http://github.com/cadorn/pinf/blob/master/docs/Lifecycle.md)
+  * [Vendor](http://github.com/cadorn/pinf/blob/master/docs/Vendor.md)
 
 Dev Setup
 =========
@@ -49,7 +50,7 @@ Public URLs:
     http://registry.pinf.org/<owner>/<path>/<PackageName>/
     http://registry.pinf.org/<owner>/<path>/catalog.json
     http://registry.pinf.org/@feeds/announcements.json
-    http://registry.pinf.org/@webhooks/post-commit
+    http://registry.pinf.org/@webhooks/post-commit/<Vendor>
 
 TODO
 ====
@@ -59,8 +60,7 @@ TODO
   * @meta support for packages
     * `http://registry.pinf.org/<owner>/<path>/<PackageName>/@meta/<MetaPath>`
   * implements support
-    * `http://registry.pinf.org/implements/<ImplementsID>`
-  * Webhook for github post-commit
+    * `http://registry.pinf.org/@implements/<ImplementsID>`
   * Etags for public package info and catalog requests
   * Remove old entries (5min +) from "Announcement" table (via cron)
   * Realtime (via XMPP) notifications of announcements

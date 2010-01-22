@@ -10,6 +10,7 @@ var URI = require("uri");
 var VALIDATOR = require("validator", "util");
 var SEMVER = require("semver", "util");
 var LOCATOR = require("./locator");
+var VENDOR = require("../vendor");
 
 
 var PackageDescriptor = exports.PackageDescriptor = function(path) {
@@ -110,11 +111,11 @@ PackageDescriptor.prototype.getCompletedSpec = function() {
     if(descriptor.repositories) {
         descriptor.repositories.forEach(function(repository) {
             if(!repository.raw) {
-                var url = rawUrlForRepository(repository);
+                var url = VENDOR.rawUrlForRepository(repository);
                 if(url) {
                     repository.raw = url;
                 }
-                var info = downloadInfoForRepository(repository);
+                var info = VENDOR.downloadInfoForRepository(repository);
                 if(info) {
                     repository.download = info;
                 }
@@ -236,7 +237,7 @@ exports.validate = function(descriptor, options) {
                     feedback.push("Missing 'repositories["+index+"].url' property");
                     return;
                 }
-                if(!validateRepositoryUrl(repository.url, options)) {
+                if(!VENDOR.validateRepositoryUrl(repository.url, options)) {
                     feedback.push("'repositories["+index+"].url' property ("+repository.url+") does not match: " + options.revisionControl.getRepositories());
                     return;
                 }
@@ -273,78 +274,5 @@ exports.validate = function(descriptor, options) {
         options.print("\0cyan(Specification: http://wiki.commonjs.org/wiki/Packages/1.0\0)");
     }
     return valid;
-}
-
-function validateRepositoryUrl(url, options) {
-    var repositories = options.revisionControl.getRepositories();
-    if(!repositories) {
-        return false;
-    }
-    var urlInfo = normalizeRepositoryUrl(url),
-        valid = false;
-    repositories.forEach(function(repository) {
-        if(valid) return;
-        var repositoryInfo = normalizeRepositoryUrl(repository);
-        if(compareRepositoryUrlInfo(urlInfo, repositoryInfo, ["private"])) {
-            valid = true;
-        }
-    });
-    return valid;
-}
-
-function normalizeRepositoryUrl(url) {
-    var info = {},
-        m;
-    
-    if(m = url.match(/^git:\/\/([^\/]*)\/(.*?).git$/)) {
-        info.type = "git";
-        info["private"] = false;
-        info.host = m[1];
-        info.path = m[2];
-    } else
-    if(m = url.match(/^git@([^:]*):(.*?).git$/)) {
-        info.type = "git";
-        info["private"] = true;
-        info.host = m[1];
-        info.path = m[2];
-    }    
-    return info;
-}
-
-function compareRepositoryUrlInfo(subject, compare, ignore) {
-    subject = UTIL.copy(subject);
-    compare = UTIL.copy(compare);
-    ignore = ignore || [];
-    ignore.forEach(function(name) {
-        if(UTIL.has(subject, ignore)) delete subject[ignore];
-        if(UTIL.has(compare, ignore)) delete compare[ignore];
-    });
-    return UTIL.eq(subject, compare);
-}
-
-function rawUrlForRepository(repository) {
-    
-    var repositoryInfo = normalizeRepositoryUrl(repository.url);
-    
-    if(repositoryInfo.host=="github.com") {
-        return "http://github.com/" + repositoryInfo.path + "/raw/{rev}/" + ((repository.path)?repository.path+"/":"") + "{path}";
-    }
-    
-    return false;
-}
-
-
-function downloadInfoForRepository(repository) {
-    
-    var repositoryInfo = normalizeRepositoryUrl(repository.url);
-    
-    if(repositoryInfo.host=="github.com") {
-        return {
-            "type": "zip",
-            "url": "http://github.com/" + repositoryInfo.path + "/zipball/{rev}/"
-        }
-    }
-    
-    return false;
 }
 

@@ -1,0 +1,7 @@
+
+<queue-entries>
+  <queue>
+    <name>github-api</name>
+    <rate>55/m</rate>
+  </queue>
+</queue-entries>

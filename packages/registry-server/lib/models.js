@@ -41,7 +41,8 @@ models["Package"] = new DB.Model("Package", {
     "revisions": new DB.TextProperty(),
     "descriptors": new DB.TextProperty(),
     "source": new DB.StringProperty(),
-    "descriptor": new DB.TextProperty()
+    "descriptor": new DB.TextProperty(),
+    "repositories": new DB.ListProperty()
 });
 
 models["Announcement"] = new DB.Model("Announcement", {

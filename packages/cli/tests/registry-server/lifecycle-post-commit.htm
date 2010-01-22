@@ -1,0 +1,51 @@
+
+<form method="POST" action="http://127.0.0.1:8080/@webhooks/post-commit/github.com">
+    
+    <textarea rows="30" cols="100" name="payload">
+{
+   "before": "1a49e27d0428286e47ab446662ae2dfa5d55046d",
+   "repository": {
+      "description": "Toolchain automation platform",
+      "watchers": 1,
+      "open_issues": 0,
+      "fork": false,
+      "forks": 0,
+      "private": false,
+      "homepage": "",
+      "owner": {
+         "email": "christoph@christophdorn.com",
+         "name": "cadorn"
+      },
+      "url": "http://github.com/cadorn/pinf",
+      "name": "pinf"
+   },
+   "after": "f48693f85034b59b2ca40dd6a4464d6e1461bc32",
+   "ref": "refs/heads/master",
+   "commits": [
+      {
+         "added": [
+            "packages/registry-server/lib/responders/feeds.js",
+            "packages/registry-server/lib/responders/webhooks.js",
+            "packages/registry-server/lib/responders/www.js"
+         ],
+         "message": "responders refactor; test post-commit support",
+         "removed": [],
+         "modified": [
+            "packages/registry-server/lib/responders/public.js",
+            "packages/registry-server/lib/server.js"
+         ],
+         "author": {
+            "email": "christoph@christophdorn.com",
+            "name": "cadorn"
+         },
+         "url": "http://github.com/cadorn/pinf/commit/9a91cd9bd308e09124445b076bd72162f3afea24",
+         "timestamp": "2010-01-20T13:35:20-08:00",
+         "id": "9a91cd9bd308e09124445b076bd72162f3afea24"
+      }
+   ]
+}        
+    </textarea>
+    <br>
+    <input type="submit" value="http://127.0.0.1:8080/@webhooks/post-commit/github.com"/>
+    
+</form>
