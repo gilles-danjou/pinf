@@ -15,6 +15,7 @@ Links
  * [WebFingerProtocol](http://code.google.com/p/webfinger/wiki/WebFingerProtocol)
  * [Design by contract](http://en.wikipedia.org/wiki/Design_by_contract)
  * [Personal Package Archives for Ubuntu](https://launchpad.net/ubuntu/+ppas)
+ * [Idempotence](http://www.aspninja.com/2010/01/21/how-to-debug-asp-net-using-firefox/)
 
 License
 =======
