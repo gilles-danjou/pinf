@@ -18,7 +18,9 @@ exports.service = function(env) {
     if(!result || result.length==0) return "OK";
     
     result.forEach(function(data) {
-        
+
+
+/*        
         pkg = PACKAGE.Package(data.datastoreKey().getName(), data);
         
         if(!data.descriptor) {
@@ -30,17 +32,16 @@ exports.service = function(env) {
     
                 pkg.data.descriptor = JSON.encode(descriptor);
     
-    print("update desc pkg: "+pkg.id);
-    
                 pkg.store();
             }
         } else
         if(!data.repositories && data.descriptor) {
 
-print("update reps pkg: "+pkg.id);
-
             pkg.store();
         }
+*/
+
+        
     });
 
     offset += limit;
