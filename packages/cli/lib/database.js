@@ -9,6 +9,9 @@ var JSON = require("json");
 var URI = require("uri");
 var JSON_STORE = require("json-store", "util");
 var PACKAGE_DESCRIPTOR = require("package/descriptor", "common");
+var PACKAGE_STORE = require("package/store", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
+var PROGRAM_STORE = require("program/store", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
+var PACKAGE_SOURCES = require("package/sources", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
 
 
 var Database = exports.Database = function(path) {
@@ -20,6 +23,12 @@ var Database = exports.Database = function(path) {
     if(!this.exists()) {
         this.path.mkdirs();
     }
+    
+    this.packageStore = PACKAGE_STORE.PackageStore(this.path);
+    this.packageStore.setSources(this.getSources());
+
+    this.programStore = PROGRAM_STORE.ProgramStore(this.path);
+    this.programStore.setPackageStore(this.packageStore);
 }
 
 Database.prototype.exists = function() {
@@ -35,6 +44,15 @@ Database.prototype.getConfig = function(path) {
     return config;
 }
 
+Database.prototype.getSources = function() {
+    var path = this.path.join("config", "sources.json");
+    if(!path.exists()) {
+        path.dirname().mkdirs();
+        path.write("{}");
+    }
+    return PACKAGE_SOURCES.PackageSources(path);
+}
+
 Database.prototype.getRegistryUriForNamespace = function(namespace) {
     var registry = this.getConfig("namespaces").get([namespace, "registry"]);
     if(!registry) {
@@ -48,3 +66,16 @@ Database.prototype.getRegistryUriForPackage = function(path) {
     var descriptor = PACKAGE_DESCRIPTOR.PackageDescriptor(path.join("package.json"));
     return URI.parse(descriptor.getRegistryUri());
 }
+
+Database.prototype.getPackage = function(locator) {
+    return this.packageStore.get(locator);
+}
+
+Database.prototype.getProgram = function(locator) {
+    return this.programStore.get(locator);
+}
+
+Database.prototype.getBuildPathForLocator = function(locator) {
+    return this.path.join("builds", locator.getFsPath());
+}
+

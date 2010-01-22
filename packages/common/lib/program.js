@@ -32,25 +32,31 @@ Program.prototype.setPackageStore = function(store) {
 }
 
 
-Program.prototype.clean = function() {
-    var path = this.getPath();
-    [
-        ".build"
-    ].forEach(function(dir) {
-        OS.command("rm -Rf " + path.join(dir));
-    });
+Program.prototype.clean = function(options) {
+    if(options.path.exists()) {
+        // sanity check before we delete the previous build
+        if(options.path.join("package.json").exists() && options.path.join("using").exists()) {
+            OS.command("rm -Rf " + options.path.valueOf());
+        }
+    }
 }
 
-Program.prototype.build = function() {
+Program.prototype.build = function(options) {
     var self = this;
 
-    this.clean();
+    options = options || {};
+    if(!options.path) {
+        options.path = this.getPath().join(".build");
+    }
+
+    this.clean(options);
 
     var descriptor = this.getDescriptor(),
+        buildPath = options.path,
         path;
         
     // link package.json file
-    path = this.getPath().join(".build", "package.json");
+    path = buildPath.join("package.json");
     path.dirname().mkdirs();
     this.getPath().join("package.json").symlink(path);
 
@@ -72,7 +78,7 @@ Program.prototype.build = function() {
             locator.pinAtVersion(usingPackage.getVersion());
         }
 
-        path = self.getPath().join(".build", "using", usingPackage.getTopLevelId());
+        path = buildPath.join("using", usingPackage.getTopLevelId());
         path.dirname().mkdirs();
         
         
@@ -107,7 +113,7 @@ TODO: Move this to Program.prototype.freeze()
         if(info.id==self.getTopLevelId()) {
             path = self.getPath();
         } else {
-            path = self.getPath().join(".build", "using", info.id);
+            path = buildPath.join("using", info.id);
         }
         JSON_STORE.JsonStore(path.join("package.json")).set(["using", info.name, "revision"], info.version);
     });
@@ -117,6 +123,6 @@ TODO: Move this to Program.prototype.freeze()
         "packageStore": this.packageStore
     });
 
-    builder.triggerBuild(this);
+    builder.triggerBuild(this, options);
 }
 

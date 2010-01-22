@@ -112,8 +112,8 @@ exports.testBuildWithSourcesOverlay = function() {
         {
            "local": {
               "module": {
-                 "id": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/test-package-6/master/lib/module").valueOf(),
-                 "path": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/test-package-6/master/lib/module.js").valueOf(),
+                 "id": program.getPath().canonical().join(".build/using/127.0.0.1/test@pinf.org/public/test-package-6/master/lib/module").valueOf(),
+                 "path": program.getPath().canonical().join(".build/using/127.0.0.1/test@pinf.org/public/test-package-6/master/lib/module.js").valueOf(),
                  "package": "127.0.0.1/test@pinf.org/public/test-package-6/master",
                  "using": {
                     "test-package": "127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master"
@@ -122,8 +122,8 @@ exports.testBuildWithSourcesOverlay = function() {
            },
            "external": {
               "module": {
-                 "id": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master/lib/module").valueOf(),
-                 "path": program.getPath().join(".build/using/127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master/lib/module.js").valueOf(),
+                 "id": program.getPath().canonical().join(".build/using/127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master/lib/module").valueOf(),
+                 "path": program.getPath().canonical().join(".build/using/127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master/lib/module.js").valueOf(),
                  "package": "127.0.0.1/test@pinf.org/public/subset/renamed-test-package-5/master",
                  "using": {}
               }

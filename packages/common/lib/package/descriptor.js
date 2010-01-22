@@ -126,6 +126,13 @@ PackageDescriptor.prototype.getCompletedSpec = function() {
     return descriptor;
 }
 
+PackageDescriptor.prototype.getRepositoryInfo = function() {
+    var spec = this.getCompletedSpec();
+    if(!spec.repositories) return false;
+    return spec.repositories[0];
+}
+
+
 PackageDescriptor.prototype.everyUsing = function(callback) {
     if(!this.spec.using) {
         return false;
@@ -155,6 +162,9 @@ PackageDescriptor.prototype.traverseEveryUsing = function(callback, options, vis
         self = this,
         itemOptions = UTIL.copy(options);
     UTIL.every(this.spec.using, function(item) {
+        if(visited[self.getUid()]) {
+            return;
+        }
         locator = LOCATOR.PackageLocator(item[1]);
         locator = callback(options["package"], item[0], locator, stacks) || locator;
         visited[self.getUid()] = true;

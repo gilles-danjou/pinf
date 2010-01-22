@@ -14,9 +14,9 @@ Builder.prototype = BUILDER.Builder();
 
 
 
-Builder.prototype.build = function(program) {
+Builder.prototype.build = function(program, options) {
 
-    var memoPath = program.getPath().join(".build", "memo.txt");
+    var memoPath = options.path.join("memo.txt");
 
     memoPath.write("This is the memo written by the builder");
 

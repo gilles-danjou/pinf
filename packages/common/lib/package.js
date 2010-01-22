@@ -25,6 +25,10 @@ Package.prototype.getPath = function() {
     return this.path;
 }
 
+Package.prototype.exists = function() {
+    return this.path.exists();
+}
+
 Package.prototype.getLocator = function() {
     return this.locator;
 }

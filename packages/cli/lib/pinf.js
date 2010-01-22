@@ -6,6 +6,9 @@ var STREAM = require('term').stream;
 var FILE = require("file");
 var SYSTEM = require("system");
 var DATABASE = require("./database");
+var PACKAGE = require("package", "common");
+var PACKAGE_LOCATOR = require("package/locator", "common");
+var URI = require("uri");
 
 var ARGS = require("args");
 var parser = exports.parser = new ARGS.Parser();
@@ -31,6 +34,21 @@ commandsDir.listPaths().forEach(function(entry) {
 
 exports.getDatabase = function() {
     return database;
+}
+
+exports.locatorForDirectory = function(directory) {
+    var pkg = PACKAGE.Package(directory);
+    if(!pkg.exists()) {
+        throw new Error("No package at: " + directory);
+    }
+    var uri = URI.parse(pkg.getUid()),
+        name = uri.directories.pop(),
+        catalog = uri.scheme + ":" + uri.authorityRoot + uri.authority + "/" + uri.directories.join("/") + "/catalog.json";
+
+    return PACKAGE_LOCATOR.PackageLocator({
+        "catalog": catalog,
+        "name": name
+    });
 }
 
 

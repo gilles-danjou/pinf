@@ -41,6 +41,10 @@ PackageLocator.prototype.getUrl = function() {
     throw new Error("Invalid spec");
 }
 
+PackageLocator.prototype.setRevision = function(revision) {
+    this.spec.revision = revision;
+}
+
 PackageLocator.prototype.getRevision = function() {
     return this.spec.revision || false;
 }

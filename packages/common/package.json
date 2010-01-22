@@ -4,8 +4,9 @@
     "type": "using",
     "using": {
         "util": {
-            "catalog": "http://github.com/cadorn/util/raw/master/catalog.json",
-            "name": "lib-js"
+            "catalog": "http://registry.pinf.org/cadorn.org/github/util/packages/catalog.json",
+            "name": "lib-js",
+            "revision": "master"
         }
     },
     "repositories": [

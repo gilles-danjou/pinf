@@ -19,7 +19,7 @@ Builder.prototype.construct = function(pkg, options) {
     this.options = options;
 }
 
-Builder.prototype.triggerBuild = function(program) {
+Builder.prototype.triggerBuild = function(program, options) {
 
     var descriptor = this.pkg.getDescriptor(),
         spec = descriptor.getPinfSpec(),
@@ -29,7 +29,7 @@ Builder.prototype.triggerBuild = function(program) {
     descriptor.everyUsing(function(name, locator) {
         var pkg = self.options.packageStore.get(locator);
         var builder = pkg.getBuilder(self.options);
-        builder.triggerBuild(program);        
+        builder.triggerBuild(program, options);        
     });
     
     // copy all declared commands
@@ -41,25 +41,25 @@ Builder.prototype.triggerBuild = function(program) {
             if(!sourcePath.exists()) {
                 throw new Error("Command declared at 'pinf.commands['"+command[0]+"'] not found at: " + sourcePath);
             }
-            targetPath = program.getPath().join(".build", "bin", command[0]);
+            targetPath = options.path.join("bin", command[0]);
             targetPath.dirname().mkdirs();
-            targetPath.write(self.expandMacros(program, sourcePath.read()));
+            targetPath.write(self.expandMacros(program, options, sourcePath.read()));
             targetPath.chmod(0755);
         });
     }
 
-    this.build(program);
+    this.build(program, options);
 }
 
-Builder.prototype.build = function(program) {
+Builder.prototype.build = function(program, options) {
     // to be overwritten
 }
 
-Builder.prototype.expandMacros = function(program, code) {
+Builder.prototype.expandMacros = function(program, options, code) {
 
     code = code.replace(/\/\*PINF_MACRO\[LoadCommandEnvironment\]\*\//g, [
         "//<PINF_MACRO[LoadCommandEnvironment]>",
-        "system.sea = \""+ program.getPath().join(".build").valueOf() +"\";",
+        "system.sea = require(\"file\").Path(module.path).dirname().join(\"../\").valueOf();",
         "require(\"packages\").main();",
         "//</PINF_MACRO>"
     ].join("\n"));
