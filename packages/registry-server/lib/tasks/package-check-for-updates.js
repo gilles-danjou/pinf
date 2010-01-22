@@ -15,6 +15,8 @@ exports.service = function(env) {
 
     var paths = JSON.decode(qs.paths);
 
+dump(paths);
+
     // lookup all packages with the same repository
     var result = MODELS.getModel("Package").all().filter("repositories IN", [qs.repository]).fetch();
     if(!result || result.length==0) return "OK";
@@ -48,15 +50,20 @@ exports.service = function(env) {
     var tags = VENDOR.getTagsForRepository(qs.repository);
     if(!tags) return "OK";
     tags = SEMVER.versionsForTags(UTIL.keys(tags));
-    if(!tags) return "OK";
-    // latest version
-    var version = tags.pop();
+    var version;
+    if(tags && tags.length>0) {
+        // latest version
+        version = tags.pop();
+    }
+
+print("version: " + version);
 
     packages.forEach(function(pkg) {
 
         var ver = pkg.getLatestVersion(version);
-        // check for updates even if there is no prior release
-        if(ver!=version) {
+print("check version: " + ver + " != " + version + " : for package: " + pkg.id);
+        // check for updates even if there is no prior release (but only if we found a version tag)
+        if(version && ver!=version) {
 
             var url = VENDOR.rawUrlForRepository(pkg.getRepositoryInfo()).
                         replace(/{rev}/, "v"+version).replace(/{path}/, "package.json");
@@ -73,6 +80,7 @@ exports.service = function(env) {
         }
 
         var rev = pkg.getLastRevision(qs.branch);
+print("check branch("+qs.branch+"): " + rev + " != " + qs.rev + " : for package: " + pkg.id);
         // only check for updates if there is a prior release
         if(rev && rev!=qs.rev) {
 

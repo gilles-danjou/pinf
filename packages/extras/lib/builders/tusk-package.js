@@ -15,8 +15,6 @@ Builder.prototype = BUILDER.Builder();
 
 
 Builder.prototype.build = function(program) {
-
-
     
     print("build tusk package");
 
