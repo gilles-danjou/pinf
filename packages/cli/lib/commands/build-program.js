@@ -25,24 +25,24 @@ command.action(function (options) {
         });
 
         var locator = PINF.locatorForDirectory(directory);
-        
+
         if(options.revision) {
             locator.setRevision(options.revision);
         }
 
         var pkg = PINF.getDatabase().getProgram(locator),
-            path = PINF.getDatabase().getBuildPathForLocator(locator);
+            path = PINF.getDatabase().getBuildPathForPackage(pkg);
 
-        pkg.build({
+        path = pkg.build({
             "path": path
         });
-        
+
         command.print("Built program at: " + path);
 
     } catch(e) {
         ARGS_UTIL.printError(e);
         return;
     }
-    
+
     command.print("\0green(Done\0)");
 });

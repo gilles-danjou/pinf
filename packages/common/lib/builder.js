@@ -3,7 +3,7 @@
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var UTIL = require("util");
-
+var LOCATOR = require("./package/locator");
 
 var Builder = exports.Builder = function(pkg, options) {
     if (!(this instanceof exports.Builder))
@@ -19,6 +19,14 @@ Builder.prototype.construct = function(pkg, options) {
     this.options = options;
 }
 
+Builder.prototype.getLocatorForSpec = function(locator) {
+    return LOCATOR.PackageLocator(locator);
+}
+
+Builder.prototype.getPackageForLocator = function(locator) {
+    return this.options.packageStore.get(locator);
+}
+
 Builder.prototype.triggerBuild = function(program, options) {
 
     var descriptor = this.pkg.getDescriptor(),
@@ -27,7 +35,7 @@ Builder.prototype.triggerBuild = function(program, options) {
     
     // build all dependencies first
     descriptor.everyUsing(function(name, locator) {
-        var pkg = self.options.packageStore.get(locator);
+        var pkg = self.getPackageForLocator(locator);
         var builder = pkg.getBuilder(self.options);
         builder.triggerBuild(program, options);        
     });

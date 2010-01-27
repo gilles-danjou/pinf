@@ -7,6 +7,18 @@ var UTIL = require("util");
 var HTTP = require("http");
 var JSON = require("json");
 var FILE = require("file");
+var URI = require("uri");
+
+exports.getVendorForUrl = function(uri) {
+    if(!(uri instanceof URI.URI)) {
+        uri = URI.parse(uri);
+    }
+    if(uri.domain=="github.com") {
+        return require("./vendor/github").Vendor();
+    }
+    throw new Error("No vendor found for URL: " + uri.url);
+}
+
 
 
 exports.validateRepositoryUrl = function(url, options) {
@@ -141,7 +153,7 @@ exports.normalizeCommitInfo = function(vendor, data) {
             "branch": payload.ref.split("/").pop(),
             "paths": JSON.encode(paths)
         };
-        
+
     } else {
         throw new Error("Vendor not supported: " + vendor);
     }

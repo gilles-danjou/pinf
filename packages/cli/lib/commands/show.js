@@ -1,6 +1,6 @@
 
 var URI = require("uri");
-var WILDFIRE = require("wildfire/binding/narwhal");
+//var WILDFIRE = require("wildfire/binding/narwhal");
 
 var ARGS = require("args");
 var parser = exports["show"] = new ARGS.Parser();
@@ -12,7 +12,7 @@ parser.action(function (options) {
 
     print("do show");    
     
-    
+/*    
     WILDFIRE.target("http://pinf.org/cadorn.org/fireconsole").send(
         "Message Meta",
         "Message Data ["+options.args+"]"
@@ -20,6 +20,6 @@ parser.action(function (options) {
     
     
     WILDFIRE.flush();
-
+*/
     
 });

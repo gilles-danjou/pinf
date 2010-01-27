@@ -5,9 +5,10 @@ var UTIL = require('util');
 var STREAM = require('term').stream;
 var FILE = require("file");
 var SYSTEM = require("system");
-var DATABASE = require("./database");
+var DATABASE = require("database", "common");
 var PACKAGE = require("package", "common");
 var PACKAGE_LOCATOR = require("package/locator", "common");
+var PINF = require("pinf", "common");
 var URI = require("uri");
 
 var ARGS = require("args");
@@ -41,14 +42,20 @@ exports.locatorForDirectory = function(directory) {
     if(!pkg.exists()) {
         throw new Error("No package at: " + directory);
     }
-    var uri = URI.parse(pkg.getUid()),
-        name = uri.directories.pop(),
-        catalog = uri.scheme + ":" + uri.authorityRoot + uri.authority + "/" + uri.directories.join("/") + "/catalog.json";
-
-    return PACKAGE_LOCATOR.PackageLocator({
-        "catalog": catalog,
-        "name": name
-    });
+    if(pkg.hasUid()) {
+        var uri = URI.parse(pkg.getUid()),
+            name = uri.directories.pop(),
+            catalog = uri.scheme + ":" + uri.authorityRoot + uri.authority + "/" + uri.directories.join("/") + "/catalog.json";
+    
+        return PACKAGE_LOCATOR.PackageLocator({
+            "catalog": catalog,
+            "name": name
+        });
+    } else {
+        return PACKAGE_LOCATOR.PackageLocator({
+            "location": "file://" + pkg.getPath().valueOf()
+        });
+    }
 }
 
 
@@ -61,9 +68,11 @@ exports.main = function (args) {
                 dbPath = FILE.Path(options.db);
             }
             if(!dbPath || !dbPath.exists()) {
-                dbPath = FILE.Path(SYSTEM.env["HOME"]).join(".pinf");
+                dbPath = FILE.Path(SYSTEM.env["HOME"]).join("pinf");
             }
             database = DATABASE.Database(dbPath);
+
+            PINF.setDatabase(database);
 
             return true;
         }

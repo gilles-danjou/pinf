@@ -2,4 +2,7 @@
 
 /*PINF_MACRO[LoadCommandEnvironment]*/
 
-require("pinf", "github.com/cadorn/pinf/raw/master/cli").main(system.args);
+system.sea = "/pinf/packages-birth/PINF/OpenSource/org.cadorn.github/packages/pinf";
+require("packages").main();
+
+require("pinf", "http://registry.pinf.org/cadorn.org/github/pinf/packages/cli/").main(system.args);

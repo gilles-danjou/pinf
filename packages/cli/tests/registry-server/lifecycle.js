@@ -8,7 +8,7 @@ var PINF = require("pinf", "github.com/cadorn/pinf/raw/master/cli");
 var JSON = require("json");
 var FILE = require("file");
 var HTTP = require("http");
-var GIT = require("revision-control/git", "github.com/cadorn/pinf/raw/master/cli");
+var GIT = require("git", "github.com/cadorn/util/raw/master/lib-js");
 
 
 var filesPath = FILE.Path(module.path).dirname().join("_files");

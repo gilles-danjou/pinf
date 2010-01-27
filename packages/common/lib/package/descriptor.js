@@ -29,10 +29,10 @@ var PackageDescriptor = exports.PackageDescriptor = function(path) {
     }
     
     if(!this.spec) {
-        throw new Error("Error parsing package descriptor"+(this.path)?" at: " + this.path:"");
+        throw new Error("Error parsing package descriptor"+((this.path)?(" at: " + this.path):""));
     }
     if(!this.spec.name) {
-        throw new Error("No 'name' property in package descriptor"+(this.path)?" at: " + this.path:"");
+        throw new Error("No 'name' property in package descriptor"+((this.path)?(" at: " + this.path):""));
     }
 }
 
@@ -70,7 +70,7 @@ PackageDescriptor.prototype.hasUid = function() {
 
 PackageDescriptor.prototype.getUid = function() {
     if(!this.spec.uid) {
-        throw new Error("No 'uid' property in package descriptor"+(this.path)?" at: " + this.path:"");
+        throw new Error("No 'uid' property in package descriptor"+((this.path)?(" at: " + this.path):""));
     }
     var uri = VALIDATOR.validate("url", this.spec.uid, {
         "require": [
@@ -79,7 +79,7 @@ PackageDescriptor.prototype.getUid = function() {
         "return": "uri"
     });
     if(uri.directories[uri.directories.length-1]!=this.spec.name) {
-        throw new Error("The 'uid' property does not have the 'name' property at the end of the URI in package descriptor"+(this.path)?" at: " + this.path:"");
+        throw new Error("The 'uid' property does not have the 'name' property at the end of the URI in package descriptor"+((this.path)?(" at: " + this.path):""));
     }
     return this.spec.uid;
 }
@@ -99,6 +99,7 @@ PackageDescriptor.prototype.getRegistryUri = function() {
 }
 
 PackageDescriptor.prototype.validate = function(options) {
+    options = options || {};
     options.path = this.path || null;
     return exports.validate(this.spec, options);
 }
@@ -143,35 +144,40 @@ PackageDescriptor.prototype.everyUsing = function(callback) {
     return true;
 }
 
-PackageDescriptor.prototype.traverseEveryUsing = function(callback, options, visited, stacks) {
+
+PackageDescriptor.prototype.traverseEveryDependency = function(callback, options) {
+    return this.traverseEveryLocator("dependencies", callback, options);
+}
+
+PackageDescriptor.prototype.traverseEveryUsing = function(callback, options) {
+    return this.traverseEveryLocator("using", callback, options);
+}
+
+PackageDescriptor.prototype.traverseEveryLocator = function(property, callback, options, stacks) {
     if(!options || !options.packageStore) {
         throw new Error("options.packageStore not provided");
     }
     if(!options || !options["package"]) {
         throw new Error("options.package not provided");
     }
-    if(!this.spec.using) {
+    if(!this.spec[property]) {
         return false;
     }
-    visited = visited || {};
     stacks = stacks || {"names": []};
-    if(visited[this.getUid()]) {
-        return false;
-    }
     var locator,
         self = this,
         itemOptions = UTIL.copy(options);
-    UTIL.every(this.spec.using, function(item) {
-        if(visited[self.getUid()]) {
-            return;
+    UTIL.every(this.spec[property], function(item) {
+        if(typeof item[1] == "object") {
+            locator = LOCATOR.PackageLocator(item[1]);
+            if(locator.isCatalog() || locator.isDirect()) {
+                locator = callback(options["package"], item[0], locator, stacks) || locator;
+                itemOptions["package"] = options.packageStore.get(locator);
+                stacks.names.push(item[0]);
+                itemOptions["package"].getDescriptor().traverseEveryLocator(property, callback, itemOptions, stacks);
+                stacks.names.pop();
+            }
         }
-        locator = LOCATOR.PackageLocator(item[1]);
-        locator = callback(options["package"], item[0], locator, stacks) || locator;
-        visited[self.getUid()] = true;
-        itemOptions["package"] = options.packageStore.get(locator);
-        stacks.names.push(item[0]);
-        itemOptions["package"].getDescriptor().traverseEveryUsing(callback, itemOptions, visited, stacks);
-        stacks.names.pop();
     });
     return true;
 }

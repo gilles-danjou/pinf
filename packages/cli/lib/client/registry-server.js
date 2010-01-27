@@ -10,7 +10,7 @@ var JSON = require("json");
 var PINF = require("../pinf");
 var VALIDATOR = require("validator", "util");
 var PACKAGE_DESCRIPTOR = require("package/descriptor", "common");
-var GIT = require("../revision-control/git");
+var GIT = require("git", "util");
 
 
 var Client = exports.Client = function(uri) {

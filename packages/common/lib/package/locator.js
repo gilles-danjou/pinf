@@ -20,7 +20,17 @@ var PackageLocator = exports.PackageLocator = function(spec) {
     } else
     if(this.spec.catalog && !this.spec.name) {
         throw new Error("Missing [package] 'name' property for 'catalog' property.");
+    } else
+    if(this.spec.location && this.spec.name) {
+        throw new Error("The 'name' property has no meaning when using 'location'!");
+    } else
+    if(this.spec.location && this.spec.revision) {
+        throw new Error("The 'revision' property has no meaning when using 'location'!");
     }
+}
+
+PackageLocator.prototype.getSpec = function() {
+    return this.spec;
 }
 
 PackageLocator.prototype.isCatalog = function() {
@@ -53,6 +63,10 @@ PackageLocator.prototype.getModule = function() {
     return this.spec.module || false;
 }
 
+PackageLocator.prototype.setModule = function(module) {
+    this.spec.module  = module;
+}
+
 PackageLocator.prototype.getName = function() {
     if(!this.spec.name) throw new Error("No 'name' property");
     return this.spec.name;
@@ -64,6 +78,11 @@ PackageLocator.prototype.getFsPath = function() {
 
 PackageLocator.prototype.getTopLevelId = function() {
     var id = this.getFsPath().split("/");
+
+    // location locators do not take revision or version into account    
+    if(this.isDirect()) {
+        return id.join("/");
+    }
 
     // normalize ID by removing revision if set in spec to allow
     // more fine-grained revision/version selection below

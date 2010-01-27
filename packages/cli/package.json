@@ -2,7 +2,7 @@
     "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/cli/",
     "name": "cli",
     "dependencies": [
-        "github.com/cadorn/wildfire/raw/master/lib-js-system"
+        "narwhal"
     ],
     "using": {
         "common": {
@@ -31,7 +31,7 @@
             "catalog": "http://registry.pinf.org/cadorn.org/github/pinf/packages/catalog.json",
             "name": "extras",
             "revision": "master",
-            "module": "builders/tusk-package.js"
+            "module": "builders/tusk-package"
         }
     }
 }

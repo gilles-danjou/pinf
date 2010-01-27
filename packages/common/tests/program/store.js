@@ -14,7 +14,7 @@ var PROGRAM_STORE = require("program/store", "http://registry.pinf.org/cadorn.or
 var LOCATOR = require("package/locator", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
 var SOURCES = require("package/sources", "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/");
 var SEMVER = require("semver", "github.com/cadorn/util/raw/master/lib-js");
-var GIT = require("revision-control/git", "github.com/cadorn/pinf/raw/master/cli");
+var GIT = require("git", "github.com/cadorn/util/raw/master/lib-js");
 
 
 var packageStorePath = FILE.Path(module.path).dirname().join("../../.tmp/package-store"),

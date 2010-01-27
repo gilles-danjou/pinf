@@ -9,7 +9,9 @@ var JSON = require("json");
 var FS_STORE = require("http/fs-store");
 var CATALOG = require("./catalog");
 var PACKAGE = require("../package");
+var DESCRIPTOR = require("./descriptor");
 var ZIP = require("zip");
+var URI = require("uri");
 
 
 var PackageStore = exports.PackageStore = function(path) {
@@ -60,7 +62,60 @@ PackageStore.prototype.get = function(locator) {
         downloadInfo = descriptor.getDownloadInfo();
     } else
     if(locator.isDirect()) {
-        throw new Error("Direct package locators are not supported!");
+        var uri = URI.parse(locator.getUrl());
+        if(uri.scheme=="file") {
+
+            if(this.sources && (descriptor = this.sources.getDescriptor(locator))) {
+                // link package
+                var packagePath = this.getPackagesPath().join(locator.getTopLevelId());
+                if(packagePath.exists()) {
+                    if(!packagePath.isLink()) {
+                        throw new Error("Found hard directory instead of link at: " + packagePath);
+                    }
+                } else {
+                    packagePath.dirname().mkdirs();
+                    descriptor.getPath().dirname().symlink(packagePath);
+                }
+                return PACKAGE.Package(packagePath, locator);
+            }
+            
+            var path = FILE.Path(uri.path);
+            if(path.split().pop()=="") path = path.dirname();
+            if(!path.exists()) {
+                throw new Error("No package found at: " + path);
+            }
+            DESCRIPTOR.PackageDescriptor(path.join("package.json")).validate();
+            var packagePath = this.getPackagesPath().join(path);
+            if(packagePath.exists()) {
+                if(!packagePath.isLink()) {
+                    throw new Error("Found hard directory instead of link at: " + packagePath);
+                }
+            } else {
+                packagePath.dirname().mkdirs();
+                path.symlink(packagePath);
+            }
+            return PACKAGE.Package(packagePath, locator);
+        } else
+        if(uri.scheme=="http") {
+
+            if(this.sources && (descriptor = this.sources.getDescriptor(locator))) {
+                // link package
+                var packagePath = this.getPackagesPath().join(locator.getTopLevelId());
+                if(packagePath.exists()) {
+                    if(!packagePath.isLink()) {
+                        throw new Error("Found hard directory instead of link at: " + packagePath);
+                    }
+                } else {
+                    packagePath.dirname().mkdirs();
+                    descriptor.getPath().dirname().symlink(packagePath);
+                }
+                return PACKAGE.Package(packagePath, locator);
+            }
+
+            throw new Error("External HTTP direct package locators are not supported yet!");
+        } else {
+            throw new Error("Package locators for URL scheme '"+uri.scheme+"' are not supported yet!");
+        }
     } else {
         throw new Error("You should never reach this!");
     }
@@ -112,4 +167,27 @@ PackageStore.prototype.get = function(locator) {
         packagePath.join("package.json").write(JSON.encode(spec, null, "  "));
     }
     return PACKAGE.Package(packagePath, locator);
+}
+
+PackageStore.prototype.deepMappingsForPackage = function(pkg, mappings) {
+    if(!pkg || !pkg.exists()) {
+        throw new Error("No valid package object");
+    }
+    mappings = mappings || [];
+    var self = this,
+        descriptor,
+        usingPackage;
+    pkg.getDescriptor().everyUsing(function(name, locator) {
+        usingPackage = self.get(locator);
+        if(self.sources && (descriptor = self.sources.getDescriptor(locator))) {
+            mappings.push([locator.getSpec(), descriptor.getPath().dirname().valueOf()]);
+        } else {
+            mappings.push([locator.getSpec(), usingPackage.getPath().valueOf()]);
+        }
+        self.deepMappingsForPackage(usingPackage, mappings);
+    });
+    
+    // TODO: Collect system package dependencies
+    
+    return mappings;
 }

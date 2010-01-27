@@ -16,7 +16,6 @@ var PACKAGES = require("packages");
 var Package = exports.Package = function(path, locator) {
     if (!(this instanceof exports.Package))
         return new exports.Package(path, locator);
-        
     this.path = path;
     this.locator = locator;
 }
@@ -33,8 +32,16 @@ Package.prototype.getLocator = function() {
     return this.locator;
 }
 
+Package.prototype.hasUid = function() {
+    return this.getDescriptor().hasUid();
+}
+
 Package.prototype.getUid = function() {
     return this.getDescriptor().getUid();
+}
+
+Package.prototype.getName = function() {
+    return this.getDescriptor().getName();
 }
 
 Package.prototype.getTopLevelId = function() {
@@ -93,16 +100,29 @@ Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyNa
         if(!locator.getModule()) {
             throw new Error("'pinf."+propertyName+"' locator does not specify a 'module' property");
         }
-        if(locator.isCatalog()) {
+        if(locator.isCatalog() || locator.isDirect()) {
             // the module is located in an external package.
             pkg = options.packageStore.get(locator);
+        } else {
+            // the module is in our own package
+            var newLocator = this.getLocator();
+            newLocator.setModule(locator.getModule());
+            locator = newLocator;
         }
-        // we need to add the package as a using package to our
-        // current PACKAGES to be able to enter it and load a module from it.
-        // TODO: Refactor to require(<module>, locator) once require supports arbitrary locators
-        PACKAGES.registerUsingPackage(options.packageStore.getPackagesPath(), FILE.Path(pkg.getTopLevelId()));
+
+        PACKAGES.registerUsingPackage(locator.getSpec(), pkg.getPath().valueOf());
+
+        // collect all dependencies (recursively) for package
+        var mappings = options.packageStore.deepMappingsForPackage(pkg);
+        // register dependency mappings in preparation for loading
+        if(mappings && mappings.length>0) {
+            mappings.forEach(function(mapping) {
+                PACKAGES.registerUsingPackage(mapping[0], mapping[1]);
+            });
+        }
+
+        // load actual module now that package and dependencies are registered
         return require(locator.getModule(), pkg.getTopLevelId());
     }
     return false;
 }
-
