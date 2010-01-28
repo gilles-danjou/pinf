@@ -25,7 +25,7 @@ var tmpDBPath = seaPath.join("build", "cli", "test", "db");
 
 exports.testPostCommit = function() {
 
-    var rev = GIT.Git(module.path).getLatestRevisionForBranch("master");
+    var rev = GIT.Git(FILE.Path(module.path)).getLatestRevisionForBranch("master");
 
     var payload = {
         "repository": {

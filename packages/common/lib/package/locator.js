@@ -29,8 +29,14 @@ var PackageLocator = exports.PackageLocator = function(spec) {
     }
 }
 
-PackageLocator.prototype.getSpec = function() {
-    return this.spec;
+PackageLocator.prototype.getSpec = function(usePinnedVersion) {
+    if(usePinnedVersion && this.hasPinnedVersion()) {
+        var spec = UTIL.deepCopy(this.spec);
+        spec.revision = this.getPinnedVersion();
+        return spec;
+    } else {
+        return this.spec;
+    }
 }
 
 PackageLocator.prototype.isCatalog = function() {
@@ -70,6 +76,14 @@ PackageLocator.prototype.setModule = function(module) {
 PackageLocator.prototype.getName = function() {
     if(!this.spec.name) throw new Error("No 'name' property");
     return this.spec.name;
+}
+
+PackageLocator.prototype.setForceRemote = function(forceRemote) {
+    this.forceRemote = forceRemote;
+}
+
+PackageLocator.prototype.getForceRemote = function() {
+    return this.forceRemote || false;
 }
 
 PackageLocator.prototype.getFsPath = function() {

@@ -179,7 +179,19 @@ Client.prototype.registerPackage = function(options) {
         var response = makeRequest(info.url, "register-package", args);
     
         if(response.status=="PACKAGE_REGISTERED") {
-    
+            try {
+                var workspace = PINF.getDatabase().getWorkspaceForSelector(options.directory);
+                if(workspace) {
+                    
+throw new Error("Test logic: " + module.path);                    
+
+//                    if(workspace.isForked()) {    // Needs implementation
+//                        descriptor.setSaveLocal(true);
+//                    }
+
+                }
+            } catch(e) {}
+
             descriptor.setUid(response.uid);
     
         }
@@ -201,7 +213,7 @@ Client.prototype.announceRelease = function(options) {
     if(!descriptor.hasUid()) {
         throw new ClientError("Cannot announce release. The 'uid' property is missing in the package descriptor found at: " + options.directory.join("package.json").valueOf());
     }
-    
+
     var descriptorValidationOptions = {
         "print": options.print,
         "revisionControl": git
@@ -231,6 +243,12 @@ Client.prototype.announceRelease = function(options) {
         // announce a new version tag
         args["version"] = git.getLatestVersion(options.major);
         args["descriptor"] = JSON.decode(git.getFileForRef("v"+args["version"], "package.json"));
+    }
+    
+    // merge local descriptor on top if applicable
+    // NOTE: local package descriptor may not contain branch-specific info!
+    if(options.directory.join("package.local.json").exists()) {
+        UTIL.deepUpdate(args["descriptor"], JSON.decode(options.directory.join("package.local.json").read()));
     }
 
     if(!PACKAGE_DESCRIPTOR.validate(args["descriptor"], descriptorValidationOptions)) {

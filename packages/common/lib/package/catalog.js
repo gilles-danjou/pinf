@@ -18,7 +18,6 @@ var PackageCatalog = exports.PackageCatalog = function(path) {
     this.spec = JSON.decode(this.path.read());
 }
 
-
 PackageCatalog.prototype.getDescriptor = function(locator) {
     if(!this.spec.packages[locator.getName()]) {
         throw new Error("Package with name '"+locator.getName()+"' not found in catalog");

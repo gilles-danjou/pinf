@@ -110,7 +110,7 @@ Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyNa
             locator = newLocator;
         }
 
-        PACKAGES.registerUsingPackage(locator.getSpec(), pkg.getPath().valueOf());
+        PACKAGES.registerUsingPackage(locator.getSpec(true), pkg.getPath().valueOf());
 
         // collect all dependencies (recursively) for package
         var mappings = options.packageStore.deepMappingsForPackage(pkg);

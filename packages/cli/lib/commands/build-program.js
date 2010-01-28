@@ -13,9 +13,18 @@ var command = exports["build-program"] = new ARGS.Parser();
 
 command.help('Build a program package');
 command.arg("PackageDirectory");
+command.option("--rdep").bool().help("Build using remote dependencies instead of local copy");
+command.option("--remote").bool().help("Build using all remote releases instead of local copy");
 command.option("--revision").set().help("The revision to build (instead of the latest tag)");
+command.option("--diff").bool().help("NYI - Display packages that will be used vs packages recorded in program.json");
 command.helpful();
 
+
+/**
+ * pinf build-program .                                 local program + check local dependencies
+ * pinf build-program --rdep .                          local program + force remote dependencies
+ * pinf build-program --remote --revision <Revision> .  force remote program + force remote dependencies
+ */
 command.action(function (options) {
 
     try {
@@ -25,16 +34,41 @@ command.action(function (options) {
         });
 
         var locator = PINF.locatorForDirectory(directory);
-
+        
+        var remoteProgram = false,
+            remoteDependencies = false;
+        
+        if(options.remote) {
+            if(options.rdep) {
+                throw new Error("--rdep cannot be used with --remote");
+            }
+            if(options.revision) {
+                locator.setRevision(options.revision);
+            }
+            // force remote program + force remote dependencies
+            locator.setForceRemote(true);
+            remoteProgram = true;
+            remoteDependencies = true;
+        } else
         if(options.revision) {
-            locator.setRevision(options.revision);
+            throw new Error("--revision can only be used with --remote");
+        } else {
+            if(options.rdep) {
+                // local program + force remote dependencies
+                remoteDependencies = true;
+            }
+            // local program + check local dependencies
+            var workspace = PINF.getDatabase().getWorkspaceForSelector(directory);
+            locator.setRevision(workspace.getRevisionControlBranch());
         }
 
         var pkg = PINF.getDatabase().getProgram(locator),
             path = PINF.getDatabase().getBuildPathForPackage(pkg);
 
         path = pkg.build({
-            "path": path
+            "path": path,
+            "remoteProgram": remoteProgram,
+            "remoteDependencies": remoteDependencies
         });
 
         command.print("Built program at: " + path);

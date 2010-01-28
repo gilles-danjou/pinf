@@ -16,6 +16,7 @@ var CREDENTIALS_STORE = require("./credentials/store");
 var WORKSPACE = require("./workspace");
 var PLATFORM = require("./platform");
 var VENDOR = require("./vendor");
+var CATALOGS = require("./catalogs");
 
 
 var Database = exports.Database = function(path) {
@@ -35,6 +36,8 @@ var Database = exports.Database = function(path) {
     this.programStore.setPackageStore(this.packageStore);
 
     this.credentialsStore = CREDENTIALS_STORE.CredentialsStore(this.path.join("config", "credentials.json"));
+    
+    this.catalogs = CATALOGS.Catalogs(this.path.join("catalogs"));
 }
 
 Database.prototype.exists = function() {
@@ -48,6 +51,10 @@ Database.prototype.getConfig = function(path) {
         config.init();
     }
     return config;
+}
+
+Database.prototype.getCatalogs = function() {
+    return this.catalogs;
 }
 
 Database.prototype.getSources = function() {
@@ -86,13 +93,11 @@ Database.prototype.getProgram = function(locator) {
 }
 
 Database.prototype.getBuildPathForPackage = function(pkg) {
-    var workspace = this.getWorkspaceForSelector(pkg.getPath()),
-        locator = pkg.getLocator(),
-        branch = workspace.getRevisionControlBranch();
+    var locator = pkg.getLocator();
     if(!locator) {
         throw new Error("No locator in package");
     }        
-    return this.path.join("builds", locator.getFsPath(), branch);
+    return this.path.join("builds", locator.getTopLevelId());
 }
 
 Database.prototype.getCredentials = function(uri, environment) {

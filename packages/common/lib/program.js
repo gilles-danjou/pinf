@@ -8,6 +8,7 @@ var FILE = require("file");
 var OS = require("os");
 var JSON_STORE = require("json-store", "util");
 var PACKAGE = require("./package");
+var LOCATOR = require("./package/locator");
 
 
 var Program = exports.Program = function(path, locator) {
@@ -20,12 +21,14 @@ var Program = exports.Program = function(path, locator) {
     if(!this.path.join("program.json").exists()) {
         throw new Error("Program descriptor file not found at: " + this.path.join("program.json"));
     }
-    
+
     this.spec = JSON_STORE.JsonStore(this.path.join("program.json"));
-    
+
     if(!this.spec.has(["name"])) {
         throw new Error("No 'name' property in: " + this.path.join("program.json"));
     }
+
+    this.localSpec = JSON_STORE.JsonStore(this.path.join("program.local.json"));
 }
 
 Program.prototype = PACKAGE.Package();
@@ -69,8 +72,15 @@ Program.prototype.build = function(options) {
     // link package.json file
     path = buildPath.join("package.json");
     path.dirname().mkdirs();
-    this.getPath().join("package.json").symlink(path);
+    this.getPath().join("package.json").copy(path);
 
+    var spec = this.spec;
+    if(!options.remoteProgram && !options.remoteDependencies) {
+        spec = this.localSpec;
+        if(!spec.exists()) {
+            spec.init();
+        }
+    }
 
     // link all system and using packages to desired versions
     UTIL.every({
@@ -91,20 +101,27 @@ Program.prototype.build = function(options) {
         var locatorRewriteInfo = [],
             visited = {};
         descriptor[type[1].iterator](function(parentPackage, name, locator, stacks) {
-            var key = ["config", type[0]].concat(stacks.names).concat([name, "$"]);
-            if(!self.spec.has(key)) {
-                // no version set - use base revision from locator
-            } else {
-                // use version we have set
-                locator.pinAtVersion(self.spec.get(key).version);
+            var key = ["packages", type[0]].concat(stacks.names).concat([name, "$"]);
+
+            if(options.remoteProgram) {
+                if(!spec.has(key)) {
+                    throw new Error("remote program.json is missing a locator for key: " + key.join(" -> "));
+                }
+                // overwite locator with the one from the program config
+                locator = LOCATOR.PackageLocator(spec.get(key).locator);
+            }
+
+            if(options.remoteDependencies) {
+                locator.setForceRemote(true);
             }
 
             var pkg = self.packageStore.get(locator);
+
             // linked packages do not contain 'version' properties
             if(pkg.getVersion()) {
                 locator.pinAtVersion(pkg.getVersion());
             }
-    
+
             path = buildPath.join(type[1].directory, pkg[type[1].id]());
             
             if(visited[path.valueOf()]) {
@@ -122,18 +139,17 @@ Program.prototype.build = function(options) {
                 locatorRewriteInfo.push({
                     "id": parentPackage[type[1].id](),
                     "name": name,
-                    "version": pkg.getVersion()
+                    "revision": pkg.getVersion()
                 });
             } else {
                 pkg.getPath().symlink(path);
             }
-    
-    /*
-            self.spec.set(key, {
-                "uid": usingPackage.getUid(),
-                "version": locator.getPinnedVersion()
+
+            spec.set(key, {
+                "uid": pkg.getUid(),
+                "locator": locator.getSpec(true)
             });
-    */
+
             return locator;
         }, {
             "packageStore": self.packageStore,
@@ -141,12 +157,12 @@ Program.prototype.build = function(options) {
         });
     
         locatorRewriteInfo.forEach(function(info) {
-            if(info.id==self.getTopLevelId()) {
-                path = self.getPath();
+            if(info.id==self[type[1].id]()) {
+                path = buildPath.join("package.json");
             } else {
-                path = buildPath.join(type[1].directory, info.id);
+                path = buildPath.join(type[1].directory, info.id).join("package.json");
             }
-            JSON_STORE.JsonStore(path.join("package.json")).set([type[1].property, info.name, "revision"], info.version);
+            JSON_STORE.JsonStore(path).set([type[1].property, info.name, "revision"], info.revision);
         });
     });
     
@@ -160,3 +176,23 @@ Program.prototype.build = function(options) {
     return options.path;
 }
 
+
+
+Program.prototype.publish = function(options) {
+    var self = this;
+
+    options = options || {};
+    if(!options.path) {
+        options.path = this.getPath().join(".build");
+    }
+    
+    options.path = options.path.join(this.spec.get(["name"]));
+
+    var publisher = this.getPublisher({
+        "packageStore": this.packageStore
+    });
+
+    publisher.triggerPublish(this, options);
+    
+    return options.path;
+}

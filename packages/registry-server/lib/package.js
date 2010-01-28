@@ -146,6 +146,7 @@ Package.prototype.announceVersion = function(version, descriptor) {
     if(!this.descriptors.versions) {
         this.descriptors.versions = {};
     }
+    descriptor = completeDescriptor(this.data.descriptor, descriptor);
     descriptor.version = version;
     this.descriptors.versions[version] = descriptor;
     this.data.descriptor = JSON.encode(descriptor);
@@ -179,6 +180,7 @@ Package.prototype.announceRevision = function(branch, revision, descriptor) {
         this.descriptors.revisions = {};
     }
     this.revisions[branch] = revision;
+    descriptor = completeDescriptor(this.data.descriptor, descriptor);
     descriptor.version = "0.0.0rev-" + revision;
     this.descriptors.revisions[revision] = descriptor;
     this.data.descriptor = JSON.encode(descriptor);
@@ -194,6 +196,28 @@ Package.prototype.announceRevision = function(branch, revision, descriptor) {
         });
         announcement.put();
     });
+}
+
+function completeDescriptor(arbitraryDescriptor, descriptor) {
+    if(!arbitraryDescriptor) {
+        return descriptor;
+    }
+    if(typeof arbitraryDescriptor == "string") {
+        arbitraryDescriptor = JSON.decode(arbitraryDescriptor);
+    }
+    // the uid and repositories properties may be missing if they are only defined
+    // in package.local.json and an annoucement is made via a post-commit hook
+    // where the repository does not include the package.local.json file.
+    // we preserve these properties by copying them from the existing arbitrary descriptor.
+    // this works as the first release must always be manually announced where the
+    // package.local.json file is available from the developer's working environment.
+    if(arbitraryDescriptor.uid && !descriptor.uid) {
+        descriptor.uid = arbitraryDescriptor.uid;
+    }
+    if(arbitraryDescriptor.repositories && !descriptor.repositories) {
+        descriptor.repositories = arbitraryDescriptor.repositories;
+    }
+    return descriptor;
 }
 
 Package.prototype.getDescriptorForRevision = function(revision) {

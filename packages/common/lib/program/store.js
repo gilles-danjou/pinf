@@ -31,7 +31,7 @@ ProgramStore.prototype.get = function(locator) {
 
     programPath.dirname().mkdirs();
 
-    if(pkg.getVersion()) {
+    if(pkg.getVersion() && !programPath.exists()) {
         FILE.copyTree(pkg.getPath(), programPath);
     } else
     if(!programPath.exists()) {

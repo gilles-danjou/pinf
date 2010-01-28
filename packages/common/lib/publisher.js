@@ -17,20 +17,13 @@ Publisher.prototype.construct = function(pkg, options) {
     this.options = options;
 }
 
-Publisher.prototype.publish = function() {
-    
-    // publish all dependencies first
-    var descriptor = this.pkg.getDescriptor(),
-        self = this;
-    descriptor.everyUsing(function(name, locator) {
-        var pkg = self.options.packageStore.get(locator);
-        var publisher = pkg.getPublisher(self.options);
-        publisher.publish();        
-    });
+Publisher.prototype.triggerPublish = function(program, options) {
+
+    this.publish(program, options);
+
+}
 
 
-
-    print("publish package: " + this.pkg.getPath());
-
-
+Publisher.prototype.publish = function(program, options) {
+    // to be overwritten
 }

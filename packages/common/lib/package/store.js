@@ -7,7 +7,7 @@ var UTIL = require("util");
 var FILE = require("file");
 var JSON = require("json");
 var FS_STORE = require("http/fs-store");
-var CATALOG = require("./catalog");
+var CATALOGS = require("../catalogs");
 var PACKAGE = require("../package");
 var DESCRIPTOR = require("./descriptor");
 var ZIP = require("zip");
@@ -20,7 +20,7 @@ var PackageStore = exports.PackageStore = function(path) {
 
     this.path = path;
 
-    this.catalogs = new FS_STORE.Store(this.path.join("catalogs"));
+    this.catalogs = CATALOGS.Catalogs(this.path.join("catalogs"));
     this.downloads = new FS_STORE.Store(this.path.join("downloads"));
 }
 
@@ -40,7 +40,7 @@ PackageStore.prototype.get = function(locator) {
     var descriptor,
         downloadInfo;
     if(locator.isCatalog()) {
-        if(this.sources && (descriptor = this.sources.getDescriptor(locator))) {
+        if(!locator.getForceRemote() && this.sources && (descriptor = this.sources.getDescriptor(locator))) {
             // link package
             var packagePath = this.getPackagesPath().join(locator.getTopLevelId());
             if(packagePath.exists()) {
@@ -53,11 +53,7 @@ PackageStore.prototype.get = function(locator) {
             }
             return PACKAGE.Package(packagePath, locator);
         }
-        var url = locator.getUrl();
-        if(!this.catalogs.has(url)) {
-            this.catalogs.download(url);
-        }
-        descriptor = CATALOG.PackageCatalog(this.catalogs.get(url)).getDescriptor(locator);
+        descriptor = this.catalogs.get(locator.getUrl()).getDescriptor(locator);
         locator.pinAtVersion(descriptor.getVersion());
         downloadInfo = descriptor.getDownloadInfo();
     } else
@@ -65,7 +61,7 @@ PackageStore.prototype.get = function(locator) {
         var uri = URI.parse(locator.getUrl());
         if(uri.scheme=="file") {
 
-            if(this.sources && (descriptor = this.sources.getDescriptor(locator))) {
+            if(!locator.getForceRemote() && this.sources && (descriptor = this.sources.getDescriptor(locator))) {
                 // link package
                 var packagePath = this.getPackagesPath().join(locator.getTopLevelId());
                 if(packagePath.exists()) {
@@ -98,7 +94,7 @@ PackageStore.prototype.get = function(locator) {
         } else
         if(uri.scheme=="http") {
 
-            if(this.sources && (descriptor = this.sources.getDescriptor(locator))) {
+            if(!locator.getForceRemote() && this.sources && (descriptor = this.sources.getDescriptor(locator))) {
                 // link package
                 var packagePath = this.getPackagesPath().join(locator.getTopLevelId());
                 if(packagePath.exists()) {
