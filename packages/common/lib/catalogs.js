@@ -27,19 +27,27 @@ Catalogs.prototype.get = function(url) {
     return CATALOG.PackageCatalog(this.store.get(url));
 }
 
-Catalogs.prototype.update = function(subPath) {
+Catalogs.prototype.update = function(url, subPath) {
     var path = this.path,
         self = this;
-    if(subPath) {
-        path = path.join(subPath);
-    }
-    path.listPaths().forEach(function(item) {
-        if(item.isDirectory()) {
-            self.update((subPath)?subPath.join(item.basename()):item.basename());
-        } else
-        if(item.basename().valueOf()=="catalog.json") {
-            // TODO: Check eTags and only update if changed            
-            self.store.download("http://" + subPath.join(item.basename()).valueOf());
+    if(url) {
+        update(url);
+    } else {
+        if(subPath) {
+            path = path.join(subPath);
         }
-    });
+        path.listPaths().forEach(function(item) {
+            if(item.isDirectory()) {
+                self.update(url, (subPath)?subPath.join(item.basename()):item.basename());
+            } else
+            if(item.basename().valueOf()=="catalog.json") {
+                update("http://" + subPath.join(item.basename()).valueOf());
+            }
+        });
+    }
+
+    function update(url) {
+        // TODO: Check eTags and only update if changed            
+        self.store.download(url);
+    }
 }

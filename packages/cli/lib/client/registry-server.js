@@ -175,27 +175,21 @@ Client.prototype.registerPackage = function(options) {
             "authkey": info.authkey,
             "package": descriptor.getName()
         };
-    
+
         var response = makeRequest(info.url, "register-package", args);
-    
+
         if(response.status=="PACKAGE_REGISTERED") {
             try {
                 var workspace = PINF.getDatabase().getWorkspaceForSelector(options.directory);
                 if(workspace) {
-                    
-throw new Error("Test logic: " + module.path);                    
-
-//                    if(workspace.isForked()) {    // Needs implementation
-//                        descriptor.setSaveLocal(true);
-//                    }
-
+                    if(workspace.isForked()) {
+                        descriptor.setSaveLocal(true);
+                    }
                 }
             } catch(e) {}
 
             descriptor.setUid(response.uid);
-    
         }
-        
     }
 
     options.print(response.message);

@@ -16,15 +16,19 @@ var VENDOR = require("../vendor");
 var PackageDescriptor = exports.PackageDescriptor = function(path) {
     if (!(this instanceof exports.PackageDescriptor))
         return new exports.PackageDescriptor(path);
-        
+
     if(path instanceof FILE.Path) {
         this.path = path;
     
         if(!path.exists()) {
             throw new PackageDescriptorError("No package descriptor found at: " + path);
         }
-        this.spec = JSON.decode(path.read());
-        
+        try {
+            this.spec = JSON.decode(path.read());
+        } catch(e) {
+            throw new PackageDescriptorError("Error parsing package descriptor"+((this.path)?(" at: " + this.path):""));
+        }
+
         // overlay local spec
         if(path.dirname().join("package.local.json").exists()) {
             this.localSpec = JSON.decode(path.dirname().join("package.local.json").read());
@@ -37,8 +41,12 @@ var PackageDescriptor = exports.PackageDescriptor = function(path) {
         this.spec = path;
     }
     
+    if(!this.globalSpec) {
+        this.globalSpec = UTIL.deepCopy(this.spec);
+    } 
+    
     if(!this.spec) {
-        throw new PackageDescriptorError("Error parsing package descriptor"+((this.path)?(" at: " + this.path):""));
+        throw new PackageDescriptorError("Empty package descriptor"+((this.path)?(" at: " + this.path):""));
     }
     if(!this.spec.name) {
         throw new PackageDescriptorError("No 'name' property in package descriptor"+((this.path)?(" at: " + this.path):""));
@@ -54,16 +62,10 @@ PackageDescriptor.prototype.save = function() {
         throw new PackageDescriptorError("Cannot save package descriptor");
     }
     if(this.saveLocal) {
-
-        var globalSpec = this.globalSpec || this.spec;
-        var localSpec = util.deepDiff(this.spec, globalSpec);
-        
-dump(localSpec);
-
-print("Save package descriptor to: " + this.path);
-
-    throw new PackageDescriptorError("Verify saving logic: " + module.path);
-        
+        var localSpec = UTIL.deepDiff(this.spec, this.globalSpec);
+        if(localSpec) {
+            this.path.dirname().join("package.local.json").write(JSON.encode(localSpec, null, "    "));
+        }
     } else {
         this.path.write(JSON.encode(this.spec, null, "    "));
     }
@@ -98,12 +100,17 @@ PackageDescriptor.prototype.getUid = function() {
     if(!this.spec.uid) {
         throw new PackageDescriptorError("No 'uid' property in package descriptor"+((this.path)?(" at: " + this.path):""));
     }
-    var uri = VALIDATOR.validate("url", this.spec.uid, {
-        "require": [
-            ["path", {"trailingSlash": true}]
-        ],
-        "return": "uri"
-    });
+    var uri;
+    try {
+        uri = VALIDATOR.validate("url", this.spec.uid, {
+            "require": [
+                ["path", {"trailingSlash": true}]
+            ],
+            "return": "uri"
+        });
+    } catch(e) {
+        throw new PackageDescriptorError("Validation error: " + e + ((this.path)?(" at: " + this.path):""));
+    }
     if(uri.directories[uri.directories.length-1]!=this.spec.name) {
         throw new PackageDescriptorError("The 'uid' property does not have the 'name' property at the end of the URI in package descriptor"+((this.path)?(" at: " + this.path):""));
     }
@@ -198,6 +205,9 @@ PackageDescriptor.prototype.traverseEveryLocator = function(property, callback, 
             locator = LOCATOR.PackageLocator(item[1]);
             if(locator.isCatalog() || locator.isDirect()) {
                 locator = callback(options["package"], item[0], locator, stacks) || locator;
+                if(!locator) {
+                    return;
+                }
                 itemOptions["package"] = options.packageStore.get(locator);
                 stacks.names.push(item[0]);
                 itemOptions["package"].getDescriptor().traverseEveryLocator(property, callback, itemOptions, stacks);

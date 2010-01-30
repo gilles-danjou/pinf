@@ -45,3 +45,7 @@ exports.getDefaultPlatform = function() {
     }
     return platform;
 }
+
+exports.mapSources = function() {
+    return exports.getDatabase().mapSources();
+}

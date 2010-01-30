@@ -3,12 +3,14 @@
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var OS = require("os");
+var UTIL = require("util");
 var PACKAGE = require("./package");
 var PINF = require("./pinf");
 var GIT = require("git", "util");
 var FILE = require("file");
 var JSON_STORE = require("json-store", "util");
 var TERM = require("term");
+var PACKAGE = require("./package");
 
 
 var Workspace = exports.Workspace = function(path) {
@@ -36,6 +38,17 @@ Workspace.prototype.getConfig = function() {
 
 Workspace.prototype.setVendorInfo = function(info) {
     this.vendorInfo = info;
+}
+
+Workspace.prototype.hasVendorInfo = function() {
+    return (!!this.vendorInfo);
+}
+
+Workspace.prototype.getVendorInfo = function() {
+    if(!this.hasVendorInfo()) {
+        throw new Error("No vendor info set!");
+    }
+    return this.vendorInfo;
 }
 
 Workspace.prototype.hasPlatform = function() {
@@ -96,8 +109,8 @@ Workspace.prototype.init = function() {
         throw new Error("Workspace already exists at: " + this.getPath());
     }
     try {
-        if(this.vendorInfo) {
-            if(this.vendorInfo.vendor.hasRepository(this.vendorInfo)) {
+        if(this.hasVendorInfo()) {
+            if(this.getVendorInfo().vendor.hasRepository(this.getVendorInfo())) {
                 throw new Error("Repository already exists on vendor site");
             }
         }
@@ -107,8 +120,8 @@ Workspace.prototype.init = function() {
         var git = GIT.Git(path);
         git.init();
         
-        if(this.vendorInfo) {
-            if(!this.vendorInfo.vendor.createRepository(this.vendorInfo)) {
+        if(this.hasVendorInfo()) {
+            if(!this.getVendorInfo().vendor.createRepository(this.getVendorInfo())) {
                 throw new Error("Error creating repository on vendor site");
             }
         }
@@ -116,11 +129,11 @@ Workspace.prototype.init = function() {
         var descriptor = {
             "name": path.basename().valueOf()
         };
-        if(this.vendorInfo) {
+        if(this.hasVendorInfo()) {
             descriptor.repositories = [
                 {
                     "type": "git",
-                    "url": this.vendorInfo.vendor.getPublicRepositoryUrl(this.vendorInfo)
+                    "url": this.getVendorInfo().vendor.getPublicRepositoryUrl(this.getVendorInfo())
                 }
             ];
         }
@@ -138,8 +151,8 @@ Workspace.prototype.init = function() {
         git.add(path.join("package.json"));
         git.add(path.join(".gitignore"));
         git.commit("first commit");
-        if(this.vendorInfo) {
-            git.remoteAdd("origin", this.vendorInfo.vendor.getPrivateRepositoryUrl(this.vendorInfo));
+        if(this.hasVendorInfo()) {
+            git.remoteAdd("origin", this.getVendorInfo().vendor.getPrivateRepositoryUrl(this.getVendorInfo()));
             git.push("origin", "master");
         }
     } catch(e) {
@@ -160,18 +173,15 @@ Workspace.prototype.checkout = function() {
     if(this.exists()) {
         throw new Error("Workspace already exists at: " + this.getPath());
     }
-    if(!this.vendorInfo) {
-        throw new Error("No vendor info for workspace");
-    }
     try {
-        if(!this.vendorInfo.vendor.hasRepository(this.vendorInfo)) {
+        if(!this.getVendorInfo().vendor.hasRepository(this.getVendorInfo())) {
             throw new Error("Repository does not exist on vendor site");
         }
 
         var path = this.getPath();
         path.mkdirs();
 
-        var url = this.vendorInfo.vendor.getRepositoryUrl(this.vendorInfo);
+        var url = this.getVendorInfo().vendor.getRepositoryUrl(this.getVendorInfo());
 
         var git = GIT.Git(path);
         git.clone(url);
@@ -183,6 +193,16 @@ Workspace.prototype.checkout = function() {
     return true;
 }
 
+Workspace.prototype.isForked = function() {
+    var info = this.getVendorInfo().vendor.getRepositoryInfo(this.getVendorInfo());
+    if(!info) {
+        throw new Error("Error getting repository info from vendor");
+    }
+    if(!UTIL.has(info, "forked")) {
+        throw new Error("Repository info does not contain 'forked' property");
+    }
+    return info.forked;
+}
 
 Workspace.prototype.switchTo = function() {
     // NOTE: This can only be run from the command line
@@ -203,4 +223,21 @@ Workspace.prototype.switchTo = function() {
 
 Workspace.prototype.getRevisionControlBranch = function() {
     return GIT.Git(this.getPath()).getActiveBranch();
+}
+
+
+Workspace.prototype.forEachPackage = function(callback, subPath) {
+    var path = this.path,
+        self = this;
+    if(subPath) {
+        path = path.join(subPath);
+    }
+    path.listPaths().forEach(function(item) {
+        if(item.basename()=="package.json") {
+            callback(PACKAGE.Package(item.dirname()));
+        } else
+        if(item.isDirectory()) {
+            self.forEachPackage(callback, (subPath)?subPath.join(item.basename()):item.basename());
+        }
+    });
 }

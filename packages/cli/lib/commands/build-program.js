@@ -68,7 +68,8 @@ command.action(function (options) {
         path = pkg.build({
             "path": path,
             "remoteProgram": remoteProgram,
-            "remoteDependencies": remoteDependencies
+            "remoteDependencies": remoteDependencies,
+            "args": options.args.slice(1)
         });
 
         command.print("Built program at: " + path);

@@ -19,30 +19,39 @@ var PackageSources = exports.PackageSources = function(path) {
 }
 
 PackageSources.prototype.getDescriptor = function(locator) {
-    if(locator.hasPinnedVersion()) {
-        throw new Error("Cannot use a locator with a pinned version");
-    }
     var info;
     if(locator.isCatalog()) {
         // check for exact revision mapping
-        info = this.spec.get([locator.getUrl(), locator.getName(), locator.getRevision()]);    
+        info = this.spec.get([locator.getUrl(), locator.getName(), locator.getRevision(), "@"]);    
         if(!info) {
             // check for semver with alpha suffix
-            info = this.spec.get([locator.getUrl(), locator.getName(), SEMVER.getMajor(locator.getRevision(), true)]);    
+            info = this.spec.get([locator.getUrl(), locator.getName(), SEMVER.getMajor(locator.getRevision(), true), "@"]);    
         }
         if(!info) {
             // check for semver with major version only
-            info = this.spec.get([locator.getUrl(), locator.getName(), SEMVER.getMajor(locator.getRevision())]);    
+            info = this.spec.get([locator.getUrl(), locator.getName(), SEMVER.getMajor(locator.getRevision()), "@"]);    
         }
     } else
     if(locator.isDirect()) {
-        info = this.spec.get([locator.getUrl()]);
+        info = this.spec.get([locator.getUrl(), "@"]);
     }
     if(!info) {
         return false;
     }
     if(!info.path) {
-        throw new Error("Sources locator does not contain a 'path' property");
+        throw new PackageSourcesError("Sources locator does not contain a 'path' property");
     }
     return DESCRIPTOR.PackageDescriptor(FILE.Path(info.path).join("package.json"));
 }
+
+
+var PackageSourcesError = exports.PackageSourcesError = function(message) {
+    this.name = "PackageSourcesError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+PackageSourcesError.prototype = new Error();
+

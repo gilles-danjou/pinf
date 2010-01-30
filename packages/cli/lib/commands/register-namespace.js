@@ -22,9 +22,7 @@ command.action(function (options) {
 
     try {
         var uri = VALIDATOR.validate("url", options.args[0], {
-            "require": [
-                ["path", {"trailingSlash": true}]
-            ],
+            "appendTrailingSlash": true,
             "return": "uri"
         });
         var user = (options.user)?VALIDATOR.validate("email", options.user):null;

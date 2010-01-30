@@ -73,6 +73,7 @@ print("check version: " + ver + " != " + version + " : for package: " + pkg.id);
                 try {
                     pkg.announceVersion(version, JSON.decode(descriptor));
                 } catch(e) {
+print("error announcing: " + e);
                     // this will fail if the descriptor is invalid
                     // TODO: Send email to owner about invalid package descriptor?
                 }
@@ -92,6 +93,7 @@ print("check branch("+qs.branch+"): " + rev + " != " + qs.rev + " : for package:
                 try {
                     pkg.announceRevision(qs.branch, qs.rev, JSON.decode(descriptor));
                 } catch(e) {
+print("error announcing: " + e);
                     // this will fail if the descriptor is invalid
                     // TODO: Send email to owner about invalid package descriptor?
                 }

@@ -20,7 +20,6 @@ exports.getVendorForUrl = function(uri) {
 }
 
 
-
 exports.validateRepositoryUrl = function(url, options) {
     var repositories = options.revisionControl.getRepositories();
     if(!repositories) {
@@ -37,6 +36,9 @@ exports.validateRepositoryUrl = function(url, options) {
     });
     return valid;
 }
+
+
+// TODO: Move vendor-specific code into ./vendor/*.js modules
 
 exports.normalizeRepositoryUrl = function(url, returnCommonString) {
 

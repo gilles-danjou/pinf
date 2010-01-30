@@ -9,6 +9,7 @@ var OS = require("os");
 var JSON_STORE = require("json-store", "util");
 var PACKAGE = require("./package");
 var LOCATOR = require("./package/locator");
+var DESCRIPTOR = require("./package/descriptor");
 
 
 var Program = exports.Program = function(path, locator) {
@@ -22,20 +23,22 @@ var Program = exports.Program = function(path, locator) {
         throw new Error("Program descriptor file not found at: " + this.path.join("program.json"));
     }
 
-    this.spec = JSON_STORE.JsonStore(this.path.join("program.json"));
-
-    if(!this.spec.has(["name"])) {
-        throw new Error("No 'name' property in: " + this.path.join("program.json"));
+    if(!this.path.join("package.json").exists()) {
+        throw new Error("Program's package descriptor file not found at: " + this.path.join("package.json"));
     }
 
+    this.spec = JSON_STORE.JsonStore(this.path.join("program.json"));
+
     this.localSpec = JSON_STORE.JsonStore(this.path.join("program.local.json"));
+    
+    this.packageDescriptor = DESCRIPTOR.PackageDescriptor(this.path.join("package.json"));
 }
 
 Program.prototype = PACKAGE.Package();
 
 
 Program.prototype.getName = function() {
-    return this.spec.get(["name"]);
+    return this.packageDescriptor.getName();
 }
 
 
@@ -61,7 +64,7 @@ Program.prototype.build = function(options) {
         options.path = this.getPath().join(".build");
     }
     
-    options.path = options.path.join(this.spec.get(["name"]));
+    options.path = options.path.join(this.getName());
 
     this.clean(options);
 
@@ -83,6 +86,7 @@ Program.prototype.build = function(options) {
     }
 
     // link all system and using packages to desired versions
+    options.uidLocators = {};
     UTIL.every({
         "system": {
             "iterator": "traverseEveryDependency",
@@ -98,11 +102,9 @@ Program.prototype.build = function(options) {
         }
     }, function(type) {
 
-        var locatorRewriteInfo = [],
-            visited = {};
+        var locatorRewriteInfo = [];
         descriptor[type[1].iterator](function(parentPackage, name, locator, stacks) {
-            var key = ["packages", type[0]].concat(stacks.names).concat([name, "$"]);
-
+            var key = ["packages", type[0]].concat(stacks.names).concat([name, "@"]);
             if(options.remoteProgram) {
                 if(!spec.has(key)) {
                     throw new Error("remote program.json is missing a locator for key: " + key.join(" -> "));
@@ -123,17 +125,25 @@ Program.prototype.build = function(options) {
             }
 
             path = buildPath.join(type[1].directory, pkg[type[1].id]());
-            
-            if(visited[path.valueOf()]) {
-                return locator;
+
+
+            // update info in program.json file
+            var info =  {};
+            if(pkg.hasUid()) {
+                info["uid"] = pkg.getUid();
+                
+                options.uidLocators[info["uid"]] = locator;
             }
-            visited[path.valueOf()] = true;
-            
-            path.dirname().mkdirs();
- 
+            info["locator"] = locator.getSpec(true);
+            spec.set(key, info);
+
+
             // if package has a version we need to copy it, otherwise we can link it (as it is likely a sources overlay)
             if(pkg.getVersion()) {
-                FILE.copyTree(pkg.getPath(), path);
+                if(!path.exists()) {
+                    path.dirname().mkdirs();
+                    FILE.copyTree(pkg.getPath(), path);
+                }
                 // since we copied it to a specific version we need to update all using package locators
                 // to include the exact version
                 locatorRewriteInfo.push({
@@ -141,14 +151,11 @@ Program.prototype.build = function(options) {
                     "name": name,
                     "revision": pkg.getVersion()
                 });
-            } else {
+            } else
+            if(!path.exists()) {
+                path.dirname().mkdirs();
                 pkg.getPath().symlink(path);
             }
-
-            spec.set(key, {
-                "uid": pkg.getUid(),
-                "locator": locator.getSpec(true)
-            });
 
             return locator;
         }, {
@@ -165,7 +172,6 @@ Program.prototype.build = function(options) {
             JSON_STORE.JsonStore(path).set([type[1].property, info.name, "revision"], info.revision);
         });
     });
-    
 
     var builder = this.getBuilder({
         "packageStore": this.packageStore

@@ -7,6 +7,7 @@ var UTIL = require("util");
 var FILE = require("file");
 var JSON = require("json");
 var URI = require("uri");
+var OS = require("os");
 var JSON_STORE = require("json-store", "util");
 var PACKAGE_DESCRIPTOR = require("./package/descriptor");
 var PACKAGE_STORE = require("./package/store");
@@ -17,6 +18,7 @@ var WORKSPACE = require("./workspace");
 var PLATFORM = require("./platform");
 var VENDOR = require("./vendor");
 var CATALOGS = require("./catalogs");
+var WORKSPACES = require("./workspaces");
 
 
 var Database = exports.Database = function(path) {
@@ -38,6 +40,8 @@ var Database = exports.Database = function(path) {
     this.credentialsStore = CREDENTIALS_STORE.CredentialsStore(this.path.join("config", "credentials.json"));
     
     this.catalogs = CATALOGS.Catalogs(this.path.join("catalogs"));
+
+    this.workspaces = WORKSPACES.Workspaces(this.path.join("workspaces"));
 }
 
 Database.prototype.exists = function() {
@@ -55,6 +59,10 @@ Database.prototype.getConfig = function(path) {
 
 Database.prototype.getCatalogs = function() {
     return this.catalogs;
+}
+
+Database.prototype.getWorkspaces = function() {
+    return this.workspaces;
 }
 
 Database.prototype.getSources = function() {
@@ -104,53 +112,118 @@ Database.prototype.getCredentials = function(uri, environment) {
     return this.credentialsStore.getCredentials(uri, environment);
 }
 
-/**
- * Supported selectors:
- *   * http://github.com/cadorn/pinf/ (+ URI.URI variant)
- *   * http://github.com/cadorn/pinf (+ URI.URI variant)
- *   * github.com/cadorn/pinf/ (+ URI.URI variant)
- *   * github.com/cadorn/pinf (+ URI.URI variant)
- *   * .../pinf/workspaces/github.com/cadorn/pinf (+ File.Path variant)
- *   * .../pinf/workspaces/github.com/cadorn/pinf/... (+ File.Path variant)
- *       will go up the tree until it finds .pinf-workspace.json
- */
 Database.prototype.getWorkspaceForSelector = function(selector) {
-    if(selector instanceof URI.URI) {
-        selector = selector.url;
-    } else
-    if(selector instanceof FILE.Path) {
-        selector = selector.canonical();
-    }
-    if(selector instanceof FILE.Path || FILE.Path(selector).exists()) {
-        var basePath = this.path.join("workspaces"),
-            path = FILE.Path(""+selector);
-        if(path.valueOf().substr(0, basePath.join("").valueOf().length)!=basePath.join("").valueOf()) {
-            throw new Error("Workspace selector path '"+path+"' does not fall within workspaces directory: " + basePath.join(""));
-        }
-        while(path.split().length>basePath.split().length) {
-            if(path.join(".pinf-workspace.json").exists()) {
-                break;
-            }
-            path = path.dirname();
-        }
-        if(!path.join(".pinf-workspace.json").exists()) {
-            throw new Error("No workspace found for selector: " + selector);
-        }
-        selector = "http://" + basePath.join("").relative(path);
-    } else
-    if(!/^http:\/\//.test(selector)) {
-        selector = "http://" + selector;
-    }
-    var vendor = VENDOR.getVendorForUrl(selector);
-    var info = vendor.parseUrl(selector);
-    if(!info.user || !info.repository) {
-        throw new Error("Not a valid repository URL");
-    }
-    var workspace = WORKSPACE.Workspace(this.path.join("workspaces", vendor.getWorkspacePath(info)));
-    workspace.setVendorInfo(info);
-    return workspace;
+    return this.getWorkspaces().getForSelector(selector);
 }
 
 Database.prototype.getPlatformForName = function(name) {
     return PLATFORM.Platform(this.path.join("platforms", name));
+}
+
+Database.prototype.mapSources = function() {
+
+    var sources = this.getSources(),
+        workspaces = this.getWorkspaces(),
+        catalogs = this.getCatalogs(),
+        self = this;
+
+    workspaces.forEach(function(workspace) {
+        if(workspace.hasUid()) {
+            workspace.forEachPackage(function(pkg) {
+                if(pkg.hasUid()) {
+                    
+                    var uid = pkg.getUid(),
+                        uri = URI.parse(uid);
+                        
+                    if(uri.domain=="registry.pinf.org") {
+                        
+                        var id = uri.authorityRoot +
+                                 uri.domain + "/" +
+                                 uri.directories.slice(0,uri.directories.length-1).join("/"),
+                            url = uri.scheme + ":" + 
+                                  id + "/" +
+                                  "catalog.json",
+                            name = uri.directories.pop(),
+                            packagePath = self.packageStore.getPackagesPath().join(id, name);
+
+                        var catalog = getCatalog(url),
+                            revisions = catalog.getRevisionsForPackage(name);
+                        
+                        if(revisions) {
+                            revisions.forEach(function(revision) {
+                                if(revision!="*") {
+
+                                    var key = [url, name, revision, "@"];
+
+                                    if(sources.spec.has(key)) {
+                                        // mapping already found
+                                        // ensure existing path exists, if not update with new path
+                                        if(!FILE.Path(sources.spec.get(key).path).exists()) {
+                                            sources.spec.set(key, {
+                                                "path": pkg.getPath().valueOf()
+                                            })
+                                        }
+                                    } else {
+                                        // mapping not found - create it
+                                        sources.spec.set(key, {
+                                            "path": pkg.getPath().valueOf()
+                                        })
+                                    }
+
+                                    // now that the mappings are updated we need to
+                                    // check the packages to ensure there are no hard directories
+                                    // where there should be links
+
+                                    var path = packagePath.join(revision);
+                                    if(path.exists()) {
+                                        if(path.isLink()) {
+                                            path.remove();
+                                        } else {
+                                            OS.command("rm -Rf " + path);
+                                        }
+                                    }
+                                    path.dirname().mkdirs();
+                                    pkg.getPath().symlink(path);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    // now go through all mappings to ensure the paths exist, if not remove the mapping
+    checkSources(sources.spec.get());
+    
+    function checkSources(spec, stack) {
+        stack = stack || [];
+        UTIL.every(spec, function(item) {
+            if(item[0]=="@") {
+                if(!FILE.Path(item[1].path).exists()) {
+                    var key = UTIL.copy(stack);
+                    while(key.length>0) {
+                        if(UTIL.len(sources.spec.get(key))==1) {
+                            sources.spec.remove(key);
+                        }
+                        key.pop();
+                    }
+                }
+            } else
+            if(typeof item[1] == "object") {
+                stack.push(item[0]);
+                checkSources(spec[item[0]], stack);
+                stack.pop();
+            }
+        });
+    }
+    
+    var catalogs = {};
+    function getCatalog(url) {
+        if(!catalogs[url]) {
+            catalogs.update(url);
+            catalogs[url] = catalogs.get(url);
+        }
+        return catalogs[url];
+    }
 }

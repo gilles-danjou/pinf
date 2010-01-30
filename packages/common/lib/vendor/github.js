@@ -24,12 +24,20 @@ Vendor.prototype.parseUrl = function(uri) {
     }
     var info = { "vendor": this },
         m;
-    
-    if(m = uri.path.match(/^\/([^\/]*)\/([^\/]*)\/?$/)) {
+    if(m = uri.path.match(/^\/([^\/]*)\/([^\/]*)\/?((zipball)\/(.*?))?\/?$/)) {
         info["user"] = m[1];
         info["repository"] = m[2];
+        if(m[4] && m[4]=="zipball") {
+            info["action"] = {
+                "name": "download",
+                "type": "zip"
+            }
+            if(!m[5]) {
+                throw new Error("Missing branch/rev from download URL: " + uri.url);
+            }
+            info["rev"] = m[5];
+        }
     }
-    
     return info;    
 }
 
@@ -45,6 +53,20 @@ Vendor.prototype.hasRepository = function(info) {
         return repository.name;
     });
     return UTIL.has(names, info.repository);
+}
+
+Vendor.prototype.getRepositoryInfo = function(info) {
+    if(!info.user || !info.repository) {
+        throw new Error("Invalid argument");
+    }
+    var result = callAPI("repos/show/" + info.user + "/" + info.repository);
+    if(!result.repository) {
+        return false;
+    }
+    return {
+        "name": result.repository.name,
+        "forked": result.repository.fork
+    }
 }
 
 Vendor.prototype.createRepository = function(info) {
@@ -89,6 +111,16 @@ Vendor.prototype.getPrivateRepositoryUrl = function(info) {
     return "git@"+info["vendor"].getName()+":"+info["user"]+"/"+info["repository"]+".git";
 }
 
+Vendor.prototype.getDownloadInfoForUrl = function(url) {
+    var info = this.parseUrl(url);
+    if(!info || !info.action || info.action.name!="download") {
+        throw new Error("Invalid download URL: " + url);
+    }
+    return {
+        "type": info.action.type,
+        "url": url
+    }
+}
 
 function callAPI(command, args) {
 

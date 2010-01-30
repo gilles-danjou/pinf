@@ -79,3 +79,11 @@ PackageCatalog.prototype.getDescriptor = function(locator) {
     // TODO: ensure final version is >= desired (revisions[revision].version >= desiredRevision) if applicable?
     return DESCRIPTOR.PackageDescriptor(spec);
 }
+
+PackageCatalog.prototype.getRevisionsForPackage = function(name) {
+    if(!this.spec.packages[name]) {
+        return false;
+    }
+    return UTIL.keys(this.spec.packages[name]);
+}
+

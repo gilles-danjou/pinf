@@ -16,6 +16,7 @@ Links
  * [Design by contract](http://en.wikipedia.org/wiki/Design_by_contract)
  * [Personal Package Archives for Ubuntu](https://launchpad.net/ubuntu/+ppas)
  * [Idempotence](http://www.aspninja.com/2010/01/21/how-to-debug-asp-net-using-firefox/)
+ * [Beautiful Failure](http://github.com/raganwald/homoiconic/blob/master/2010/01/beautiful_failure.markdown#readme)
 
 License
 =======
