@@ -38,7 +38,7 @@ command.action(function (options) {
 
         var platform = PINF.getPlatformForName(name);
         
-        platform.init(locator);
+        platform.init(locator, name);
 
         command.print("Installed platform at: " + platform.getPath());
 

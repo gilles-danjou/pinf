@@ -2,14 +2,11 @@
 
 function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
-
 var UTIL = require("util");
 var URI = require("uri");
 var FILE = require("file");
 var DESCRIPTOR = require("./package/descriptor");
 var LOCATOR = require("./package/locator");
-var BUILDER = require("./builder");
-var PUBLISHER = require("./publisher");
 var PACKAGES = require("packages");
 
 
@@ -44,6 +41,10 @@ Package.prototype.getName = function() {
     return this.getDescriptor().getName();
 }
 
+Package.prototype.getImplementsForUri = function(uri) {
+    return this.getDescriptor().getImplementsForUri(uri);
+}
+
 Package.prototype.getTopLevelId = function() {
     if(this.locator) {
         return this.locator.getTopLevelId();
@@ -74,7 +75,7 @@ Package.prototype.getBuilder = function(options) {
     if(module) {
         return module.Builder(this, options);
     } else {
-        return BUILDER.Builder(this, options);
+        return require("./builder").Builder(this, options);
     }
 }
 
@@ -83,7 +84,7 @@ Package.prototype.getPublisher = function(options) {
     if(module) {
         return module.Publisher(this, options);
     } else {
-        return PUBLISHER.Publisher(this, options);
+        return require("./publisher").Publisher(this, options);
     }
 }
 
@@ -105,7 +106,7 @@ Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyNa
             pkg = options.packageStore.get(locator);
         } else {
             // the module is in our own package
-            var newLocator = this.getLocator();
+            var newLocator = this.getLocator().clone();
             newLocator.setModule(locator.getModule());
             locator = newLocator;
         }

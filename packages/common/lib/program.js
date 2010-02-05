@@ -192,7 +192,7 @@ Program.prototype.publish = function(options) {
         options.path = this.getPath().join(".build");
     }
     
-    options.path = options.path.join(this.spec.get(["name"]));
+    options.path = options.path.join(this.getName());
 
     var publisher = this.getPublisher({
         "packageStore": this.packageStore

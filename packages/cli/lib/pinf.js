@@ -4,12 +4,8 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 var UTIL = require('util');
 var STREAM = require('term').stream;
 var FILE = require("file");
-var SYSTEM = require("system");
 var DATABASE = require("database", "common");
-var PACKAGE = require("package", "common");
-var PACKAGE_LOCATOR = require("package/locator", "common");
 var PINF = require("pinf", "common");
-var URI = require("uri");
 
 var ARGS = require("args");
 var parser = exports.parser = new ARGS.Parser();
@@ -18,8 +14,6 @@ parser.help('PINF - A Toolchain Automation Platform');
 parser.option("--db").set().help("Path to PINF database");
 parser.helpful();
 
-
-var database;
 
 var commandsDir = FILE.Path(module.path).dirname().join("commands");
 commandsDir.listPaths().forEach(function(entry) {
@@ -34,28 +28,11 @@ commandsDir.listPaths().forEach(function(entry) {
 
 
 exports.getDatabase = function() {
-    return database;
+    return PINF.getDatabase();
 }
 
 exports.locatorForDirectory = function(directory) {
-    var pkg = PACKAGE.Package(directory);
-    if(!pkg.exists()) {
-        throw new Error("No package at: " + directory);
-    }
-    if(pkg.hasUid()) {
-        var uri = URI.parse(pkg.getUid()),
-            name = uri.directories.pop(),
-            catalog = uri.scheme + ":" + uri.authorityRoot + uri.authority + "/" + uri.directories.join("/") + "/catalog.json";
-    
-        return PACKAGE_LOCATOR.PackageLocator({
-            "catalog": catalog,
-            "name": name
-        });
-    } else {
-        return PACKAGE_LOCATOR.PackageLocator({
-            "location": "file://" + pkg.getPath().valueOf()
-        });
-    }
+    return PINF.locatorForDirectory(directory);
 }
 
 
@@ -63,16 +40,12 @@ exports.main = function (args) {
     var options = parser.parse(args,{
         preActCallback: function(options, context) {
             
-            var dbPath;
-            if(options.db) {
-                dbPath = FILE.Path(options.db);
+            var path;
+            if(options.db && (path = FILE.Path(options.db)).exists() ) {
+                PINF.setDatabase(DATABASE.Database(path));
+            } else {
+                PINF.setDatabase(PINF.getDefaultDatabase());
             }
-            if(!dbPath || !dbPath.exists()) {
-                dbPath = FILE.Path(SYSTEM.env["HOME"]).join("pinf");
-            }
-            database = DATABASE.Database(dbPath);
-
-            PINF.setDatabase(database);
 
             return true;
         }

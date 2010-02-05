@@ -37,6 +37,10 @@ PackageStore.prototype.setSources = function(sources) {
     this.sources = sources;
 }
 
+PackageStore.prototype.getSources = function() {
+    return this.sources;
+}
+
 PackageStore.prototype.get = function(locator) {
     var descriptor,
         downloadInfo,

@@ -29,6 +29,10 @@ var PackageLocator = exports.PackageLocator = function(spec) {
     }
 }
 
+PackageLocator.prototype.clone = function() {
+    return PackageLocator(UTIL.deepCopy(this.spec));
+}
+
 PackageLocator.prototype.getSpec = function(usePinnedVersion) {
     if(usePinnedVersion && this.hasPinnedVersion()) {
         var spec = UTIL.deepCopy(this.spec);

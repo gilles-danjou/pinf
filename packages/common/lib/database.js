@@ -19,6 +19,8 @@ var PLATFORM = require("./platform");
 var VENDOR = require("./vendor");
 var CATALOGS = require("./catalogs");
 var WORKSPACES = require("./workspaces");
+var PLATFORMS = require("./platforms");
+var FS_STORE = require("http/fs-store");
 
 
 var Database = exports.Database = function(path) {
@@ -42,6 +44,10 @@ var Database = exports.Database = function(path) {
     this.catalogs = CATALOGS.Catalogs(this.path.join("catalogs"));
 
     this.workspaces = WORKSPACES.Workspaces(this.path.join("workspaces"));
+
+    this.platforms = PLATFORMS.Platforms(this.path.join("platforms"));
+    
+    this.cache = new FS_STORE.Store(this.path.join("cache"));
 }
 
 Database.prototype.exists = function() {
@@ -57,12 +63,24 @@ Database.prototype.getConfig = function(path) {
     return config;
 }
 
+Database.prototype.getDataPath = function(path) {
+    return this.path.join("data", path);
+}
+
+Database.prototype.getCache = function() {
+    return this.cache;
+}
+
 Database.prototype.getCatalogs = function() {
     return this.catalogs;
 }
 
 Database.prototype.getWorkspaces = function() {
     return this.workspaces;
+}
+
+Database.prototype.getPlatforms = function() {
+    return this.platforms;
 }
 
 Database.prototype.getSources = function() {
@@ -120,7 +138,13 @@ Database.prototype.getPlatformForName = function(name) {
     return PLATFORM.Platform(this.path.join("platforms", name));
 }
 
+Database.prototype.getPlatformForLocator = function(locator) {
+    return PLATFORM.Platform(this.path.join("platforms", locator.getFsPath()));
+}
+
 Database.prototype.mapSources = function() {
+    
+    // TODO: Allow for reloading dirty catalogs only
 
     var sources = this.getSources(),
         workspaces = this.getWorkspaces(),

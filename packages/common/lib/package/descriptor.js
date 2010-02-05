@@ -166,6 +166,35 @@ PackageDescriptor.prototype.getRepositoryInfo = function() {
     return spec.repositories[0];
 }
 
+PackageDescriptor.prototype.getImplementsForUri = function(uri) {
+    if(!this.spec["implements"]) {
+        return false;
+    }
+    if(!this.spec["implements"][uri]) {
+        return false;
+    }
+    return this.spec["implements"][uri];
+}
+
+PackageDescriptor.prototype.getPlatformLocatorForName = function(name) {
+    if(!this.spec.pinf || !this.spec.pinf.platforms) {
+        return false;
+    }
+    if(!this.spec.pinf.platforms[name]) {
+        return false;
+    }
+    return LOCATOR.PackageLocator(this.spec.pinf.platforms[name]);
+}
+
+PackageDescriptor.prototype.getUsingLocatorForName = function(name) {
+    if(!this.spec.using) {
+        return false;
+    }
+    if(!this.spec.using[name]) {
+        return false;
+    }
+    return LOCATOR.PackageLocator(this.spec.using[name]);
+}
 
 PackageDescriptor.prototype.everyUsing = function(callback) {
     if(!this.spec.using) {
@@ -177,6 +206,15 @@ PackageDescriptor.prototype.everyUsing = function(callback) {
     return true;
 }
 
+PackageDescriptor.prototype.everyPlatform = function(callback) {
+    if(!this.spec.pinf || !this.spec.pinf.platforms) {
+        return false;
+    }
+    UTIL.every(this.spec.pinf.platforms, function(item) {
+        callback(item[0], LOCATOR.PackageLocator(item[1]));
+    });
+    return true;
+}
 
 PackageDescriptor.prototype.traverseEveryDependency = function(callback, options) {
     return this.traverseEveryLocator("dependencies", callback, options);

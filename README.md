@@ -4,7 +4,8 @@ PINF
 
 A toolchain automation platform written in JavaScript on top of [Narwhal](http://narwhaljs.org/).
 
-**STATUS: Under development. Not functional yet!**
+**STATUS: Under development. A first release with tutorial will be published soon.**
+
  
 
 Links

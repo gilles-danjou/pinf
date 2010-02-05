@@ -22,13 +22,14 @@ Workspaces.prototype.getPath = function() {
 
 /**
  * Supported selectors:
- *   * http://github.com/cadorn/pinf/ (+ URI.URI variant)
- *   * http://github.com/cadorn/pinf (+ URI.URI variant)
- *   * github.com/cadorn/pinf/ (+ URI.URI variant)
- *   * github.com/cadorn/pinf (+ URI.URI variant)
+ *   * http://github.com/cadorn/pinf/ (+ URI.URI variant) - Vendor URIs
+ *   * http://github.com/cadorn/pinf (+ URI.URI variant) - Vendor URIs
+ *   * github.com/cadorn/pinf/ (+ URI.URI variant) - Vendor URIs
+ *   * github.com/cadorn/pinf (+ URI.URI variant) - Vendor URIs
  *   * .../pinf/workspaces/github.com/cadorn/pinf (+ File.Path variant)
  *   * .../pinf/workspaces/github.com/cadorn/pinf/... (+ File.Path variant)
  *       will go up the tree until it finds the last package.json file
+ *   * http://registry.pinf.org/cadorn.org/github/fireconsole/ - UIDs
  */
 Workspaces.prototype.getForSelector = function(selector, useExactPath) {
     if(selector instanceof URI.URI) {
@@ -78,7 +79,25 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         workspace = WORKSPACE.Workspace(this.path.join(vendor.getWorkspacePath(info)));
         workspace.setVendorInfo(info);
     } catch(e) {
-        workspace = WORKSPACE.Workspace(path);
+        if(!path) {
+            // check if selector is a UID
+            this.forEach(function(ws) {
+                if(workspace) return;
+                ws.forEachPackage(function(pkg) {
+                    if(workspace) return;
+                    try {
+                        if(pkg.hasUid() && pkg.getUid()==selector) {
+                            workspace = ws;
+                        }
+                    } catch(e) {}
+                });
+            });
+            if(!workspace) {
+                throw new Error("No workspace found for UID selector: " + selector);
+            }
+        } else {
+            workspace = WORKSPACE.Workspace(path);
+        }
     }
     return workspace;
 }

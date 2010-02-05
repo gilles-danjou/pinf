@@ -4,13 +4,13 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var OS = require("os");
 var UTIL = require("util");
-var PACKAGE = require("./package");
 var PINF = require("./pinf");
 var GIT = require("git", "util");
 var FILE = require("file");
 var JSON_STORE = require("json-store", "util");
 var TERM = require("term");
 var PACKAGE = require("./package");
+var LOCATOR = require("./package/locator");
 
 
 var Workspace = exports.Workspace = function(path) {
@@ -186,6 +186,8 @@ Workspace.prototype.checkout = function() {
         var git = GIT.Git(path);
         git.clone(url);
 
+        // TODO: pinf map-sources
+
     } catch(e) {
         this.destroy();
         throw e;
@@ -211,9 +213,19 @@ Workspace.prototype.switchTo = function() {
     if(!this.exists()) {
         throw new Error("Workspace not found at: " + this.getPath());
     }
-    
+
     if(!this.hasPlatform()) {
-        this.setPlatform(PINF.getDefaultPlatform());
+        var spec = this.getDescriptor().getPinfSpec();
+        if(spec.platforms && spec.platform && spec.platforms[spec.platform]) {
+            var locator = LOCATOR.PackageLocator(spec.platforms[spec.platform]),
+                platform = PINF.getPlatformForLocator(locator);
+            if(!platform.exists()) {
+                platform.init(locator);
+            }
+            this.setPlatform(platform);
+        } else {
+            this.setPlatform(PINF.getDefaultPlatform());
+        }
     }
 
     // NOTE: This will enter a new shell
