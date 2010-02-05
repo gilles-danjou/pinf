@@ -14,8 +14,6 @@ var PACKAGE_STORE = require("./package/store");
 var PROGRAM_STORE = require("./program/store");
 var PACKAGE_SOURCES = require("./package/sources");
 var CREDENTIALS_STORE = require("./credentials/store");
-var WORKSPACE = require("./workspace");
-var PLATFORM = require("./platform");
 var VENDOR = require("./vendor");
 var CATALOGS = require("./catalogs");
 var WORKSPACES = require("./workspaces");
@@ -134,12 +132,8 @@ Database.prototype.getWorkspaceForSelector = function(selector) {
     return this.getWorkspaces().getForSelector(selector);
 }
 
-Database.prototype.getPlatformForName = function(name) {
-    return PLATFORM.Platform(this.path.join("platforms", name));
-}
-
-Database.prototype.getPlatformForLocator = function(locator) {
-    return PLATFORM.Platform(this.path.join("platforms", locator.getFsPath()));
+Database.prototype.getPlatformForSelector = function(selector) {
+    return this.getPlatforms().getForSelector(selector);
 }
 
 Database.prototype.mapSources = function() {

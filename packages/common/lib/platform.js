@@ -4,6 +4,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var PACKAGES = require("packages");
 var PACKAGE = require("./package");
+var LOCATOR = require("./package/locator");
 var PINF = require("./pinf");
 var OS = require("os");
 
@@ -64,6 +65,34 @@ Platform.prototype.init = function(locator, name) {
         throw e;
     }
     return true;
+}
+
+Platform.prototype.update = function() {
+
+    var file = this.getPath().join("package.json");
+    if(!file.exists()) {
+        throw new Error("No platform descriptor found at: " + file);
+    }
+
+    var spec = JSON.decode(file.read().toString());
+    if(!spec || !spec.name || !spec.using || !spec.using.platform) {
+        throw new Error("Malformed platform descriptor at: " + file);
+    }
+
+    try {
+
+        // TODO: We need to compile the platform in a new directory and
+        //       only replace the existing one once we know the new one works.        
+        this.destroy();
+        this.init(LOCATOR.PackageLocator(spec.using.platform), spec.name);
+
+    } catch(e) {
+        // The init failed which means we now have a broken or rather missing platform.
+        // To allow re-running of "pinf update-platform <ID>" we keep the package.json file
+        file.dirname().mkdirs();
+        file.write(JSON.encode(spec, null, "    "));
+        throw e;
+    }
 }
 
 Platform.prototype.destroy = function() {

@@ -5,6 +5,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 var URI = require("uri");
 var FILE = require("file");
 var PLATFORM = require("./platform");
+var LOCATOR = require("./package/locator");
 
 
 
@@ -18,6 +19,46 @@ var Platforms = exports.Platforms = function(path) {
 Platforms.prototype.getPath = function() {
     return this.path;
 }
+
+
+
+/**
+ * Supported selectors:
+ *   * string ID of path to platform (this.getPath().join(<selector>))
+ *   * LOCATOR.PackageLocator (this.getPath().join(<selector>.getFsPath()))
+ */
+Platforms.prototype.getForSelector = function(selector) {
+    var id;
+    if(selector instanceof LOCATOR.PackageLocator) {
+        id = selector.getFsPath().valueOf();
+    } else
+    if(typeof selector == "string") {
+        id = selector;
+    } else {
+        throw new Error("Selector type not supported");
+    }
+    return PLATFORM.Platform(this.path.join(id));
+}
+
+
+Platforms.prototype.getDefault = function() {
+    // TODO: Make default platform configurable
+    // default to narwhal-rhino for now
+    var name = "registry.pinf.org/cadorn.org/github/platforms/packages/narwhal/packages/rhino/master",
+        platform = exports.getForSelector(name);
+    if(!platform.exists()) {
+        var locator = LOCATOR.PackageLocator({
+            "catalog": "http://registry.pinf.org/cadorn.org/github/platforms/packages/narwhal/packages/catalog.json",
+            "name": "rhino",
+            "revision": "master"
+        });
+        // Install default platform
+        platform = exports.getForSelector(locator);
+        platform.init(locator);
+    }
+    return platform;
+}
+
 
 Platforms.prototype.forEach = function(callback, subPath) {
     var path = this.path,

@@ -35,14 +35,6 @@ exports.getWorkspaceForSelector = function(selector) {
     return exports.getDatabase().getWorkspaceForSelector(selector);
 }
 
-exports.getPlatformForName = function(name) {
-    return exports.getDatabase().getPlatformForName(name);
-}
-
-exports.getPlatformForLocator = function(locator) {
-    return exports.getDatabase().getPlatformForLocator(locator);
-}
-
 exports.getPackageForLocator = function(locator) {
     return exports.getDatabase().getPackage(locator);
 }
@@ -51,21 +43,22 @@ exports.getPackageStore = function() {
     return exports.getDatabase().getPackageStore();
 }
 
+exports.getPlatformForSelector = function(selector) {
+    return exports.getDatabase().getPlatformForSelector(selector);
+}
+
+exports.getPlatformForName = function(name) {
+    // TODO: Deprecate in favor of exports.getPlatformForSelector()
+    return exports.getDatabase().getPlatformForSelector(name);
+}
+
+exports.getPlatformForLocator = function(locator) {
+    // TODO: Deprecate in favor of exports.getPlatformForSelector()
+    return exports.getDatabase().getPlatformForSelector(locator);
+}
+
 exports.getDefaultPlatform = function() {
-    // default to narwhal-rhino for now
-    var name = "registry.pinf.org/cadorn.org/github/platforms/packages/narwhal/packages/rhino/master",
-        platform = exports.getPlatformForName(name);
-    if(!platform.exists()) {
-        var locator = LOCATOR.PackageLocator({
-            "catalog": "http://registry.pinf.org/cadorn.org/github/platforms/packages/narwhal/packages/catalog.json",
-            "name": "rhino",
-            "revision": "master"
-        });
-        // Install default platform
-        platform = exports.getPlatformForLocator(locator);
-        platform.init(locator);
-    }
-    return platform;
+    return exports.getDatabase().getPlatforms().getDefault();
 }
 
 exports.mapSources = function() {
