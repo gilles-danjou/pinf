@@ -62,11 +62,9 @@ command.action(function (options) {
             locator.setRevision(workspace.getRevisionControlBranch());
         }
 
-        var pkg = PINF.getDatabase().getProgram(locator),
-            path = PINF.getDatabase().getBuildPathForPackage(pkg);
+        var pkg = PINF.getDatabase().getProgram(locator);
 
         path = pkg.build({
-            "path": path,
             "remoteProgram": remoteProgram,
             "remoteDependencies": remoteDependencies,
             "args": options.args.slice(1)

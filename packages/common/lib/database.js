@@ -52,6 +52,10 @@ Database.prototype.exists = function() {
     return this.path.exists();
 }
 
+Database.prototype.getPath = function() {
+    return this.path;
+}
+
 Database.prototype.getConfig = function(path) {
     var file = this.path.join("config", path + ".json");
     var config = JSON_STORE.JsonStore(file);
@@ -63,6 +67,10 @@ Database.prototype.getConfig = function(path) {
 
 Database.prototype.getDataPath = function(path) {
     return this.path.join("data", path);
+}
+
+Database.prototype.getBackupPath = function(path) {
+    return this.path.join("backup", path);
 }
 
 Database.prototype.getCache = function() {
@@ -122,6 +130,14 @@ Database.prototype.getBuildPathForPackage = function(pkg) {
         throw new Error("No locator in package");
     }        
     return this.path.join("builds", locator.getTopLevelId());
+}
+
+Database.prototype.getTestPathForPackage = function(pkg) {
+    var locator = pkg.getLocator();
+    if(!locator) {
+        throw new Error("No locator in package");
+    }        
+    return this.path.join("tests", locator.getTopLevelId());
 }
 
 Database.prototype.getCredentials = function(uri, environment) {

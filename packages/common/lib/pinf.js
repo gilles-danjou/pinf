@@ -5,8 +5,6 @@ var FILE = require("file");
 var URI = require("uri");
 var SYSTEM = require("system");
 var DATABASE = require("./database");
-var PACKAGE = require("./package");
-var LOCATOR = require("./package/locator");
 
 
 var database;
@@ -66,7 +64,11 @@ exports.mapSources = function() {
 }
 
 exports.locatorForDirectory = function(directory) {
-    var pkg = PACKAGE.Package(directory);
+    
+    var LOCATOR = require("./package/locator");
+
+    
+    var pkg = require("./package").Package(directory);
     if(!pkg.exists()) {
         throw new Error("No package at: " + directory);
     }

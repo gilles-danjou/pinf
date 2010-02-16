@@ -21,6 +21,10 @@ Package.prototype.getPath = function() {
     return this.path;
 }
 
+Package.prototype.getBuildPath = function() {
+    return require("./pinf").getDatabase().getBuildPathForPackage(this);
+}
+
 Package.prototype.exists = function() {
     return this.path.exists();
 }
@@ -71,27 +75,33 @@ Package.prototype.getDescriptor = function() {
 }
 
 Package.prototype.getBuilder = function(options) {
-    var module = this.getModuleForPinfLocatorProperty(options, "builder");
-    if(module) {
-        return module.Builder(this, options);
+    var info = this.getInfoForPinfLocatorProperty("builder");
+    if(info) {
+        return info.module.Builder(info.pkg, options);
     } else {
         return require("./builder").Builder(this, options);
     }
 }
 
 Package.prototype.getPublisher = function(options) {
-    var module = this.getModuleForPinfLocatorProperty(options, "publisher");
-    if(module) {
-        return module.Publisher(this, options);
+    var info = this.getInfoForPinfLocatorProperty("publisher");
+    if(info) {
+        return info.module.Publisher(info.pkg, options);
     } else {
         return require("./publisher").Publisher(this, options);
     }
 }
 
-Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyName) {
-    if(!options.packageStore) {
-        throw new Error("'options.packageStore' not provided");
+Package.prototype.getTester = function() {
+    var info = this.getInfoForPinfLocatorProperty("tester");
+    if(info) {
+        return info.module.Tester(info.pkg);
+    } else {
+        return require("./tester").Tester(this);
     }
+}
+
+Package.prototype.getInfoForPinfLocatorProperty = function(propertyName) {
     var descriptor = this.getDescriptor(),
         pinf = descriptor.getPinfSpec();
 
@@ -103,7 +113,7 @@ Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyNa
         }
         if(locator.isCatalog() || locator.isDirect()) {
             // the module is located in an external package.
-            pkg = options.packageStore.get(locator);
+            pkg = require("./pinf").getPackageForLocator(locator);
         } else {
             // the module is in our own package
             var newLocator = this.getLocator().clone();
@@ -111,19 +121,29 @@ Package.prototype.getModuleForPinfLocatorProperty = function(options, propertyNa
             locator = newLocator;
         }
 
-        PACKAGES.registerUsingPackage(locator.getSpec(true), pkg.getPath().valueOf());
-
-        // collect all dependencies (recursively) for package
-        var mappings = options.packageStore.deepMappingsForPackage(pkg);
-        // register dependency mappings in preparation for loading
-        if(mappings && mappings.length>0) {
-            mappings.forEach(function(mapping) {
-                PACKAGES.registerUsingPackage(mapping[0], mapping[1]);
-            });
-        }
+        pkg.makeCallable();
 
         // load actual module now that package and dependencies are registered
-        return require(locator.getModule(), pkg.getTopLevelId());
+        return {
+            "pkg": require("./pinf").getPackageForLocator(locator),
+            "module": require(locator.getModule(), pkg.getTopLevelId())
+        }
     }
     return false;
+}
+
+
+Package.prototype.makeCallable = function() {
+    
+    PACKAGES.registerUsingPackage(this.getLocator().getSpec(true), this.getPath().valueOf());
+
+    // collect all dependencies (recursively) for package
+    var mappings = require("./pinf").getDatabase().getPackageStore().deepMappingsForPackage(this);
+    
+    // register dependency mappings in preparation for loading
+    if(mappings && mappings.length>0) {
+        mappings.forEach(function(mapping) {
+            PACKAGES.registerUsingPackage(mapping[0], mapping[1]);
+        });
+    }
 }

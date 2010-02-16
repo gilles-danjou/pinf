@@ -18,9 +18,17 @@ var PackageCatalog = exports.PackageCatalog = function(path) {
     this.spec = JSON.decode(this.path.read());
 }
 
+PackageCatalog.prototype.getPath = function() {
+    return this.path;
+}
+
+PackageCatalog.prototype.getDirtyPath = function() {
+    return this.path.dirname().join(this.path.basename() + "~dirty");
+}
+
 PackageCatalog.prototype.getDescriptor = function(locator) {
     if(!this.spec.packages[locator.getName()]) {
-        throw new Error("Package with name '"+locator.getName()+"' not found in catalog");
+        throw new Error("Package with name '"+locator.getName()+"' not found in catalog: " + this.path);
     }
     var self = this,
         desiredRevision = locator.getPinnedVersion() || locator.getRevision(),
@@ -87,3 +95,6 @@ PackageCatalog.prototype.getRevisionsForPackage = function(name) {
     return UTIL.keys(this.spec.packages[name]);
 }
 
+PackageCatalog.prototype.flagAsDirty = function() {
+    this.getDirtyPath().touch();
+}

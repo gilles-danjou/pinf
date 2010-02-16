@@ -226,15 +226,24 @@ Workspace.prototype.switchTo = function() {
         } else {
             this.setPlatform(PINF.getDefaultPlatform());
         }
+    } else {
+        var platform = this.getPlatform();
+        if(!platform.exists()) {
+            throw new Error("Platform does not exist at: " + platform.getPath());
+        }
     }
 
     // NOTE: This will enter a new shell
     OS.system(this.getPath().join("bin", ".pinf-activate-workspace").valueOf());
 }
 
+Workspace.prototype.getRevisionControl = function() {
+    return GIT.Git(this.getPath());
+}
 
+// TODO: Deprecate in favor of this.getRevisionControl()
 Workspace.prototype.getRevisionControlBranch = function() {
-    return GIT.Git(this.getPath()).getActiveBranch();
+    return this.getRevisionControl().getActiveBranch();
 }
 
 

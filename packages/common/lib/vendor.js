@@ -16,7 +16,7 @@ exports.getVendorForUrl = function(uri) {
     if(uri.domain=="github.com") {
         return require("./vendor/github").Vendor();
     }
-    throw new Error("No vendor found for URL: " + uri.url);
+    return false;
 }
 
 
@@ -177,3 +177,17 @@ exports.getTagsForRepository = function(repository) {
 
     return false;
 }
+
+
+
+
+var VendorError = exports.VendorError = function(message) {
+    this.name = "VendorError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+VendorError.prototype = new VendorError();
+

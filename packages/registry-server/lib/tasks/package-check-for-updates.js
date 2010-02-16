@@ -47,18 +47,23 @@ dump(paths);
 
 
     // fetch tags for repository
-    var tags = VENDOR.getTagsForRepository(qs.repository);
-    if(!tags) return "OK";
-    tags = SEMVER.versionsForTags(UTIL.keys(tags));
-    var version;
-    if(tags && tags.length>0) {
-        // latest version
-        version = tags.pop();
-    }
+    var allTags = VENDOR.getTagsForRepository(qs.repository);
+    if(!allTags) return "OK";
+
+    packages.forEach(function(pkg) {
+        
+        var path = pkg.getRepositoryInfo().path || false;
+
+        var tags = SEMVER.versionsForTags(UTIL.keys(allTags), path);
+        var version;
+        if(tags && tags.length>0) {
+            // latest version
+            version = tags.pop();
+        }
 
 print("version: " + version);
 
-    packages.forEach(function(pkg) {
+        // TODO: Check each package in its own task
 
         var ver = pkg.getLatestVersion(version);
 print("check version: " + ver + " != " + version + " : for package: " + pkg.id);
@@ -71,7 +76,12 @@ print("check version: " + ver + " != " + version + " : for package: " + pkg.id);
             var descriptor = UTIL.trim(HTTP.read(url).decodeToString());
             if(descriptor && descriptor.substr(0,1)=="{") {
                 try {
-                    pkg.announceVersion(version, JSON.decode(descriptor));
+                    descriptor = JSON.decode(descriptor);
+                    // remove uid and repositories properties. these will be completed by arbitrary package descriptor.
+                    delete descriptor["uid"];
+                    delete descriptor["repositories"];
+
+                    pkg.announceVersion(version, descriptor);
                 } catch(e) {
 print("error announcing: " + e);
                     // this will fail if the descriptor is invalid
@@ -91,7 +101,12 @@ print("check branch("+qs.branch+"): " + rev + " != " + qs.rev + " : for package:
             var descriptor = UTIL.trim(HTTP.read(url).decodeToString());
             if(descriptor && descriptor.substr(0,1)=="{") {
                 try {
-                    pkg.announceRevision(qs.branch, qs.rev, JSON.decode(descriptor));
+                    descriptor = JSON.decode(descriptor);
+                    // remove uid and repositories properties. these will be completed by arbitrary package descriptor.
+                    delete descriptor["uid"];
+                    delete descriptor["repositories"];
+
+                    pkg.announceRevision(qs.branch, qs.rev, descriptor);
                 } catch(e) {
 print("error announcing: " + e);
                     // this will fail if the descriptor is invalid

@@ -36,12 +36,6 @@ Platform.prototype.init = function(locator, name) {
             "packageStore": this.getPackageStore()
         });
 
-        // TODO: Deprecate 'path' property below
-        builder.triggerBuild(pkg, {
-            "path": path,
-            "platformName": name
-        });
-
         // write package.json file for platform
         var file = path.join("package.json");
         if(file.exists()) {
@@ -54,8 +48,15 @@ Platform.prototype.init = function(locator, name) {
             }
         }, null, "    "));
 
+        // TODO: Deprecate 'path' property below
+        builder.triggerBuild(this, {
+            "path": path,
+            "platformName": name
+        });
+
         // write empty bin/activate.bash if it does not exist
         file = path.join("bin", "activate.bash");
+        file.dirname().mkdirs();
         if(!file.exists()) {
             file.write("export PATH="+file.dirname()+":\"$PATH\"");
         }
@@ -100,6 +101,10 @@ Platform.prototype.destroy = function() {
     OS.command("rm -Rf " + this.getPath());
 }
 
+Platform.prototype.isAliased = function() {
+    return (this.getName().split("/").length==1);
+}
+
 Platform.prototype.getPackageStore = function() {
     return PINF.getPackageStore();
 }
@@ -110,19 +115,37 @@ Platform.prototype.getControlPackage = function() {
     return pkg;
 }
 
-Platform.prototype.expandMacros = function(program, contents) {
-    
-    var uri = "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/@meta/platform/macros",
+Platform.prototype.expandMacros = function(context, contents) {
+    return this.callService(context, "expandMacros", [contents]);
+}
+
+Platform.prototype.getVariations = function(context) {
+    return this.callService(context, "getVariations", []);
+}
+
+
+Platform.prototype.callService = function(context, name, args) {
+    var contract_uri = "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/@meta/platform/services/0.1.0",
         pkg = this.getControlPackage(),
-        info = pkg.getImplementsForUri(uri);
+        info = pkg.getImplementsForUri(contract_uri);
     if(!info) {
-        return contents;
+        return false;
     }
     if(!info.module) {
-        throw new Error("Implements definition for uri '"+uri+"' does not specify 'module' property.");
+        throw new Error("Implements definition for uri '"+contract_uri+"' does not specify 'module' property.");
     }
 
     var macros = require(info.module, pkg.getTopLevelId());
-    return macros.expandMacros(this, program, contents);
-}
+    if(!macros[name]) {
+        return false;
+    }
 
+    return macros[name].apply(null, [
+        {
+            "platform": this,
+            "builder": context.pkg.getBuilder(),
+            "targetPackage": context.targetPackage,
+            "testPackage": context.testPackage
+        }
+    ].concat(args));
+}

@@ -24,7 +24,15 @@ Catalogs.prototype.get = function(url) {
     if(!this.has(url)) {
         this.store.download(url);
     }
-    return CATALOG.PackageCatalog(this.store.get(url));
+    var catalog = CATALOG.PackageCatalog(this.store.get(url));
+    // download catalog if dirty
+    if(catalog.getDirtyPath().exists()) {
+        // TODO: Check eTags and only update if changed            
+        this.store.download(url);
+        catalog.getDirtyPath().remove();
+        return this.get(url);
+    }
+    return catalog;
 }
 
 Catalogs.prototype.update = function(url, subPath) {

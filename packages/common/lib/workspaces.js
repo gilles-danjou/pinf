@@ -29,7 +29,8 @@ Workspaces.prototype.getPath = function() {
  *   * .../pinf/workspaces/github.com/cadorn/pinf (+ File.Path variant)
  *   * .../pinf/workspaces/github.com/cadorn/pinf/... (+ File.Path variant)
  *       will go up the tree until it finds the last package.json file
- *   * http://registry.pinf.org/cadorn.org/github/fireconsole/ - UIDs
+ *   * http://registry.pinf.org/cadorn.org/github/fireconsole/ - UIDs (matches against workspace and all containing packages)
+ *   * <name> (if name is unique among workspaces)
  */
 Workspaces.prototype.getForSelector = function(selector, useExactPath) {
     if(selector instanceof URI.URI) {
@@ -80,9 +81,11 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         workspace.setVendorInfo(info);
     } catch(e) {
         if(!path) {
-            // check if selector is a UID
+            // check if selector is a UID or Name
+            var namedWorkspace = false;
             this.forEach(function(ws) {
                 if(workspace) return;
+                // match possible 'UID' selector against all workspace packages
                 ws.forEachPackage(function(pkg) {
                     if(workspace) return;
                     try {
@@ -91,9 +94,19 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
                         }
                     } catch(e) {}
                 });
+                // match possible 'name' selector against workspace
+                if(("http://" + ws.getName()) == selector) {
+                    if(namedWorkspace) {
+                        throw new Error("Multiple workspaces found for name. Use a more precise selector!");
+                    }
+                    namedWorkspace = ws;
+                }
             });
+            if(namedWorkspace) {
+                workspace = namedWorkspace;
+            }
             if(!workspace) {
-                throw new Error("No workspace found for UID selector: " + selector);
+                throw new Error("No workspace found for UID/name selector: " + selector);
             }
         } else {
             workspace = WORKSPACE.Workspace(path);

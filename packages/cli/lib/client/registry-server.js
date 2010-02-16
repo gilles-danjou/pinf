@@ -4,6 +4,8 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 
 
+// TODO: Refactor as much as possible into the "common" package
+
 var UTIL = require("util");
 var HTTP_CLIENT = require("http-client");
 var JSON = require("json");
@@ -234,9 +236,13 @@ Client.prototype.announceRelease = function(options) {
         args["revision"] = git.getLatestRevisionForBranch(options.branch);
         args["descriptor"] = JSON.decode(git.getFileForRef(args["revision"], "package.json"));
     } else {
+        var path = descriptor.getRepositoryInfo().path || false;
         // announce a new version tag
-        args["version"] = git.getLatestVersion(options.major);
-        args["descriptor"] = JSON.decode(git.getFileForRef("v"+args["version"], "package.json"));
+        args["version"] = git.getLatestVersion(options.major, path);
+        if(!args["version"]) {
+            throw new ClientError("No tagged version found!");
+        }
+        args["descriptor"] = JSON.decode(git.getFileForRef(((path)?path+"/":"")+"v"+args["version"], "package.json"));
     }
     
     // merge local descriptor on top if applicable
@@ -248,7 +254,11 @@ Client.prototype.announceRelease = function(options) {
     if(!PACKAGE_DESCRIPTOR.validate(args["descriptor"], descriptorValidationOptions)) {
         throw new ClientError("Package descriptor from repository not valid");
     }
-    
+
+    // mark corresponding catalog as dirty
+    var catalog = PINF.getDatabase().getCatalogs().get(info.url + "/catalog.json");
+    catalog.flagAsDirty();
+
     var response = makeRequest(info.url, "announce-release", args);
 
     if(response.status=="RELEASE_ANNOUNCED") {

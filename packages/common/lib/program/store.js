@@ -5,7 +5,6 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 var UTIL = require("util");
 var FILE = require("file");
-var FS_STORE = require("http/fs-store");
 var PROGRAM = require("../program");
 var PINF = require("../pinf");
 
@@ -25,10 +24,14 @@ ProgramStore.prototype.setPackageStore = function(store) {
     this.packageStore = store;
 }
 
+ProgramStore.prototype.getBasePath = function() {
+    return this.path.join("programs");
+}
+
 ProgramStore.prototype.get = function(locator) {
 
     var pkg = this.packageStore.get(locator);
-    var programPath = this.path.join("programs", locator.getTopLevelId());
+    var programPath = this.getBasePath().join(locator.getTopLevelId());
 
     programPath.dirname().mkdirs();
 

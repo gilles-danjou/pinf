@@ -216,6 +216,37 @@ PackageDescriptor.prototype.everyPlatform = function(callback) {
     return true;
 }
 
+
+PackageDescriptor.prototype.everyDependency = function(callback) {
+    if(!this.spec.dependencies) {
+        return false;
+    }
+    UTIL.every(this.spec.dependencies, function(item) {
+        var locator;
+        if(typeof item == "string") {
+            callback(item, locator);
+        } else {
+            locator = item[1];
+            try {
+                locator = LOCATOR.PackageLocator(locator);
+            } catch(e) {};
+            callback(item[0], locator);
+        }
+    });
+    return true;
+}
+
+PackageDescriptor.prototype.everyImplements = function(callback) {
+    if(!this.spec["implements"]) {
+        return false;
+    }
+    UTIL.every(this.spec["implements"], function(item) {
+        callback(item[0], item[1]);
+    });
+    return true;
+}
+
+
 PackageDescriptor.prototype.traverseEveryDependency = function(callback, options) {
     return this.traverseEveryLocator("dependencies", callback, options);
 }
@@ -280,6 +311,9 @@ PackageDescriptor.prototype.getDownloadInfo = function() {
         rev = m[1];
     } else {
         rev = "v" + version;
+    }
+    if(repository.path && rev.substr(0,1)=="v") {
+        rev = repository.path + "/" + rev;
     }
     if(!type) {
         if(!uri.file) {

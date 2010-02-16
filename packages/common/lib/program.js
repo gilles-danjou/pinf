@@ -10,18 +10,28 @@ var JSON_STORE = require("json-store", "util");
 var PACKAGE = require("./package");
 var LOCATOR = require("./package/locator");
 var DESCRIPTOR = require("./package/descriptor");
+var PINF = require("./pinf");
 
 
 var Program = exports.Program = function(path, locator) {
     if (!(this instanceof exports.Program))
         return new exports.Program(path, locator);
+
+    if(path && locator) {
+        this.construct(path, locator);
+    }
+}
+
+Program.prototype = PACKAGE.Package();
+
+Program.prototype.construct = function(path, locator) {
         
     this.path = path;
     this.locator = locator;
     
-    if(!this.path.join("program.json").exists()) {
-        throw new Error("Program descriptor file not found at: " + this.path.join("program.json"));
-    }
+//    if(!this.path.join("program.json").exists()) {
+//        throw new Error("Program descriptor file not found at: " + this.path.join("program.json"));
+//    }
 
     if(!this.path.join("package.json").exists()) {
         throw new Error("Program's package descriptor file not found at: " + this.path.join("package.json"));
@@ -34,8 +44,6 @@ var Program = exports.Program = function(path, locator) {
     this.packageDescriptor = DESCRIPTOR.PackageDescriptor(this.path.join("package.json"));
 }
 
-Program.prototype = PACKAGE.Package();
-
 
 Program.prototype.getName = function() {
     return this.packageDescriptor.getName();
@@ -47,11 +55,12 @@ Program.prototype.setPackageStore = function(store) {
 }
 
 
-Program.prototype.clean = function(options) {
-    if(options.path.exists()) {
+Program.prototype.clean = function() {
+    var buildPath = this.getBuildPath();
+    if(buildPath.exists()) {
         // basic sanity check before we delete the previous build
-        if(options.path.join("raw", "package.json").exists()) {
-            OS.command("rm -Rf " + options.path.valueOf());
+        if(buildPath.join("raw", "package.json").exists()) {
+            OS.command("rm -Rf " + buildPath.valueOf());
         }
     }
 }
@@ -60,20 +69,18 @@ Program.prototype.build = function(options) {
     var self = this;
 
     options = options || {};
-    if(!options.path) {
-        options.path = this.getPath().join(".build");
+
+    if(!options.skipClean) {
+        this.clean();
     }
     
-    options.path = options.path.join(this.getName());
-
-    this.clean(options);
-
     var descriptor = this.getDescriptor(),
-        buildPath = options.path.join("raw"),
+        buildPath = this.getBuildPath(),
+        rawBuildPath = buildPath.join("raw"),
         path;
         
     // link package.json file
-    path = buildPath.join("package.json");
+    path = rawBuildPath.join("package.json");
     path.dirname().mkdirs();
     this.getPath().join("package.json").copy(path);
 
@@ -82,6 +89,11 @@ Program.prototype.build = function(options) {
         spec = this.localSpec;
         if(!spec.exists()) {
             spec.init();
+        }
+    } else
+    if(options.remoteDependencies) {
+        if(!this.spec.exists()) {
+            this.spec.init();
         }
     }
 
@@ -124,8 +136,12 @@ Program.prototype.build = function(options) {
                 locator.pinAtVersion(pkg.getVersion());
             }
 
-            path = buildPath.join(type[1].directory, pkg[type[1].id]());
-
+            if(type[0]=="system") {
+                path = rawBuildPath.join(type[1].directory, stacks.names.concat(name).join("."));
+            } else
+            if(type[0]=="using") {
+                path = rawBuildPath.join(type[1].directory, pkg.getTopLevelId());
+            }
 
             // update info in program.json file
             var info =  {};
@@ -144,7 +160,7 @@ Program.prototype.build = function(options) {
                     path.dirname().mkdirs();
                     FILE.copyTree(pkg.getPath(), path);
                 }
-                // since we copied it to a specific version we need to update all using package locators
+                // since we copied it to a specific version we need to update all package locators
                 // to include the exact version
                 locatorRewriteInfo.push({
                     "id": parentPackage[type[1].id](),
@@ -165,21 +181,30 @@ Program.prototype.build = function(options) {
     
         locatorRewriteInfo.forEach(function(info) {
             if(info.id==self[type[1].id]()) {
-                path = buildPath.join("package.json");
+                path = rawBuildPath.join("package.json");
             } else {
-                path = buildPath.join(type[1].directory, info.id).join("package.json");
+                path = rawBuildPath.join(type[1].directory, info.id).join("package.json");
             }
             JSON_STORE.JsonStore(path).set([type[1].property, info.name, "revision"], info.revision);
         });
     });
 
-    var builder = this.getBuilder({
-        "packageStore": this.packageStore
-    });
-
+    var builder = this.getBuilder();
+    options["skipWriteCommands"] = true;
     builder.triggerBuild(this, options);
-    
-    return options.path;
+
+
+
+    // build tester
+
+    var spec = descriptor.getPinfSpec();
+    if(spec && spec.tester) {
+        var pkg = PINF.getPackageForLocator(LOCATOR.PackageLocator(spec.tester));
+        options.testPackage = pkg;
+        pkg.getBuilder().triggerBuild(PACKAGE.Package(rawBuildPath), options);
+    }
+
+    return buildPath;
 }
 
 
@@ -192,8 +217,6 @@ Program.prototype.publish = function(options) {
         options.path = this.getPath().join(".build");
     }
     
-    options.path = options.path.join(this.getName());
-
     var publisher = this.getPublisher({
         "packageStore": this.packageStore
     });

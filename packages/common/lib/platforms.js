@@ -35,7 +35,7 @@ Platforms.prototype.getForSelector = function(selector) {
     if(typeof selector == "string") {
         id = selector;
     } else {
-        throw new Error("Selector type not supported");
+        throw new PlatformsError("Selector type not supported: " + selector);
     }
     return PLATFORM.Platform(this.path.join(id));
 }
@@ -45,7 +45,7 @@ Platforms.prototype.getDefault = function() {
     // TODO: Make default platform configurable
     // default to narwhal-rhino for now
     var name = "registry.pinf.org/cadorn.org/github/platforms/packages/narwhal/packages/rhino/master",
-        platform = exports.getForSelector(name);
+        platform = this.getForSelector(name);
     if(!platform.exists()) {
         var locator = LOCATOR.PackageLocator({
             "catalog": "http://registry.pinf.org/cadorn.org/github/platforms/packages/narwhal/packages/catalog.json",
@@ -53,7 +53,7 @@ Platforms.prototype.getDefault = function() {
             "revision": "master"
         });
         // Install default platform
-        platform = exports.getForSelector(locator);
+        platform = this.getForSelector(locator);
         platform.init(locator);
     }
     return platform;
@@ -84,3 +84,16 @@ Platforms.prototype.forEach = function(callback, subPath) {
         });
     }
 }
+
+
+
+var PlatformsError = exports.PlatformsError = function(message) {
+    this.name = "PlatformsError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+PlatformsError.prototype = new Error();
+

@@ -13,6 +13,8 @@ var DESCRIPTOR = require("./descriptor");
 var ZIP = require("zip");
 var URI = require("uri");
 var VENDOR = require("../vendor");
+var SEMVER = require("semver", "util");
+var OS = require("os");
 
 
 var PackageStore = exports.PackageStore = function(path) {
@@ -63,13 +65,13 @@ PackageStore.prototype.get = function(locator) {
             var path = FILE.Path(uri.path);
             if(path.split().pop()=="") path = path.dirname();
             if(!path.exists()) {
-                throw new Error("No package found at: " + path);
+                throw new PackageStoreError("No package found at: " + path);
             }
             DESCRIPTOR.PackageDescriptor(path.join("package.json")).validate();
             var packagePath = this.getPackagesPath().join(path);
             if(packagePath.exists()) {
                 if(!packagePath.isLink()) {
-                    throw new Error("Found hard directory instead of link at: " + packagePath);
+                    throw new PackageStoreError("Found hard directory instead of link at: " + packagePath);
                 }
             } else {
                 packagePath.dirname().mkdirs();
@@ -82,33 +84,47 @@ PackageStore.prototype.get = function(locator) {
                 return pkg;
             }
             var vendor = VENDOR.getVendorForUrl(uri.url);
-            if(!vendor) {
-                throw new Error("External HTTP direct package locators are not supported for vendor: " + uri.domain);
+            if(vendor) {
+                downloadInfo = vendor.getDownloadInfoForUrl(uri.url);
+            } else {
+                // no specific vendor found - try and determine download info ourselves
+                var ext = FILE.Path(uri.file).extension().substr(1);
+                switch(ext) {
+                    case "tgz":
+                        downloadInfo = {
+                            "type": ext,
+                            "url": uri.url
+                        };
+                        break;
+                    default:
+                        throw new PackageStoreError("Direct download URL with extension '"+ext+"' not supported!");
+                        break;
+                }
             }
-            downloadInfo = vendor.getDownloadInfoForUrl(uri.url);
         } else {
-            throw new Error("Package locators for URL scheme '"+uri.scheme+"' are not supported yet!");
+            throw new PackageStoreError("Package locators for URL scheme '"+uri.scheme+"' are not supported yet!");
         }
     } else {
-        throw new Error("You should never reach this!");
+        throw new PackageStoreError("You should never reach this!");
     }
     var packagePath = this.getPackagesPath().join(locator.getTopLevelId());    
     if(packagePath.exists()) {
         if(packagePath.isLink()) {
-            throw new Error("Found link instead of hard directory at: " + packagePath);
+            throw new PackageStoreError("Found link instead of hard directory at: " + packagePath);
         }
         return PACKAGE.Package(packagePath, locator);
     }
-    if(!this.downloads.has(downloadInfo.url)) {
-        this.downloads.download(downloadInfo.url);
+    var url = downloadInfo.url;
+    if(!this.downloads.has(url)) {
+        url = download(url);
     }
-    var file = this.downloads.get(downloadInfo.url);
+    var file = this.downloads.get(url);
     if(!file.exists()) {
-        throw new Error("Error downloading archive from: " + downloadInfo.url);
+        throw new PackageStoreError("Error downloading archive from: " + url);
     }
     if(file.size()==0) {
         file.remove();
-        throw new Error("Downloaded archive is empty: " + downloadInfo.url);
+        throw new PackageStoreError("Downloaded archive is empty: " + url);
     }
     var extractionPath = file.dirname().join(file.basename() + "~extracted");
     if(!extractionPath.exists()) {
@@ -125,10 +141,19 @@ PackageStore.prototype.get = function(locator) {
                 });
             } catch(e) {
                 file.remove();
-                throw new Error("Error unzipping: " + e + " file: " + file + " from url: " + downloadInfo.url);
+                throw new PackageStoreError("Error unzipping: " + e + " file: " + file + " from url: " + url);
+            }
+        } else
+        if(downloadInfo.type=="tgz") {
+            extractionPath.mkdirs();
+            OS.command("tar -zxvf " + file + " -C " + extractionPath);
+            if(!UTIL.len(extractionPath.listPaths())) {
+                OS.command("rm -Rf " + extractionPath);
+                file.remove();
+                throw new PackageStoreError("Error untargzipping: file: " + file + " from url: " + url);
             }
         } else {
-            throw new Error("Archive type not supported: " + downloadInfo.type);
+            throw new PackageStoreError("Archive type not supported: " + downloadInfo.type);
         }
     }
     packagePath.dirname().mkdirs();
@@ -152,11 +177,18 @@ PackageStore.prototype.get = function(locator) {
     
     function checkSources(locator) {
         if(!locator.getForceRemote() && self.sources && (descriptor = self.sources.getDescriptor(locator))) {
+            // convert revision into MAJOR version if applicable
+            // this ensures 0.1.0alpha can be linked while actual versions (0.1.0alpha1) are hard directories
+            var fsLocator = locator.clone();
+            var major = SEMVER.getMajor(locator.getRevision(), true);
+            if(major) {
+                fsLocator.setRevision(major);
+            }
             // link package
-            var packagePath = self.getPackagesPath().join(locator.getTopLevelId());
+            var packagePath = self.getPackagesPath().join(fsLocator.getTopLevelId());
             if(packagePath.exists()) {
                 if(!packagePath.isLink()) {
-                    throw new Error("Found hard directory instead of link at: " + packagePath);
+                    throw new PackageStoreError("Found hard directory instead of link at: " + packagePath);
                 }
             } else {
                 packagePath.dirname().mkdirs();
@@ -166,27 +198,72 @@ PackageStore.prototype.get = function(locator) {
         }
         return false;
     }
+
+    function download(url) {
+        // PINF mirrors popular downloads. We check the mirror for some types of packages.
+        // TODO: The types of packages to check for on the mirror should be configurable
+        try {
+            var uri = URI.parse(url);
+            if(uri.domain=="github.com" && uri.directories[2]=="zipball" && uri.file!="master") {
+                var mirrorUrl = "http://mirror.pinf.org/" + uri.domain + uri.path;
+                if(self.downloads.has(mirrorUrl)) {
+                    return url;
+                }
+                self.downloads.download(mirrorUrl);
+                return mirrorUrl;
+            }
+
+        } catch(e) {
+            // file is not in mirror
+        }
+        self.downloads.download(url);
+        return url;
+    }
 }
 
 PackageStore.prototype.deepMappingsForPackage = function(pkg, mappings) {
     if(!pkg || !pkg.exists()) {
-        throw new Error("No valid package object");
+        throw new PackageStoreError("No valid package object");
     }
     mappings = mappings || [];
     var self = this,
         descriptor,
-        usingPackage;
-    pkg.getDescriptor().everyUsing(function(name, locator) {
-        usingPackage = self.get(locator);
-        if(self.sources && (descriptor = self.sources.getDescriptor(locator))) {
-            mappings.push([locator.getSpec(), descriptor.getPath().dirname().valueOf()]);
-        } else {
-            mappings.push([locator.getSpec(), usingPackage.getPath().valueOf()]);
-        }
-        self.deepMappingsForPackage(usingPackage, mappings);
+        depPackage;
+
+    [
+        "Using",
+        "Platform",
+        "Dependency"
+    ].forEach(function(type) {
+        pkg.getDescriptor()["every"+type](function(name, locator) {
+            if(!locator) return;
+            depPackage = self.get(locator);
+            if(self.sources && (descriptor = self.sources.getDescriptor(locator))) {
+                mappings.push([locator.getSpec(), descriptor.getPath().dirname().valueOf(), type.toLowerCase()]);
+            } else {
+                mappings.push([locator.getSpec(), depPackage.getPath().valueOf(), type.toLowerCase()]);
+            }
+            self.deepMappingsForPackage(depPackage, mappings);
+        });
     });
     
-    // TODO: Collect system package dependencies
     
+
+    // TODO: Collect system package dependencies
+
     return mappings;
 }
+
+
+
+var PackageStoreError = exports.PackageStoreError = function(message) {
+    this.name = "PackageStoreError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+PackageStoreError.prototype = new PackageStoreError();
+
+

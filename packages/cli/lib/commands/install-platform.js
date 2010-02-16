@@ -23,6 +23,8 @@ command.action(function (options) {
         });
         var catalogName = VALIDATOR.validate("string", options.args[1]);
         var revision = (options.args[2])?VALIDATOR.validate("string", options.args[2]):null;
+        
+        // TODO: Only allow [A-Za-z0-9_-]
         var name = (options.name)?VALIDATOR.validate("string", options.name):null;
 
         var locator = LOCATOR.PackageLocator({
