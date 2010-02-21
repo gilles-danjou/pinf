@@ -26,6 +26,7 @@ Workspaces.prototype.getPath = function() {
  *   * http://github.com/cadorn/pinf (+ URI.URI variant) - Vendor URIs
  *   * github.com/cadorn/pinf/ (+ URI.URI variant) - Vendor URIs
  *   * github.com/cadorn/pinf (+ URI.URI variant) - Vendor URIs
+ *   * github.com/cadorn/pinf:sub/path - Vendor URIs with sub-path
  *   * .../pinf/workspaces/github.com/cadorn/pinf (+ File.Path variant)
  *   * .../pinf/workspaces/github.com/cadorn/pinf/... (+ File.Path variant)
  *       will go up the tree until it finds the last package.json file
@@ -33,6 +34,7 @@ Workspaces.prototype.getPath = function() {
  *   * <name> (if name is unique among workspaces)
  */
 Workspaces.prototype.getForSelector = function(selector, useExactPath) {
+    var subPath;
     if(selector instanceof URI.URI) {
         selector = selector.url;
     } else
@@ -68,7 +70,13 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         selector = "http://" + this.path.join("").relative(lastMatch);
     } else
     if(!/^http:\/\//.test(selector)) {
-        selector = "http://" + selector;
+        var parts = selector.split(":");
+        if(parts.length==2) {
+            selector = "http://" + parts[0];
+            subPath = parts[1];
+        } else {
+            selector = "http://" + selector;
+        }
     }
     var workspace;
     try {
@@ -77,7 +85,11 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         if(!info.user || !info.repository) {
             throw new Error("Not a valid repository URL");
         }
-        workspace = WORKSPACE.Workspace(this.path.join(vendor.getWorkspacePath(info)));
+        path = this.path.join(vendor.getWorkspacePath(info));
+        if(subPath) {
+            path = path.join(subPath);
+        }
+        workspace = WORKSPACE.Workspace(path);
         workspace.setVendorInfo(info);
     } catch(e) {
         if(!path) {

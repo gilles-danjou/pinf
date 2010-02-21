@@ -6,6 +6,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 var UTIL = require("util");
 var FILE = require("file");
 var OS = require("os");
+var JSON = require("json");
 var JSON_STORE = require("json-store", "util");
 var PACKAGE = require("./package");
 var LOCATOR = require("./package/locator");
@@ -79,10 +80,10 @@ Program.prototype.build = function(options) {
         rawBuildPath = buildPath.join("raw"),
         path;
         
-    // link package.json file
+    // write package.json file (merged with package.local.json if avaiable)
     path = rawBuildPath.join("package.json");
     path.dirname().mkdirs();
-    this.getPath().join("package.json").copy(path);
+    path.write(JSON.encode(descriptor.spec, null, "    "));
 
     var spec = this.spec;
     if(!options.remoteProgram && !options.remoteDependencies) {

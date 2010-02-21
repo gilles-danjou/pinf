@@ -55,7 +55,13 @@ Catalogs.prototype.update = function(url, subPath) {
     }
 
     function update(url) {
+        print(url);
         // TODO: Check eTags and only update if changed            
         self.store.download(url);
+
+        var catalog = CATALOG.PackageCatalog(self.store.get(url));
+        if(catalog.getDirtyPath().exists()) {
+            catalog.getDirtyPath().remove();
+        }
     }
 }

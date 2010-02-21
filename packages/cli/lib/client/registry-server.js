@@ -256,7 +256,8 @@ Client.prototype.announceRelease = function(options) {
     }
 
     // mark corresponding catalog as dirty
-    var catalog = PINF.getDatabase().getCatalogs().get(info.url + "/catalog.json");
+
+    var catalog = PINF.getDatabase().getCatalogs().get(info.url + "catalog.json");
     catalog.flagAsDirty();
 
     var response = makeRequest(info.url, "announce-release", args);
@@ -283,25 +284,30 @@ ClientError.prototype = new Error();
 
 function makeRequest(url, action, args) {
 
-    args["action"] = action;
-    
-    var body = JSON.encode(args);
-    var response = HTTP_CLIENT.HttpClient({
-        "method": "POST",
-        "url": url,
-        "headers": {
-            "Content-Length": body.length,
-            "Content-Type": "application/json"
-        },
-        "body": [
-            body
-        ]
-    }).connect();
-    
-    var body = [];
-    response.body.forEach(function(chunk) {
-        body.push(chunk.decodeToString());
-    });
-    
-    return JSON.decode(body.join(""));
+    try {
+        args["action"] = action;
+        
+        var body = JSON.encode(args);
+        var response = HTTP_CLIENT.HttpClient({
+            "method": "POST",
+            "url": url,
+            "headers": {
+                "Content-Length": body.length,
+                "Content-Type": "application/json"
+            },
+            "body": [
+                body
+            ]
+        }).connect();
+        
+        var body = [];
+        response.body.forEach(function(chunk) {
+            body.push(chunk.decodeToString());
+        });
+        
+        return JSON.decode(body.join(""));
+    } catch(e) {
+        dump(body.join(""));
+        system.log.error(e);
+    }
 }

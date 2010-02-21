@@ -81,6 +81,7 @@ Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
             }
             targetPath = targetPackage.getPath().join("bin", command[0]);
             targetPath.dirname().mkdirs();
+
             var contents = sourcePath.read();
             if(command[1].platform) {
                 var locator = descriptor.getPlatformLocatorForName(command[1].platform);
