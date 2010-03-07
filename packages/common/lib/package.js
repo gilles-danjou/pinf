@@ -101,6 +101,15 @@ Package.prototype.getTester = function() {
     }
 }
 
+Package.prototype.getLauncher = function() {
+    var info = this.getInfoForPinfLocatorProperty("launcher");
+    if(info) {
+        return info.module.Launcher(info.pkg);
+    } else {
+        return require("./launcher").Launcher(this);
+    }
+}
+
 Package.prototype.getInfoForPinfLocatorProperty = function(propertyName) {
     var descriptor = this.getDescriptor(),
         pinf = descriptor.getPinfSpec();
@@ -121,6 +130,9 @@ Package.prototype.getInfoForPinfLocatorProperty = function(propertyName) {
             locator = newLocator;
         }
 
+        // TODO: If pkg has a program.json file we need to build the package first as the
+        //       module being required may need the built program
+
         pkg.makeCallable();
 
         // load actual module now that package and dependencies are registered
@@ -134,12 +146,12 @@ Package.prototype.getInfoForPinfLocatorProperty = function(propertyName) {
 
 
 Package.prototype.makeCallable = function() {
-    
+
     PACKAGES.registerUsingPackage(this.getLocator().getSpec(true), this.getPath().valueOf());
 
     // collect all dependencies (recursively) for package
     var mappings = require("./pinf").getDatabase().getPackageStore().deepMappingsForPackage(this);
-    
+
     // register dependency mappings in preparation for loading
     if(mappings && mappings.length>0) {
         mappings.forEach(function(mapping) {

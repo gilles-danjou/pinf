@@ -11,7 +11,7 @@ var PINF = require("pinf", "common");
 var command = exports["activate-platform"] = new ARGS.Parser();
 
 command.help('Activate a platform for a workspace');
-command.arg("Workspace", "Name");
+command.args("Workspace", "Name");
 command.option("-s", "--switch").bool().help("Switch to workspace");
 command.helpful();
 

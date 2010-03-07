@@ -19,7 +19,7 @@ var PackageDescriptor = exports.PackageDescriptor = function(path) {
 
     if(path instanceof FILE.Path) {
         this.path = path;
-    
+
         if(!path.exists()) {
             throw new PackageDescriptorError("No package descriptor found at: " + path);
         }
@@ -85,6 +85,11 @@ PackageDescriptor.prototype.getVersion = function() {
 
 PackageDescriptor.prototype.getPinfSpec = function() {
     return this.spec.pinf || false;
+}
+
+PackageDescriptor.prototype.getPlatform = function() {
+    if(!this.spec.pinf) return false;
+    return this.spec.pinf.platform || false;
 }
 
 PackageDescriptor.prototype.getTopLevelId = function() {
@@ -196,6 +201,16 @@ PackageDescriptor.prototype.getUsingLocatorForName = function(name) {
     return LOCATOR.PackageLocator(this.spec.using[name]);
 }
 
+PackageDescriptor.prototype.getDependencyLocatorForName = function(name) {
+    if(!this.spec.dependencies) {
+        return false;
+    }
+    if(UTIL.isArrayLike(this.spec.dependencies) || !this.spec.dependencies[name]) {
+        return false;
+    }
+    return LOCATOR.PackageLocator(this.spec.dependencies[name]);
+}
+
 PackageDescriptor.prototype.everyUsing = function(callback) {
     if(!this.spec.using) {
         return false;
@@ -211,6 +226,16 @@ PackageDescriptor.prototype.everyPlatform = function(callback) {
         return false;
     }
     UTIL.every(this.spec.pinf.platforms, function(item) {
+        callback(item[0], LOCATOR.PackageLocator(item[1]));
+    });
+    return true;
+}
+
+PackageDescriptor.prototype.everyProgram = function(callback) {
+    if(!this.spec.pinf || !this.spec.pinf.programs) {
+        return false;
+    }
+    UTIL.every(this.spec.pinf.programs, function(item) {
         callback(item[0], LOCATOR.PackageLocator(item[1]));
     });
     return true;
@@ -262,27 +287,36 @@ PackageDescriptor.prototype.traverseEveryLocator = function(property, callback, 
     if(!options || !options["package"]) {
         throw new PackageDescriptorError("options.package not provided");
     }
-    if(!this.spec[property]) {
-        return false;
-    }
     stacks = stacks || {"names": []};
     var locator,
         self = this,
         itemOptions = UTIL.copy(options);
-    UTIL.every(this.spec[property], function(item) {
-        if(typeof item[1] == "object") {
-            locator = LOCATOR.PackageLocator(item[1]);
-            if(locator.isCatalog() || locator.isDirect()) {
-                locator = callback(options["package"], item[0], locator, stacks) || locator;
-                if(!locator) {
-                    return;
-                }
-                itemOptions["package"] = options.packageStore.get(locator);
-                stacks.names.push(item[0]);
-                itemOptions["package"].getDescriptor().traverseEveryLocator(property, callback, itemOptions, stacks);
-                stacks.names.pop();
-            }
+        
+    var properties = [property];
+    // traverse using packages to look for dependencies
+    if(property=="dependencies") {
+        properties.push("using");
+    }
+    properties.forEach(function(prop) {
+        // ignore if no spec or spec is an array (i.e. spec must be an object with a bunch of locators)
+        if(!self.spec[prop] || UTIL.isArrayLike(self.spec[prop])) {
+            return;
         }
+        UTIL.every(self.spec[prop], function(item) {
+            if(typeof item[1] == "object") {
+                locator = LOCATOR.PackageLocator(item[1]);
+                if(locator.isCatalog() || locator.isDirect()) {
+                    locator = callback(options["package"], item[0], locator, stacks, prop) || locator;
+                    if(!locator) {
+                        return;
+                    }
+                    itemOptions["package"] = options.packageStore.get(locator);
+                    stacks.names.push(item[0]);
+                    itemOptions["package"].getDescriptor().traverseEveryLocator(property, callback, itemOptions, stacks);
+                    stacks.names.pop();
+                }
+            }
+        });
     });
     return true;
 }

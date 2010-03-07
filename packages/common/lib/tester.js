@@ -37,6 +37,7 @@ Tester.prototype.triggerTest = function(targetPackage, testOptions) {
 
 Tester.prototype.test = function(targetPackage, testOptions) {
     // to be overwritten
+    throw new Error("You need to declare a tester in the package descriptor!");
 }
 
 

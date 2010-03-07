@@ -246,10 +246,6 @@ PackageStore.prototype.deepMappingsForPackage = function(pkg, mappings) {
             self.deepMappingsForPackage(depPackage, mappings);
         });
     });
-    
-    
-
-    // TODO: Collect system package dependencies
 
     return mappings;
 }

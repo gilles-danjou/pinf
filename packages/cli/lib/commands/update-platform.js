@@ -7,6 +7,7 @@ var ARGS = require("args");
 var ARGS_UTIL = require("args-util", "util");
 var VALIDATOR = require("validator", "util");
 var PINF = require("pinf", "common");
+var FILE = require("file");
 
 var command = exports["update-platform"] = new ARGS.Parser();
 
@@ -17,8 +18,23 @@ command.helpful();
 command.action(function (options) {
     try {
         var id = VALIDATOR.validate("string", options.args[0]);
+        
+        // if we are in a workspace we update the platform with the given name as declared
+        // in the package descriptor
+        var workspace = PINF.getDatabase().getWorkspaceForSelector(FILE.Path(FILE.cwd()));
+        var platform;
+        if(workspace) {
+            var locator = workspace.getDescriptor().getPlatformLocatorForName(id);
+            if(locator) {
+                platform = PINF.getPlatformForSelector(locator);
+            }
+        }
+        
+        // check global platforms if ID is not declared in workspace
+        if(!platform) {
+            platform = PINF.getPlatformForName(id);
+        }
 
-        var platform = PINF.getPlatformForName(id);
         if(!platform.exists()) {
             command.print("No platform found for ID: " + id);
             return;

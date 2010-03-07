@@ -74,7 +74,7 @@ Program.prototype.build = function(options) {
     if(!options.skipClean) {
         this.clean();
     }
-    
+
     var descriptor = this.getDescriptor(),
         buildPath = this.getBuildPath(),
         rawBuildPath = buildPath.join("raw"),
@@ -116,7 +116,11 @@ Program.prototype.build = function(options) {
     }, function(type) {
 
         var locatorRewriteInfo = [];
-        descriptor[type[1].iterator](function(parentPackage, name, locator, stacks) {
+        descriptor[type[1].iterator](function(parentPackage, name, locator, stacks, property) {
+            if(!locator) {
+                return;
+            }
+
             var key = ["packages", type[0]].concat(stacks.names).concat([name, "@"]);
             if(options.remoteProgram) {
                 if(!spec.has(key)) {
@@ -136,19 +140,25 @@ Program.prototype.build = function(options) {
             if(pkg.getVersion()) {
                 locator.pinAtVersion(pkg.getVersion());
             }
-
-            if(type[0]=="system") {
-                path = rawBuildPath.join(type[1].directory, stacks.names.concat(name).join("."));
-            } else
-            if(type[0]=="using") {
-                path = rawBuildPath.join(type[1].directory, pkg.getTopLevelId());
+            
+            // when traversing dependencies, using packages are traversed as well
+            if(property!=type[1]["property"]) {
+                return locator;
             }
+
+//            if(type[0]=="system") {
+//                path = rawBuildPath.join(type[1].directory, stacks.names.concat(name).join("."));
+//            } else
+//            if(type[0]=="using") {
+//                path = rawBuildPath.join(type[1].directory, pkg.getTopLevelId());
+                path = rawBuildPath.join("using", pkg.getTopLevelId());
+//            }
 
             // update info in program.json file
             var info =  {};
             if(pkg.hasUid()) {
                 info["uid"] = pkg.getUid();
-                
+
                 options.uidLocators[info["uid"]] = locator;
             }
             info["locator"] = locator.getSpec(true);
@@ -179,7 +189,7 @@ Program.prototype.build = function(options) {
             "packageStore": self.packageStore,
             "package": self
         });
-    
+
         locatorRewriteInfo.forEach(function(info) {
             if(info.id==self[type[1].id]()) {
                 path = rawBuildPath.join("package.json");
@@ -189,6 +199,23 @@ Program.prototype.build = function(options) {
             JSON_STORE.JsonStore(path).set([type[1].property, info.name, "revision"], info.revision);
         });
     });
+    
+    
+    // link all packages with no UID property
+    // these are packages that are managed as part of this package
+    // if a UID is present the package will end up in /using/ based on dependency declarations
+    var sourceBasePath = this.getPath().join("packages"),
+        targetBasePath = rawBuildPath.join("packages");
+    if(sourceBasePath.exists()) {
+        targetBasePath.mkdirs();
+        sourceBasePath.listPaths().forEach(function(item) {
+            if(item.join("package.json").exists()) {
+                if(!UTIL.has(JSON.decode(item.join("package.json").read().toString()), "uid")) {
+                    item.symlink(targetBasePath.join(item.basename()));
+                }
+            }
+        });
+    };
 
     var builder = this.getBuilder();
     options["skipWriteCommands"] = true;
@@ -225,4 +252,14 @@ Program.prototype.publish = function(options) {
     publisher.triggerPublish(this, options);
     
     return options.path;
+}
+
+
+Program.prototype.launch = function(options) {
+    
+    var launcher = this.getLauncher({
+        "packageStore": this.packageStore
+    });
+
+    launcher.triggerLaunch(this, options);
 }

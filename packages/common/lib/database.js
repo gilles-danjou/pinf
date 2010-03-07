@@ -101,7 +101,7 @@ Database.prototype.getSources = function() {
 Database.prototype.getRegistryUriForNamespace = function(namespace) {
     var registry = this.getConfig("namespaces").get([namespace, "registry"]);
     if(!registry) {
-        throw new Error("Namespace not found in local registry");
+        throw new DatabaseError("Namespace not found in local registry");
     }
     var registryInfo = this.getConfig("registries").get([registry]);
     return URI.parse(registryInfo.server + namespace + "/");
@@ -127,7 +127,7 @@ Database.prototype.getProgram = function(locator) {
 Database.prototype.getBuildPathForPackage = function(pkg) {
     var locator = pkg.getLocator();
     if(!locator) {
-        throw new Error("No locator in package");
+        throw new DatabaseError("No locator in package: " + pkg.getPath());
     }        
     return this.path.join("builds", locator.getTopLevelId());
 }
@@ -135,7 +135,7 @@ Database.prototype.getBuildPathForPackage = function(pkg) {
 Database.prototype.getTestPathForPackage = function(pkg) {
     var locator = pkg.getLocator();
     if(!locator) {
-        throw new Error("No locator in package");
+        throw new DatabaseError("No locator in package: " + pkg.getPath());
     }        
     return this.path.join("tests", locator.getTopLevelId());
 }
@@ -259,3 +259,15 @@ Database.prototype.mapSources = function() {
         return catalogs[url];
     }
 }
+
+
+
+var DatabaseError = exports.DatabaseError = function(message) {
+    this.name = "DatabaseError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+DatabaseError.prototype = new Error();

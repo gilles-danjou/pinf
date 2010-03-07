@@ -62,6 +62,10 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
             if(path.join("package.json").exists()) {
                 lastMatch = path;
             }
+            // stop at the deepest affirmative workspace
+            if(path.join(".pinf-workspace.json").exists()) {
+                break;
+            }
             path = path.dirname();
         }
         if(!lastMatch) {

@@ -284,11 +284,13 @@ ClientError.prototype = new Error();
 
 function makeRequest(url, action, args) {
 
+    var response;
+
     try {
         args["action"] = action;
         
         var body = JSON.encode(args);
-        var response = HTTP_CLIENT.HttpClient({
+        var client = HTTP_CLIENT.HttpClient({
             "method": "POST",
             "url": url,
             "headers": {
@@ -298,16 +300,18 @@ function makeRequest(url, action, args) {
             "body": [
                 body
             ]
-        }).connect();
+        });
+        response = client.connect();
         
-        var body = [];
+        var responseBody = [];
         response.body.forEach(function(chunk) {
-            body.push(chunk.decodeToString());
+            responseBody.push(chunk.decodeToString());
         });
         
-        return JSON.decode(body.join(""));
+        return JSON.decode(responseBody.join(""));
     } catch(e) {
-        dump(body.join(""));
+        dump(response);
         system.log.error(e);
+        throw e;
     }
 }

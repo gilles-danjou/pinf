@@ -38,8 +38,17 @@ Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
 
     this.prepare(targetPackage, buildOptions);
 
+    // install/build all dependent programs
+    descriptor.everyProgram(function(name, locator) {
+        var pkg = PINF.getDatabase().getProgram(locator);
+        pkg.build({
+            "remoteProgram": false,
+            "remoteDependencies": false,
+            "args": []
+        });
+    });
 
-    // install/build all dependent platforms first
+    // install/build all dependent platforms
     descriptor.everyPlatform(function(name, locator) {
         var platform = PINF.getPlatformForLocator(locator);
         if(!platform.exists()) {
