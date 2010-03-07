@@ -6,3 +6,5 @@
 /local/
 /.narwhal/
 .tmp/
+/.pinf-workspace.json
+/bin/.pinf-activate-workspace

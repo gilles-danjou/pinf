@@ -1,27 +1,6 @@
 {
     "uid": "http://registry.pinf.org/cadorn.org/github/pinf/",
     "name": "pinf",
-    "dependencies": [
-        "narwhal"
-    ],
-    "using": {
-        "cli": {
-            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
-            "name": "cli"
-        },
-        "registry-server": {
-            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
-            "name": "registry-server"
-        },
-        "common": {
-            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
-            "name": "common"
-        },
-        "extras": {
-            "catalog": "http://github.com/cadorn/pinf/raw/master/catalog.json",
-            "name": "extras"
-        }
-    },
     "repositories": [
         {
             "type": "git",

@@ -1,8 +1,12 @@
 {
     "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/cli/",
     "name": "cli",
-    "dependencies": [
-        "narwhal"
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/cli"
+        }
     ],
     "using": {
         "common": {
@@ -16,13 +20,6 @@
             "revision": "master"
         }
     },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git://github.com/cadorn/pinf.git",
-            "path": "packages/cli"
-        }
-    ],
     "pinf": {
         "commands": {
             "pinf": "pinf"
