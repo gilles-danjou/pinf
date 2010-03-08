@@ -79,7 +79,7 @@ Program.prototype.build = function(options) {
         buildPath = this.getBuildPath(),
         rawBuildPath = buildPath.join("raw"),
         path;
-        
+
     // write package.json file (merged with package.local.json if avaiable)
     path = rawBuildPath.join("package.json");
     path.dirname().mkdirs();
@@ -217,8 +217,10 @@ Program.prototype.build = function(options) {
         });
     };
 
+print("build program: " + this.getPath());
+
     var builder = this.getBuilder();
-    options["skipWriteCommands"] = true;
+//    options["skipWriteCommands"] = true;
     builder.triggerBuild(this, options);
 
 

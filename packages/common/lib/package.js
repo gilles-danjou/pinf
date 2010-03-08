@@ -137,7 +137,7 @@ Package.prototype.getInfoForPinfLocatorProperty = function(propertyName) {
 
         // load actual module now that package and dependencies are registered
         return {
-            "pkg": require("./pinf").getPackageForLocator(locator),
+            "pkg": this,//require("./pinf").getPackageForLocator(locator),
             "module": require(locator.getModule(), pkg.getTopLevelId())
         }
     }

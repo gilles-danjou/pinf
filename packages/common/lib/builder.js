@@ -8,6 +8,11 @@ var PINF = require("./pinf");
 var OS = require("os");
 
 
+var DEBUG = true;
+
+var debugStrDepth = 0;
+
+
 var Builder = exports.Builder = function(pkg, options) {
     if (!(this instanceof exports.Builder))
         return new exports.Builder(pkg, options);
@@ -32,11 +37,21 @@ Builder.prototype.getPackageForLocator = function(locator) {
 
 Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
 
+    debugStrDepth++;
+    var debugStrPrefix = "";
+    for(var i=0;i<debugStrDepth;i++) debugStrPrefix += debugStrDepth+"    ";
+
+    if(DEBUG) print(debugStrPrefix + "Builder.prototype.triggerBuild: " + this.pkg.getPath());
+
     var descriptor = this.pkg.getDescriptor(),
         spec = descriptor.getPinfSpec(),
         self = this;
 
+    if(DEBUG) print(debugStrPrefix + "  -- prepare:");
+
     this.prepare(targetPackage, buildOptions);
+
+    if(DEBUG) print(debugStrPrefix + "  -- build programs:");
 
     // install/build all dependent programs
     descriptor.everyProgram(function(name, locator) {
@@ -48,28 +63,42 @@ Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
         });
     });
 
+    if(DEBUG) print(debugStrPrefix + "  -- build platforms:");
+
     // install/build all dependent platforms
     descriptor.everyPlatform(function(name, locator) {
+        if(DEBUG) print(debugStrPrefix + "     platform: " + name);
         var platform = PINF.getPlatformForLocator(locator);
         if(!platform.exists()) {
             platform.init(locator);
         }
     });
 
+    if(DEBUG) print(debugStrPrefix + "  -- build system packages:");
+
     // build all dependencies
     descriptor.everyDependency(function(name, locator) {
         if(!(locator instanceof LOCATOR.PackageLocator)) return;
+        if(DEBUG) print(debugStrPrefix + "     package: " + name);
         var pkg = self.getPackageForLocator(locator);
         var builder = pkg.getBuilder(self.options);
         builder.triggerBuild(targetPackage, buildOptions);        
     });
 
+    if(DEBUG) print(debugStrPrefix + "  -- build using packages:");
+
     // build all using packages
+    var usingBuildOptions = UTIL.copy(buildOptions);
+    usingBuildOptions["skipWriteCommands"] = true;
     descriptor.everyUsing(function(name, locator) {
+        if(DEBUG) print(debugStrPrefix + "     package: " + name);
+        
         var pkg = self.getPackageForLocator(locator);
         var builder = pkg.getBuilder(self.options);
-        builder.triggerBuild(targetPackage, buildOptions);        
+        builder.triggerBuild(targetPackage, usingBuildOptions);        
     });
+
+    if(DEBUG) print(debugStrPrefix + "  -- build commands:");
 
     // copy all declared commands
     if(spec.commands && !buildOptions["skipWriteCommands"]) {
@@ -127,13 +156,21 @@ Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
                     }, contents);
                 }
             }
+
+            if(DEBUG) print(debugStrPrefix + "     command: " + targetPath);
             
             targetPath.write(contents);
             targetPath.chmod(0755);
         });
     }
 
+    if(DEBUG) print(debugStrPrefix + "  -- build:");
+
     this.build(targetPackage, buildOptions);
+
+    if(DEBUG) print(debugStrPrefix + "DONE Builder.prototype.triggerBuild");
+
+    debugStrDepth--;
 }
 
 Builder.prototype.prepare = function(program, options) {

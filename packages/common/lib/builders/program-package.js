@@ -75,10 +75,12 @@ Builder.prototype.build = function(targetPackage, buildOptions) {
     var descriptor = targetPackage.getDescriptor();
 
     // build all using packages
+/*  THIS SHOULD NO LONGER BE NEEDED
     descriptor.everyUsing(function(name, locator) {
         var pkg = self.getPackageForLocator(locator);
         var builder = pkg.getBuilder(self.options);
         builder.triggerBuild(targetPackage, buildOptions);        
     });
+*/
 
 }

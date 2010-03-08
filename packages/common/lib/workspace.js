@@ -251,13 +251,18 @@ Workspace.prototype.forEachPackage = function(callback, subPath) {
     var path = this.path,
         self = this;
     if(subPath) {
+        // if we are deeper than 7 directories we give up
+        // workspaces should not be nested so deep
+        if(subPath.valueOf().split("/").length>7) {
+            return;
+        }
         path = path.join(subPath);
     }
     path.listPaths().forEach(function(item) {
         if(item.basename()=="package.json") {
             callback(PACKAGE.Package(item.dirname()));
         } else
-        if(item.isDirectory()) {
+        if(item.isDirectory() && item.basename()!=".git") {
             self.forEachPackage(callback, (subPath)?subPath.join(item.basename()):item.basename());
         }
     });

@@ -2,4 +2,4 @@
 
 /*PINF_MACRO[LoadCommandEnvironment]*/
 
-require("pinf", "http://registry.pinf.org/cadorn.org/github/pinf/packages/cli/").main(system.args);
+require("pinf", "registry.pinf.org/cadorn.org/github/pinf/packages/cli/master").main(system.args);

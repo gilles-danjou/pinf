@@ -21,14 +21,24 @@
         }
     },
     "pinf": {
+        "platforms": {
+            "narwhal-rhino": {
+                "catalog": "http://registry.pinf.org/cadorn.org/github/platforms/packages/narwhal/packages/catalog.json",
+                "name": "rhino",
+                "revision": "master"
+            }
+        },
         "commands": {
-            "pinf": "pinf"
+            "pinf": {
+                "path": "bin/pinf",
+                "platform": "narwhal-rhino"
+            }
         },
         "builder": {
             "catalog": "http://registry.pinf.org/cadorn.org/github/pinf/packages/catalog.json",
-            "name": "extras",
+            "name": "common",
             "revision": "master",
-            "module": "builders/tusk-package"
+            "module": "builders/program-package"
         }
     }
 }

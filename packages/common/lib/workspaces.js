@@ -145,7 +145,7 @@ Workspaces.prototype.forEach = function(callback, subPath) {
             found = true;
             callback(self.getForSelector(item.dirname(), true));
         } else
-        if(item.isDirectory()) {
+        if(item.isDirectory() && item.basename()!=".git" && item.basename()!=".svn") {
             dirs.push(item.basename());
         }
     });

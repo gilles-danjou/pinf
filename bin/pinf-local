@@ -1,0 +1,11 @@
+#!/usr/bin/env narwhal
+
+// ./pinf-local - Run pinf using packages directly from ../packages/
+// Requires: git clone git@github.com:cadorn/util.git ../../util
+// This is used to bootstrap pinf when there is not a pinf host environment available
+
+system.sea = require("file").Path(module.path).join("../../").valueOf();
+
+require("packages").main();
+
+require("pinf", "registry.pinf.org/cadorn.org/github/pinf/packages/cli/master").main(system.args);
