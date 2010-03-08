@@ -28,6 +28,10 @@ Get the source and build the PINF command:
     mkdir bootstraps
     cd bootstraps
     git clone git://github.com/280north/narwhal.git narwhal
+    cd narwhal
+    git branch --track experimental origin/experimental
+    git checkout experimental
+    cd ..
     export PATH=~/pinf/bootstraps/narwhal/bin:$PATH
     git clone git@github.com:cadorn/pinf.git pinf
     export PATH=~/pinf/bootstraps/pinf/bin:$PATH
