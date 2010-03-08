@@ -17,6 +17,9 @@ var Workspaces = exports.Workspaces = function(path) {
 }
 
 Workspaces.prototype.getPath = function() {
+    if(!this.path.exists()) {
+        this.path.mkdirs();
+    }
     return this.path;
 }
 
