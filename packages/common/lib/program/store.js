@@ -58,21 +58,25 @@ ProgramStore.prototype.get = function(locator) {
         });
 
         // if there are *.local.* files in the workspace for this program we link them
-        var workspace = PINF.getWorkspaceForSelector(pkg.getUid());
-        if(workspace) {
-            var repoInfo = pkg.getDescriptor().getRepositoryInfo(),
-                basePath = workspace.getPath();
-            if(repoInfo.path) {
-                basePath = basePath.join(repoInfo.path);
-            }
-            [
-                "package.local.json",
-                "program.local.json"
-            ].forEach(function(basename) {
-                if(basePath.join(basename).exists() && !programPath.join(basename).exists()) {
-                    basePath.join(basename).symlink(programPath.join(basename));
+        try {
+            var workspace = PINF.getWorkspaceForSelector(pkg.getUid());
+            if(workspace) {
+                var repoInfo = pkg.getDescriptor().getRepositoryInfo(),
+                    basePath = workspace.getPath();
+                if(repoInfo.path) {
+                    basePath = basePath.join(repoInfo.path);
                 }
-            });
+                [
+                    "package.local.json",
+                    "program.local.json"
+                ].forEach(function(basename) {
+                    if(basePath.join(basename).exists() && !programPath.join(basename).exists()) {
+                        basePath.join(basename).symlink(programPath.join(basename));
+                    }
+                });
+            }
+        } catch(e) {
+            // slient! - this is a flow-control try-catch which is fine as this is an edge use-case
         }
     }
 
