@@ -60,14 +60,19 @@ command.action(function (options) {
             }
             // local program + check local dependencies
 
-            var workspace = PINF.getDatabase().getWorkspaceForSelector(directory),
+            var workspace,
                 revisionControl;
             // if we have a workspace try and consult git to get the branch
-            if(workspace.exists()) {
-                revisionControl = workspace.getRevisionControl();
-                if(!revisionControl.initialized()) {
-                    revisionControl = null;
+            try {
+                workspace = PINF.getDatabase().getWorkspaceForSelector(directory);
+                if(workspace && workspace.exists()) {
+                    revisionControl = workspace.getRevisionControl();
+                    if(!revisionControl.initialized()) {
+                        revisionControl = null;
+                    }
                 }
+            } catch(e) {
+                // slient! - this is a flow-control try-catch which is fine as this is an edge use-case
             }
             // if not workspace or git repository try and consult git for directory directly
             if(!revisionControl) {
