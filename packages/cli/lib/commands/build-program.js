@@ -58,8 +58,11 @@ command.action(function (options) {
                 remoteDependencies = true;
             }
             // local program + check local dependencies
-            var workspace = PINF.getDatabase().getWorkspaceForSelector(directory);
-            locator.setRevision(workspace.getRevisionControlBranch());
+            var workspace = PINF.getDatabase().getWorkspaceForSelector(directory),
+                revisionControl = workspace.getRevisionControl();
+            if(revisionControl && revisionControl.initialized()) {
+                locator.setRevision(revisionControl.getActiveBranch());
+            }
         }
 
         var pkg = PINF.getDatabase().getProgram(locator);
