@@ -1,0 +1,18 @@
+{
+    "uid": "http://registry.pinf.org/cadorn.org/github/pinf/programs/cli/",
+    "name": "cli",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "programs/cli"
+        }
+    ],
+    "using": {
+        "program": {
+            "catalog": "http://registry.pinf.org/cadorn.org/github/pinf/packages/catalog.json",
+            "name": "cli",
+            "revision": "master"
+        }
+    }
+}
