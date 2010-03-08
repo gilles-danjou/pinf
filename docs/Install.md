@@ -11,8 +11,8 @@ Requirements:
   * java
 
 
-The easy way
-------------
+Versioned release
+-----------------
 
 Coming soon!
 
@@ -20,7 +20,7 @@ Coming soon!
 From source
 -----------
 
-Get the source and build the PINF command:
+Get the sources and build the PINF command:
 
     cd ~
     mkdir pinf

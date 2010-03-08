@@ -26,59 +26,59 @@ command.action(function (options) {
 
         workspaces.forEach(function(workspace) {
             
-//if(workspace.getName()!="fireconsole") return;
-
             command.print("\0yellow(" +workspace.getName()+ "\0): " + workspace.getPath());
             
-            var rc = workspace.getRevisionControl(),
-                status = rc.getStatus();
-            if(status.dirty) {
-                // dirty working copy
-                command.print("    Git: \0red(" + status.branch + " : dirty working copy\0)");
-            } else
-            if(status.ahead) {
-                // all committed, need to push
-                command.print("    Git: \0magenta(" + status.branch + " : pending push\0)");
-            } else {
-                // all good
-                descriptor = null;
-                if(workspace.hasUid()) {
-                    // get published revision from catalog
-                    locator = locatorForUid(workspace.getUid(), status.branch);
-                    catalog = catalogs.get(locator.getUrl());
-                    var revisions = catalog.getRevisionsForPackage(locator.getName());
-                    if(UTIL.has(revisions, status.branch)) {
-                        descriptor = catalog.getDescriptor(locator);
-                    }
-                }
-                workspaceRevison = rc.getLatestRevisionForBranch(status.branch);
-                command.print("    Git: \0green(" + status.branch + " : " + workspaceRevison + "\0)" +
-                    ((descriptor)?(
-                        " \0"+(("0.0.0rev-"+workspaceRevison==descriptor.getVersion())?"green":"red")+"(" +
-                        locator.getUrl() + 
-                        "\0)"
-                    ):""));
-
-                var str = ["Packages:"];
-                workspace.forEachPackage(function(pkg) {
-                    if(pkg.hasUid() && pkg.getName()!=workspace.getName()) {
-                        locator = locatorForUid(pkg.getUid(), status.branch);
+            var rc = workspace.getRevisionControl();
+            if(rc.initialized()) {
+                var status = rc.getStatus();
+                if(status.dirty) {
+                    // dirty working copy
+                    command.print("    Git: \0red(" + status.branch + " : dirty working copy\0)");
+                } else
+                if(status.ahead) {
+                    // all committed, need to push
+                    command.print("    Git: \0magenta(" + status.branch + " : pending push\0)");
+                } else {
+                    // all good
+                    descriptor = null;
+                    if(workspace.hasUid()) {
+                        // get published revision from catalog
+                        locator = locatorForUid(workspace.getUid(), status.branch);
                         catalog = catalogs.get(locator.getUrl());
                         var revisions = catalog.getRevisionsForPackage(locator.getName());
                         if(UTIL.has(revisions, status.branch)) {
                             descriptor = catalog.getDescriptor(locator);
-
-                            str.push("\0"+(("0.0.0rev-"+workspaceRevison==descriptor.getVersion())?"green":"red")+"(" +
-                                pkg.getName() + 
-                                "\0)");
-
-                        } else {
-                            str.push(pkg.getName());
                         }
                     }
-                });
-                if(str.length>1) {
-                    command.print("    " + str.join(" "));
+                    workspaceRevison = rc.getLatestRevisionForBranch(status.branch);
+                    command.print("    Git: \0green(" + status.branch + " : " + workspaceRevison + "\0)" +
+                        ((descriptor)?(
+                            " \0"+(("0.0.0rev-"+workspaceRevison==descriptor.getVersion())?"green":"red")+"(" +
+                            locator.getUrl() + 
+                            "\0)"
+                        ):""));
+    
+                    var str = ["Packages:"];
+                    workspace.forEachPackage(function(pkg) {
+                        if(pkg.hasUid() && pkg.getName()!=workspace.getName()) {
+                            locator = locatorForUid(pkg.getUid(), status.branch);
+                            catalog = catalogs.get(locator.getUrl());
+                            var revisions = catalog.getRevisionsForPackage(locator.getName());
+                            if(UTIL.has(revisions, status.branch)) {
+                                descriptor = catalog.getDescriptor(locator);
+    
+                                str.push("\0"+(("0.0.0rev-"+workspaceRevison==descriptor.getVersion())?"green":"red")+"(" +
+                                    pkg.getName() + 
+                                    "\0)");
+    
+                            } else {
+                                str.push(pkg.getName());
+                            }
+                        }
+                    });
+                    if(str.length>1) {
+                        command.print("    " + str.join(" "));
+                    }
                 }
             }
         });
