@@ -53,7 +53,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
 //        if(path.valueOf().substr(0, this.path.join("").valueOf().length)!=this.path.join("").valueOf()) {
 //            throw new WorkspacesError("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
 //        }
-        selector = "http://" + this.path.join("").relative(path);
+        selector = "http://" + this.getPath().join("").relative(path);
     } else
     if(selector instanceof FILE.Path || FILE.Path(selector).exists()) {
         path = FILE.Path(""+selector);
@@ -61,7 +61,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
 //            throw new WorkspacesError("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
 //        }
         var lastMatch;
-        while(path.split().length>this.path.split().length) {
+        while(path.split().length>this.getPath().split().length) {
             if(path.join("package.json").exists()) {
                 lastMatch = path;
             }
@@ -74,7 +74,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         if(!lastMatch) {
             throw new WorkspacesError("No workspace found for selector: " + selector);
         }
-        selector = "http://" + this.path.join("").relative(lastMatch);
+        selector = "http://" + this.getPath().join("").relative(lastMatch);
     } else
     if(!/^http:\/\//.test(selector)) {
         var parts = selector.split(":");
@@ -92,7 +92,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         if(!info.user || !info.repository) {
             throw new WorkspacesError("Not a valid repository URL");
         }
-        path = this.path.join(vendor.getWorkspacePath(info));
+        path = this.getPath().join(vendor.getWorkspacePath(info));
         if(subPath) {
             path = path.join(subPath);
         }
@@ -135,7 +135,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
 }
 
 Workspaces.prototype.forEach = function(callback, subPath) {
-    var path = this.path,
+    var path = this.getPath(),
         self = this;
     if(subPath) {
         path = path.join(subPath);

@@ -36,15 +36,15 @@ Get the source and build the PINF command:
     git clone git://github.com/cadorn/util.git util
     git clone git://github.com/cadorn/pinf.git pinf
     export PATH=~/pinf/bootstraps/pinf/bin:$PATH
-    pinf-local build-program ~/pinf/bootstraps/pinf/packages/cli
+    pinf-local build-program ~/pinf/bootstraps/pinf/programs/cli
 
-The built binary is available at:
+The built binary is available at (substitute `<VERSION>` with the actual directory name):
 
-    ~/pinf/programs/registry.pinf.org/cadorn.org/github/pinf/programs/cli/master/bin/pinf
+    ~/pinf/programs/registry.pinf.org/cadorn.org/github/pinf/programs/cli/<VERSION>/bin/pinf
 
-Add it to your `PATH` in `/etc/profile`, `~/.bash_profile` or equivalent:
+Put it on your `PATH` in `/etc/profile`, `~/.bash_profile` or equivalent:
 
-    export PATH=~/pinf/programs/registry.pinf.org/cadorn.org/github/pinf/programs/cli/master/bin:$PATH
+    export PATH=~/pinf/programs/registry.pinf.org/cadorn.org/github/pinf/programs/cli/<VERSION>/bin:$PATH
 
 Now run the test suite:
 
