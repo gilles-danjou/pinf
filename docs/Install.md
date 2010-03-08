@@ -32,9 +32,9 @@ Get the source and build the PINF command:
     git branch --track experimental origin/experimental
     git checkout experimental
     cd ..
-    git clone git://github.com/cadorn/util.git util
     export PATH=~/pinf/bootstraps/narwhal/bin:$PATH
-    git clone git@github.com:cadorn/pinf.git pinf
+    git clone git://github.com/cadorn/util.git util
+    git clone git://github.com/cadorn/pinf.git pinf
     export PATH=~/pinf/bootstraps/pinf/bin:$PATH
     pinf-local build-program ~/pinf/bootstraps/pinf/packages/cli
 
