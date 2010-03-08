@@ -1,6 +1,7 @@
 .DS_Store
 .tmp_*
 *.local.*
+.project
 /build/
 /local/
 /.narwhal/

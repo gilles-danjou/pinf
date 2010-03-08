@@ -47,16 +47,16 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         if(!FILE.isAbsolute(path)) {
             throw new Error("Selector is not an absolute path!");
         }
-        if(path.valueOf().substr(0, this.path.join("").valueOf().length)!=this.path.join("").valueOf()) {
-            throw new Error("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
-        }
+//        if(path.valueOf().substr(0, this.path.join("").valueOf().length)!=this.path.join("").valueOf()) {
+//            throw new Error("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
+//        }
         selector = "http://" + this.path.join("").relative(path);
     } else
     if(selector instanceof FILE.Path || FILE.Path(selector).exists()) {
         path = FILE.Path(""+selector);
-        if(path.valueOf().substr(0, this.path.join("").valueOf().length)!=this.path.join("").valueOf()) {
-            throw new Error("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
-        }
+//        if(path.valueOf().substr(0, this.path.join("").valueOf().length)!=this.path.join("").valueOf()) {
+//            throw new Error("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
+//        }
         var lastMatch;
         while(path.split().length>this.path.split().length) {
             if(path.join("package.json").exists()) {
