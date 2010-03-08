@@ -2,6 +2,15 @@
 Installing PINF
 ===============
 
+To use pinf you need to install the PINF command line tool.
+
+Requirements:
+
+  * UNIX (Only Mac OSX is tested)
+  * git
+  * java
+
+
 The easy way
 ------------
 
@@ -11,13 +20,7 @@ Coming soon!
 From source
 -----------
 
-Requirements:
-
-  * UNIX (Only Mac OSX is tested)
-  * git
-  * java
-
-Build the PINF command line tool:
+Get the source and build the PINF command:
 
     cd ~
     mkdir pinf
@@ -34,7 +37,9 @@ The built binary is available at:
 
     ~/pinf/programs/registry.pinf.org/cadorn.org/github/pinf/programs/cli/master/bin/pinf
 
-To make this convenient to use it should be on your `PATH` at all times.
+Add it to your `PATH` in `/etc/profile`, `~/.bash_profile` or equivalent:
+
+    export PATH=~/pinf/programs/registry.pinf.org/cadorn.org/github/pinf/programs/cli/master/bin:$PATH
 
 Now run the test suite:
 
