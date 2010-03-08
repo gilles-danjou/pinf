@@ -12,7 +12,9 @@ var PACKAGES = require("packages");
 var PackageLocator = exports.PackageLocator = function(spec) {
     if (!(this instanceof exports.PackageLocator))
         return new exports.PackageLocator(spec);
-        
+
+    this.__class__ = "PackageLocator";
+
     this.spec = spec;
     
     if(this.spec.catalog && this.spec.location) {

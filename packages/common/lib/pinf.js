@@ -16,11 +16,21 @@ exports.getDefaultDatabase = function() {
 
 exports.setDatabase = function(obj) {
     database = obj;
+    // keep a global memo of the pinf database path so it can be referenced from
+    // pinf modules with different top-level IDs (as is teh case when pinf is present in
+    // a program via different package versions)
+    system.pinf = {
+        "databasePath": database.getPath()
+    }
 }
 
 exports.getDatabase = function() {
     if(!database) {
-        throw new Error("Database not set");
+        if(system.pinf && system.pinf.databasePath) {
+            database = DATABASE.Database(system.pinf.databasePath);
+        } else {
+            throw new PinfError("Database not set");
+        }
     }
     return database;
 }
@@ -70,7 +80,7 @@ exports.locatorForDirectory = function(directory) {
     
     var pkg = require("./package").Package(directory);
     if(!pkg.exists()) {
-        throw new Error("No package at: " + directory);
+        throw new PinfError("No package at: " + directory);
     }
     if(pkg.hasUid()) {
         var uri = URI.parse(pkg.getUid()),
@@ -86,3 +96,14 @@ exports.locatorForDirectory = function(directory) {
         });
     }
 }
+
+
+var PinfError = exports.PinfError = function(message) {
+    this.name = "PinfError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+PinfError.prototype = new Error();

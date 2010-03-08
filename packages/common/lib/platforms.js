@@ -29,7 +29,7 @@ Platforms.prototype.getPath = function() {
  */
 Platforms.prototype.getForSelector = function(selector) {
     var id;
-    if(selector instanceof LOCATOR.PackageLocator) {
+    if(selector instanceof LOCATOR.PackageLocator || (selector.__class__ && selector.__class__=="PackageLocator")) {
         id = selector.getFsPath().valueOf();
     } else
     if(typeof selector == "string") {

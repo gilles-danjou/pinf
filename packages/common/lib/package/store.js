@@ -109,9 +109,9 @@ PackageStore.prototype.get = function(locator) {
     }
     var packagePath = this.getPackagesPath().join(locator.getTopLevelId());    
     if(packagePath.exists()) {
-        if(packagePath.isLink()) {
-            throw new PackageStoreError("Found link instead of hard directory at: " + packagePath);
-        }
+//        if(packagePath.isLink()) {
+//            throw new PackageStoreError("Found link instead of hard directory at: " + packagePath);
+//        }
         return PACKAGE.Package(packagePath, locator);
     }
     var url = downloadInfo.url;

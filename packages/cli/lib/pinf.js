@@ -39,7 +39,6 @@ exports.locatorForDirectory = function(directory) {
 exports.main = function (args) {
     var options = parser.parse(args,{
         preActCallback: function(options, context) {
-            
             var path;
             if(options.db && (path = FILE.Path(options.db)).exists() ) {
                 PINF.setDatabase(DATABASE.Database(path));

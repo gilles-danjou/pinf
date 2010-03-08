@@ -8,6 +8,7 @@ var ARGS = require("args");
 var ARGS_UTIL = require("args-util", "util");
 var VALIDATOR = require("validator", "util");
 var PINF = require("../pinf");
+var GIT = require("git", "util");
 
 var command = exports["build-program"] = new ARGS.Parser();
 
@@ -58,8 +59,20 @@ command.action(function (options) {
                 remoteDependencies = true;
             }
             // local program + check local dependencies
+
             var workspace = PINF.getDatabase().getWorkspaceForSelector(directory),
+                revisionControl;
+            // if we have a workspace try and consult git to get the branch
+            if(workspace.exists()) {
                 revisionControl = workspace.getRevisionControl();
+                if(!revisionControl.initialized()) {
+                    revisionControl = null;
+                }
+            }
+            // if not workspace or git repository try and consult git for directory directly
+            if(!revisionControl) {
+                revisionControl = GIT.Git(directory);
+            }
             if(revisionControl && revisionControl.initialized()) {
                 locator.setRevision(revisionControl.getActiveBranch());
             }

@@ -45,17 +45,17 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
     if(useExactPath) {
         path = FILE.Path(""+selector);
         if(!FILE.isAbsolute(path)) {
-            throw new Error("Selector is not an absolute path!");
+            throw new WorkspacesError("Selector is not an absolute path!");
         }
 //        if(path.valueOf().substr(0, this.path.join("").valueOf().length)!=this.path.join("").valueOf()) {
-//            throw new Error("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
+//            throw new WorkspacesError("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
 //        }
         selector = "http://" + this.path.join("").relative(path);
     } else
     if(selector instanceof FILE.Path || FILE.Path(selector).exists()) {
         path = FILE.Path(""+selector);
 //        if(path.valueOf().substr(0, this.path.join("").valueOf().length)!=this.path.join("").valueOf()) {
-//            throw new Error("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
+//            throw new WorkspacesError("Workspace selector path '"+path+"' does not fall within workspaces directory: " + this.path.join(""));
 //        }
         var lastMatch;
         while(path.split().length>this.path.split().length) {
@@ -69,7 +69,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
             path = path.dirname();
         }
         if(!lastMatch) {
-            throw new Error("No workspace found for selector: " + selector);
+            throw new WorkspacesError("No workspace found for selector: " + selector);
         }
         selector = "http://" + this.path.join("").relative(lastMatch);
     } else
@@ -87,7 +87,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         var vendor = VENDOR.getVendorForUrl(selector);
         var info = vendor.parseUrl(selector);
         if(!info.user || !info.repository) {
-            throw new Error("Not a valid repository URL");
+            throw new WorkspacesError("Not a valid repository URL");
         }
         path = this.path.join(vendor.getWorkspacePath(info));
         if(subPath) {
@@ -113,7 +113,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
                 // match possible 'name' selector against workspace
                 if(("http://" + ws.getName()) == selector) {
                     if(namedWorkspace) {
-                        throw new Error("Multiple workspaces found for name. Use a more precise selector!");
+                        throw new WorkspacesError("Multiple workspaces found for name. Use a more precise selector!");
                     }
                     namedWorkspace = ws;
                 }
@@ -122,7 +122,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
                 workspace = namedWorkspace;
             }
             if(!workspace) {
-                throw new Error("No workspace found for UID/name selector: " + selector);
+                throw new WorkspacesError("No workspace found for UID/name selector: " + selector);
             }
         } else {
             workspace = WORKSPACE.Workspace(path);
@@ -155,3 +155,15 @@ Workspaces.prototype.forEach = function(callback, subPath) {
         });
     }
 }
+
+
+var WorkspacesError = exports.WorkspacesError = function(message) {
+    this.name = "WorkspacesError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+WorkspacesError.prototype = new Error();
+

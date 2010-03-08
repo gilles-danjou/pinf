@@ -217,8 +217,6 @@ Program.prototype.build = function(options) {
         });
     };
 
-print("build program: " + this.getPath());
-
     var builder = this.getBuilder();
 //    options["skipWriteCommands"] = true;
     builder.triggerBuild(this, options);
@@ -234,7 +232,7 @@ print("build program: " + this.getPath());
         pkg.getBuilder().triggerBuild(PACKAGE.Package(rawBuildPath), options);
     }
 
-    return buildPath;
+    return this.getPath();
 }
 
 

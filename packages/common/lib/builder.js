@@ -16,7 +16,7 @@ var debugStrDepth = 0;
 var Builder = exports.Builder = function(pkg, options) {
     if (!(this instanceof exports.Builder))
         return new exports.Builder(pkg, options);
-    
+
     if(this.construct===Builder.prototype.construct) {
         this.construct(pkg, options);
     }

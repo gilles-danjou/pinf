@@ -28,7 +28,7 @@ PackageCatalog.prototype.getDirtyPath = function() {
 
 PackageCatalog.prototype.getDescriptor = function(locator) {
     if(!this.spec.packages[locator.getName()]) {
-        throw new Error("Package with name '"+locator.getName()+"' not found in catalog: " + this.path);
+        throw new CatalogError("Package with name '"+locator.getName()+"' not found in catalog: " + this.path);
     }
     var self = this,
         desiredRevision = locator.getPinnedVersion() || locator.getRevision(),
@@ -49,7 +49,7 @@ PackageCatalog.prototype.getDescriptor = function(locator) {
             }
         });
         if(majorVersion==-1) {
-            throw new Error("No numeric (without alpha suffix) versioned release found for package: " + locator.getName());
+            throw new CatalogError("No numeric (without alpha suffix) versioned release found for package: " + locator.getName() + " in catalog: " + this.path);
         }
         revision = majorVersion;
     } else
@@ -74,7 +74,7 @@ PackageCatalog.prototype.getDescriptor = function(locator) {
         revision = desiredRevision;
     }
     if(!revisions[revision]) {
-        throw new Error("No package release found matching '" + desiredRevision + "' looking for key '"+revision+"'");
+        throw new CatalogError("No package release found matching '" + desiredRevision + "' looking for key '"+revision+"'");
     }
 
     var spec = revisions[revision];
@@ -98,3 +98,14 @@ PackageCatalog.prototype.getRevisionsForPackage = function(name) {
 PackageCatalog.prototype.flagAsDirty = function() {
     this.getDirtyPath().touch();
 }
+
+
+var CatalogError = exports.CatalogError = function(message) {
+    this.name = "CatalogError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+CatalogError.prototype = new Error();
