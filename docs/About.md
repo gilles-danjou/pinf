@@ -26,9 +26,9 @@ Tenets
 Project Links
 -------------
 
- * Github: http://github.com/cadorn/pinf
- * Twitter: http://twitter.com/pinf
- * Mailing list: http://groups.google.com/group/pinf-dev
+ * Github: [http://github.com/cadorn/pinf](http://github.com/cadorn/pinf)
+ * Twitter: [http://twitter.com/pinf](http://twitter.com/pinf)
+ * Mailing list: [http://groups.google.com/group/pinf-dev](http://groups.google.com/group/pinf-dev)
 
 
 Sponsorship & Open Source
@@ -41,12 +41,12 @@ PINF strives to be a [first class Open Source project](http://almaer.com/blog/be
  *  0 points: Say you are open (**Check**)
  * 10 points: Choose an OSI license (**Check**)
  * 20 points: Define the governance of the code (**Check**)
-      o Does one company hold all of the cards? (*Yes, but that will change in time.*)
-      o Can others participate? (**Yes**)
-      o For code, who participates? (**Committers and contributors** - *Get Involved!*)
-      o Can anyone patch? (**Yes - via github pull-requests for MIT licensed code**)
-      o Can you, and if so how do you become a committer? (**Yes - prove your worth by getting involved**)
-      o At the core: How are decisions made (**Democratic Dictatorship until we have a steering committee**)
+   * Does one company hold all of the cards? (*Yes, but that will change in time.*)
+   * Can others participate? (**Yes**)
+   * For code, who participates? (**Committers and contributors** - *Get Involved!*)
+   * Can anyone patch? (**Yes - via github pull-requests for MIT licensed code**)
+   * Can you, and if so how do you become a committer? (**Yes - prove your worth by getting involved**)
+   * At the core: How are decisions made (**Democratic Dictatorship until we have a steering committee**)
  * 30 points: A reference implementation under an open source license (**Check**)
  * 40 points: Where does the IP stand? (**Clean & open**). Did you donate it to a foundation? (*No*)
 
