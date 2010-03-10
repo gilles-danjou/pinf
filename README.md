@@ -43,8 +43,8 @@ Status
 
 PINF is under **heavy development** and while some concepts are set in stone many details are a work in progress.
 
-PINF is considered to be of **Alpha** quality meaning it is subject to change without notice. That being said we will
-try hard to make changes as pain free as possible.
+PINF is considered to be of **Alpha** quality meaning things are subject to change without notice. That being said we will
+try hard to make changes as pain free as possible. After all we use PINF too and need the same migration paths.
 
 Even though PINF is a young project, with some care it can be used in **production workflows**. We are
 actively looking for **early adopters** to begin using PINF. This is essential to prove PINF as a generic
