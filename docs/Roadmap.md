@@ -34,7 +34,7 @@ To accomplish this the following areas are being addressed:
 
 Using PINF to build programs based on a few specialized *platform packages* is easy to do and works today. The true challenge lies in how to compose the dependency tree to provide interoperable platforms that provide layers of common denominators across infrastructure and system administration concerns. For example it should be sufficient for a program to declare it depends on the *LAMP* platform and PINF will automatically assemble everything needed to run that program on any given system or cluster while giving the administrator freedom to post-tweak the setup as needed.
 
-PINF is implemented to a level where exploration of how meta-data should be used to define program and platform composition is possible. The current PINF API has evolved from such explorations and represents a minimal set of features that are deemed to be essential as a foundation. The following list points to projects conducting these kinds of explorations.
+PINF is implemented to a level where exploration of how meta-data should be used to define program and platform composition is possible. The current PINF system has evolved from such explorations and represents a minimal set of features that are deemed to be essential as a foundation. The following list points to projects conducting these kinds of explorations.
 
  * [http://github.com/cadorn/platforms](http://github.com/cadorn/platforms) - These actively maintained PINF platform packages were developed while building PINF and will continue to evolve. They are the primary source of insight influencing PINF development to date.
 

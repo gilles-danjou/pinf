@@ -8,9 +8,9 @@ PINF installation per user on a system with the PINF home directory located at `
 not been addresses as of yet)*.
 
 Once PINF is installed on a given path it **may not be relocated**. This is because the absolute path to the PINF home directory is
-compiled into many PINF-controlled files once you start using PINF. This mode of operation is essential to allow files to be referenced
+compiled into many PINF-controlled files. This mode of operation is essential to allow files to be referenced
 from many different scripts and contexts. You can relocate a PINF home directory only by cleaning the setup and rebuilding everything. This may
-sound cumbersome but it is not. PINF automates your toolchain and thus keeps track of everything allowing it to re-built itself at
+sound cumbersome but it is not. PINF automates your toolchain and thus keeps track of everything allowing it to re-build itself at
 a different path on the same system or on a different system *(Note: Relocation functionality has not yet been implemented)*.
 
 
@@ -44,7 +44,7 @@ Dynamically generated and maintained by PINF (**DO NOT MODIFY**):
   * `~/pinf/data/` - Any and all kinds of data for toolchain packages.
   * `~/pinf/downloads/` - Cached files downloaded from the internet.
   * `~/pinf/packages/` - Cached packages organized for easy referencing.
-  * `~/pinf/platforms/` - Platform packages used in workspace workflows.
+  * `~/pinf/platforms/` - Platform packages used in workspace workflows and package building.
   * `~/pinf/programs/` - Built program packages callable from the outside.
 
 
