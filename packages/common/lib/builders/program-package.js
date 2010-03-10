@@ -21,15 +21,18 @@ Builder.prototype = BUILDER.Builder();
 
 Builder.prototype.build = function(targetPackage, buildOptions) {
     var self = this;
-    
+
     var sourceBasePath = targetPackage.getPath(),
         rawBasePath = targetPackage.getBuildPath().join("raw"),
         targetBasePath = targetPackage.getBuildPath().join("program"),
         sourcePath,
         targetPath;
 
-    targetBasePath.mkdirs();
-    
+    if(!targetBasePath.exists()) {
+        targetBasePath.mkdirs();
+    }
+
+
     // copy package.json
     sourcePath = rawBasePath.join("package.json");
     targetPath = targetBasePath.join("package.json");
@@ -55,7 +58,9 @@ Builder.prototype.build = function(targetPackage, buildOptions) {
     sourcePath = rawBasePath.join("using");
     if(sourcePath.exists()) {
         targetPath = targetBasePath.join("using");
-        sourcePath.symlink(targetPath);
+        if(!targetPath.exists()) {
+            sourcePath.symlink(targetPath);
+        }
     }
     
     // link program directories
@@ -72,10 +77,11 @@ Builder.prototype.build = function(targetPackage, buildOptions) {
     });
 
 
+/*  THIS SHOULD NO LONGER BE NEEDED
+
     var descriptor = targetPackage.getDescriptor();
 
     // build all using packages
-/*  THIS SHOULD NO LONGER BE NEEDED
     descriptor.everyUsing(function(name, locator) {
         var pkg = self.getPackageForLocator(locator);
         var builder = pkg.getBuilder(self.options);

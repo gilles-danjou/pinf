@@ -1,5 +1,9 @@
-The PINF Lifecycle
-==================
+*Is this document missing information? [Tell us](http://groups.google.com/group/pinf-dev) what you want to know and we will do our best in writing additional content!*
+
+The PINF Registry System
+========================
+
+**NOTE: This document has not been reviewed recently. Updated information is coming soon.**
 
 Notes:
 

@@ -24,7 +24,7 @@ Workspace.prototype = PACKAGE.Package();
 
 Workspace.prototype.getConfig = function() {
     if(!this.exists()) {
-        throw new Error("Workspace not found at: " + this.getPath());
+        throw new WorkspaceError("Workspace not found at: " + this.getPath());
     }
 
     if(!this.config) {
@@ -46,14 +46,14 @@ Workspace.prototype.hasVendorInfo = function() {
 
 Workspace.prototype.getVendorInfo = function() {
     if(!this.hasVendorInfo()) {
-        throw new Error("No vendor info set!");
+        throw new WorkspaceError("No vendor info set!");
     }
     return this.vendorInfo;
 }
 
 Workspace.prototype.hasPlatform = function() {
     if(!this.exists()) {
-        throw new Error("Workspace not found at: " + this.getPath());
+        throw new WorkspaceError("Workspace not found at: " + this.getPath());
     }
 
     return this.getConfig().has(["platform"]);
@@ -61,20 +61,19 @@ Workspace.prototype.hasPlatform = function() {
 
 Workspace.prototype.getPlatform = function() {
     if(!this.exists()) {
-        throw new Error("Workspace not found at: " + this.getPath());
+        throw new WorkspaceError("Workspace not found at: " + this.getPath());
     }
-
     var config = this.getConfig(),
         key = ["platform"];
     if(!config.has(key)) {
-        throw new Error("No platform activated for workspace");
+        throw new WorkspaceError("No platform activated for workspace");
     }
     return PINF.getPlatformForName(config.get(key));
 }
 
 Workspace.prototype.setPlatform = function(platform) {
     if(!this.exists()) {
-        throw new Error("Workspace not found at: " + this.getPath());
+        throw new WorkspaceError("Workspace not found at: " + this.getPath());
     }
 
     var config = this.getConfig(),
@@ -106,12 +105,12 @@ Workspace.prototype.setPlatform = function(platform) {
 
 Workspace.prototype.init = function() {
     if(this.exists()) {
-        throw new Error("Workspace already exists at: " + this.getPath());
+        throw new WorkspaceError("Workspace already exists at: " + this.getPath());
     }
     try {
         if(this.hasVendorInfo()) {
             if(this.getVendorInfo().vendor.hasRepository(this.getVendorInfo())) {
-                throw new Error("Repository already exists on vendor site");
+                throw new WorkspaceError("Repository already exists on vendor site");
             }
         }
         var path = this.getPath();
@@ -122,7 +121,7 @@ Workspace.prototype.init = function() {
         
         if(this.hasVendorInfo()) {
             if(!this.getVendorInfo().vendor.createRepository(this.getVendorInfo())) {
-                throw new Error("Error creating repository on vendor site");
+                throw new WorkspaceError("Error creating repository on vendor site");
             }
         }
         
@@ -171,11 +170,11 @@ Workspace.prototype.destroy = function() {
 
 Workspace.prototype.checkout = function() {
     if(this.exists()) {
-        throw new Error("Workspace already exists at: " + this.getPath());
+        throw new WorkspaceError("Workspace already exists at: " + this.getPath());
     }
     try {
         if(!this.getVendorInfo().vendor.hasRepository(this.getVendorInfo())) {
-            throw new Error("Repository does not exist on vendor site");
+            throw new WorkspaceError("Repository does not exist on vendor site");
         }
 
         var path = this.getPath();
@@ -198,10 +197,10 @@ Workspace.prototype.checkout = function() {
 Workspace.prototype.isForked = function() {
     var info = this.getVendorInfo().vendor.getRepositoryInfo(this.getVendorInfo());
     if(!info) {
-        throw new Error("Error getting repository info from vendor");
+        throw new WorkspaceError("Error getting repository info from vendor");
     }
     if(!UTIL.has(info, "forked")) {
-        throw new Error("Repository info does not contain 'forked' property");
+        throw new WorkspaceError("Repository info does not contain 'forked' property");
     }
     return info.forked;
 }
@@ -211,7 +210,7 @@ Workspace.prototype.switchTo = function() {
     // TODO: Verify that we are running from the command line
 
     if(!this.exists()) {
-        throw new Error("Workspace not found at: " + this.getPath());
+        throw new WorkspaceError("Workspace not found at: " + this.getPath());
     }
 
     if(!this.hasPlatform()) {
@@ -229,7 +228,11 @@ Workspace.prototype.switchTo = function() {
     } else {
         var platform = this.getPlatform();
         if(!platform.exists()) {
-            throw new Error("Platform does not exist at: " + platform.getPath());
+            var descriptor = this.getDescriptor();
+            platform.init(descriptor.getPlatformLocatorForName(descriptor.getPinfSpec().platform));
+            if(!platform.exists()) {
+                throw new WorkspaceError("Platform does not exist at: " + platform.getPath());
+            }
         }
     }
 
@@ -267,3 +270,16 @@ Workspace.prototype.forEachPackage = function(callback, subPath) {
         }
     });
 }
+
+
+
+var WorkspaceError = exports.WorkspaceError = function(message) {
+    this.name = "WorkspaceError";
+    this.message = message;
+
+    // this lets us get a stack trace in Rhino
+    if (typeof Packages !== "undefined")
+        this.rhinoException = Packages.org.mozilla.javascript.JavaScriptException(this, null, 0);
+}
+WorkspaceError.prototype = new Error();
+

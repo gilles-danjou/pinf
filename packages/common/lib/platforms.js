@@ -28,16 +28,19 @@ Platforms.prototype.getPath = function() {
  *   * LOCATOR.PackageLocator (this.getPath().join(<selector>.getFsPath()))
  */
 Platforms.prototype.getForSelector = function(selector) {
-    var id;
+    var id,
+        locator;
     if(selector instanceof LOCATOR.PackageLocator || (selector.__class__ && selector.__class__=="PackageLocator")) {
         id = selector.getFsPath().valueOf();
+        locator = selector;
     } else
     if(typeof selector == "string") {
         id = selector;
+        // TODO: Construct a locator for the named platform
     } else {
         throw new PlatformsError("Selector type not supported: " + selector);
     }
-    return PLATFORM.Platform(this.path.join(id));
+    return PLATFORM.Platform(this.path.join(id), locator);
 }
 
 

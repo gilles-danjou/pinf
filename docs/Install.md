@@ -1,14 +1,15 @@
+*Is this document missing information? [Tell us](http://groups.google.com/group/pinf-dev) what you want to know and we will do our best in writing additional content!*
 
 Installing PINF
 ===============
 
-To use pinf you need to install the PINF command line tool.
+To use pinf you need to install the [PINF command line tool](http://github.com/cadorn/pinf/blob/master/docs/CLI.md).
 
 Requirements:
 
   * UNIX (Only Mac OSX is tested)
-  * git
   * java
+  * git
 
 
 Versioned release

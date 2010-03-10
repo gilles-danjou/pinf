@@ -1,5 +1,9 @@
+*Is this document missing information? [Tell us](http://groups.google.com/group/pinf-dev) what you want to know and we will do our best in writing additional content!*
+
 PINF Vendors
 ============
+
+**NOTE: This document has not been reviewed recently. Updated information is coming soon.**
 
 PINF provides an abstraction to work with vendors by encoding and decoding PINF-internal data to
 formats and urls that vendors implement.

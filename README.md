@@ -1,23 +1,55 @@
 
-PINF
-====
+**STATUS: Not functional yet! Writing documentation and cleaning implementation. Will be ready very soon!**
 
-A toolchain automation platform written in JavaScript on top of [Narwhal](http://narwhaljs.org/).
 
-**STATUS: Under development. A first release with tutorial will be published soon.**
+Overview
+========
 
- 
+PINF is a toolchain automation platform designed to manipulate your project artifacts via defined,
+predictable and repeatable processes in a globally unique namespace.
 
-Links
-=====
+Initial audience: **Server Side JavaScript developers**
 
- * [(Python) People want CPAN :-)](http://groups.google.com/group/commonjs/browse_thread/thread/5aa78c78d6fcdd0c?hl=en)
- * [Defining Well-Known URIs](http://tools.ietf.org/html/draft-nottingham-site-meta-05)
- * [WebFingerProtocol](http://code.google.com/p/webfinger/wiki/WebFingerProtocol)
- * [Design by contract](http://en.wikipedia.org/wiki/Design_by_contract)
- * [Personal Package Archives for Ubuntu](https://launchpad.net/ubuntu/+ppas)
- * [Idempotence](http://www.aspninja.com/2010/01/21/how-to-debug-asp-net-using-firefox/)
- * [Beautiful Failure](http://github.com/raganwald/homoiconic/blob/master/2010/01/beautiful_failure.markdown#readme)
+Requirements: **UNIX, java, git**
+
+Start with the [Quick Start Guide](http://github.com/cadorn/pinf/blob/master/docs/QuickStart.md).
+You can follow PINF on [twitter](http://twitter.com/pinf), [email](http://groups.google.com/group/pinf-dev) or
+[github](http://github.com/cadorn/pinf).
+
+More information:
+
+ * [Quick Start](http://github.com/cadorn/pinf/blob/master/docs/QuickStart.md) - *Coming Soon*
+ * [About PINF](http://github.com/cadorn/pinf/blob/master/docs/About.md)
+ * [Roadmap](http://github.com/cadorn/pinf/blob/master/docs/Roadmap.md)
+ * [Installing PINF](http://github.com/cadorn/pinf/blob/master/docs/Install.md)
+ * [Configuration](http://github.com/cadorn/pinf/blob/master/docs/Configuration.md)
+ * [Directory Structure](http://github.com/cadorn/pinf/blob/master/docs/DirectoryStructure.md)
+ * [Packages](http://github.com/cadorn/pinf/blob/master/docs/Packages.md) - *Coming Soon*
+ * [Workspaces](http://github.com/cadorn/pinf/blob/master/docs/Workspaces.md) - *Coming Soon*
+ * [Platforms](http://github.com/cadorn/pinf/blob/master/docs/Platforms.md) - *Coming Soon*
+ * [Build Flow](http://github.com/cadorn/pinf/blob/master/docs/BuildFlow.md) - *Coming Soon*
+ * [Builders](http://github.com/cadorn/pinf/blob/master/docs/Builders.md) - *Coming Soon*
+ * [Build Server](http://github.com/cadorn/pinf/blob/master/docs/BuildServer.md) - *Coming Soon*
+ * [Namespaces](http://github.com/cadorn/pinf/blob/master/docs/Namespaces.md) - *Coming Soon*
+ * [Versioning](http://github.com/cadorn/pinf/blob/master/docs/Versioning.md) - *Coming Soon*
+ * [Registry](http://github.com/cadorn/pinf/blob/master/docs/Registry.md)
+ * [Vendors](http://github.com/cadorn/pinf/blob/master/docs/Vendors.md)
+ * [CLI](http://github.com/cadorn/pinf/blob/master/docs/CLI.md) - *Coming Soon*
+ * [Links](http://github.com/cadorn/pinf/blob/master/docs/Links.md)
+
+
+Status
+======
+
+PINF is under **heavy development** and while some concepts are set in stone many details are a work in progress.
+
+PINF is considered to be of **Alpha** quality meaning it is subject to change without notice. That being said we will
+try hard to make changes as pain free as possible.
+
+Even though PINF is a young project, with some care it can be used in **production workflows**. We are
+actively looking for **early adopters** to begin using PINF. This is essential to prove PINF as a generic
+toolchain automation platform by ensuring it works with many different workflows and requirements.
+
 
 License
 =======

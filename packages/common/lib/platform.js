@@ -9,10 +9,11 @@ var PINF = require("./pinf");
 var OS = require("os");
 
 
-var Platform = exports.Platform = function(path) {
+var Platform = exports.Platform = function(path, locator) {
     if (!(this instanceof exports.Platform))
-        return new exports.Platform(path);
+        return new exports.Platform(path, locator);
     this.path = path;
+    this.locator = locator;
 }
 
 Platform.prototype = PACKAGE.Package();
@@ -22,6 +23,7 @@ Platform.prototype.init = function(locator, name) {
     if(this.exists()) {
         throw new Error("Platform already exists at: " + this.getPath());
     }
+    var self = this;
     name = name || locator.getTopLevelId();
     try {
         var pkg = PINF.getPackageForLocator(locator);
@@ -31,10 +33,6 @@ Platform.prototype.init = function(locator, name) {
 
         var path = this.getPath();
         path.mkdirs();
-
-        var builder = pkg.getBuilder({
-            "packageStore": this.getPackageStore()
-        });
 
         // write package.json file for platform
         var file = path.join("package.json");
@@ -48,6 +46,12 @@ Platform.prototype.init = function(locator, name) {
             }
         }, null, "    "));
 
+
+        var builder = pkg.getBuilder({
+            "packageStore": this.getPackageStore()
+        });
+
+
         // TODO: Deprecate 'path' property below
         builder.triggerBuild(this, {
             "path": path,
@@ -60,6 +64,15 @@ Platform.prototype.init = function(locator, name) {
         if(!file.exists()) {
             file.write("export PATH="+file.dirname()+":\"$PATH\"");
         }
+        
+        // link all binaries from built programs to platform
+        pkg.getDescriptor().everyProgram(function(name, locator) {
+            var programPkg = PINF.getDatabase().getProgram(locator),
+                binPath = programPkg.getPath().join("bin");
+            binPath.listPaths().forEach(function(item) {
+                item.symlink(self.getPath().join("bin", item.basename()));
+            });
+        });
 
     } catch(e) {
         this.destroy();
