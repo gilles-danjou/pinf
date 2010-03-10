@@ -21,8 +21,6 @@ Tenets
  * **Incremental Engagement** - Migration through gradual integration.
  * **Atomicity** - Pervasive snapshot versioning from development to production.
  * **Idempotent Operations** - Reliability and predictability through design.
- * **Asynchronic Operations** - Borderless and timeless chaining of functionality modules.
- * **Total Collaboration** - Foster vertical (domain), horizontal (problem area) and focused (project) communities.
 
 
 Project Links
