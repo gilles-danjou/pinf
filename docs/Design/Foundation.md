@@ -9,10 +9,10 @@ Audience: [CommonJS community](http://commonjs.org/) in general and [narwhal com
 
 This design document outlines how PINF builds a namespace and dependency system on top of CommonJS. It is intended to inform CommonJS proposals concerned with providing the building blocks for package management:
 
-  * *Concern 1:* require2 semantics for [Modules 1.0](http://wiki.commonjs.org/wiki/Modules/1.0) specification - implementations would have the option of supporting an additional require form with semantics coupled to a packaging standard - i.e. require("<module", "<package>")
-  * *Concern 2:* packaging standard - a way to compose programs by means of packages and package dependencies
-  * *Concern 3:* package catalog specification - a way to distribute packages
-  * *Concern 4:* amendments to [Packages 1.0](http://wiki.commonjs.org/wiki/Packages/1.0) specification - to support a package catalog specification and source file referencing
+  * *Concern 1:* **require2 semantics for [Modules 1.0](http://wiki.commonjs.org/wiki/Modules/1.0) specification** - implementations would have the option of supporting an additional require form with semantics coupled to a packaging standard - i.e. require("<module>", "<package>")
+  * *Concern 2:* **packaging standard** - a way to compose programs by means of packages and package dependencies
+  * *Concern 3:* **package catalog specification** - a way to distribute packages
+  * *Concern 4:* **amendments to [Packages 1.0](http://wiki.commonjs.org/wiki/Packages/1.0) specification** - to support a package catalog specification and source file referencing
 
 CommonJS aims to standardize a common system API for JavaScript across various implementations that will provide the foundation for a vast ecosystem of libraries and applications. History has shown that languages and platforms with a good package management design have evolved with more success than those without. This speaks to the value of standardizing a minimal scaffold that affords package management ecosystems to evolve as well.
 
@@ -113,34 +113,36 @@ The conventions described above form a foundation that can evolve in many direct
 
 Finally it is argued that provisions must be made to support collaborative workflows by enabling developers to share pre-stable releases of their code. To accomplish this the revision selector follows additional conventions as illustrated below:
 
-   version       directory    revision selectors
- t 0.1.0         0            0.1.0  or  0.1  or  0  or  0*
- i 0.1.1alpha    0alpha       0.1.1alpha  or  0.1alpha  or  0alpha  or  0*
- m 1.0.0         1            1.0.0  or  1.0  or  1  or  1*
- e 1.0.1alpha1   1alpha       1.0.1alpha1  or  1.0.1alpha  or  1.0alpha  or  1alpha
-   1.0.1alpha2   1alpha       1.0.1alpha1  or  1.0.1alpha2  ...
- - 2.0.0rc1      2rc          2rc  or  2*  ...
- | 2.0.0         2            2rc  or  2*  ...
- | 3.0.0alpha1   3alpha       3.0alpha  or  3*  ...
- V 3.0.0beta15   3beta        3.0alpha  or  3*  ...
-   3.0.0rc3      3rc          3.0alpha  or  3*  ...
-   3.0.0         3            3.0alpha  or  3*  ...
-   3.5.7         3            3.0alpha  or  3*  ...  
- --latest--
-   0.1.0         0
-   0.1.1alpha    0alpha
-   1.0.0         1
-   1.0.1alpha2   1alpha
-   2.0.0rc1      2rc
-   2.0.0         2
-   3.0.0alpha1   3alpha
-   3.0.0beta15   3beta
-   3.0.0rc3      3rc
-   3.5.7         3
- --development branches--
-   0.0.0rev-<ref>   <name>    <name>
+     version       directory    revision selectors
+   t 0.1.0         0            0.1.0  or  0.1  or  0  or  0*
+   i 0.1.1alpha    0alpha       0.1.1alpha  or  0.1alpha  or  0alpha  or  0*
+   m 1.0.0         1            1.0.0  or  1.0  or  1  or  1*
+   e 1.0.1alpha1   1alpha       1.0.1alpha1  or  1.0.1alpha  or  1.0alpha  or  1alpha
+     1.0.1alpha2   1alpha       1.0.1alpha1  or  1.0.1alpha2  ...
+   - 2.0.0rc1      2rc          2rc  or  2*  ...
+   | 2.0.0         2            2rc  or  2*  ...
+   | 3.0.0alpha1   3alpha       3.0alpha  or  3*  ...
+   V 3.0.0beta15   3beta        3.0alpha  or  3*  ...
+     3.0.0rc3      3rc          3.0alpha  or  3*  ...
+     3.0.0         3            3.0alpha  or  3*  ...
+     3.5.7         3            3.0alpha  or  3*  ...  
+   --latest--
+     0.1.0         0
+     0.1.1alpha    0alpha
+     1.0.0         1
+     1.0.1alpha2   1alpha
+     2.0.0rc1      2rc
+     2.0.0         2
+     3.0.0alpha1   3alpha
+     3.0.0beta15   3beta
+     3.0.0rc3      3rc
+     3.5.7         3
+   --development branches--
+     0.0.0rev-<ref>   <name>    <name>
 
-== Archives containing multiple packages ==
+
+Archives containing multiple packages
+-------------------------------------
 
     http://domain.org/path/to/myPackage/1.3.2.zip ~ /package.json ~ {
       "packages": {
@@ -200,7 +202,9 @@ or
     
     /using/very.cool.tv/catalogPackageName/1/package.json
 
-== Catch-all for catalog package revisions ==
+
+Catch-all for catalog package revisions
+---------------------------------------
 
 To empower development lifecycle tools the following optional extension to the catalog specification provides everything needed to reference arbitrary revisions of a package and the files it contains.
 
@@ -247,7 +251,9 @@ It is sufficient for a package to specify the following minimal repository infor
       ]
     }
 
-== Catalogs without revisions ==
+
+Catalogs without revisions
+--------------------------
 
 For production release catalogs it may be desirable to support a catalog structure that follows a more traditional format. The following is proposed as an optional format that removes the revision map and is intended for use with stable production release versions of packages only.
 
@@ -269,7 +275,9 @@ For production release catalogs it may be desirable to support a catalog structu
       }
     }
 
-== Sanctioned namespaces ==
+
+Sanctioned namespaces
+---------------------
 
 The namespace scheme proposed lends itself well to operate with the use of catalog registry servers. CommonJS could gain control of the top-level namespace by hosting an official registry server:
 
@@ -294,8 +302,9 @@ It may be agreed on to drop the registry hostname from the namespace path to pro
 
 Globally unique/meaningful top level names may be provided by hostnames, email addresses, IP addresses, mac addresses, phone numbers, uuids, OpenIDs, Latitude + Longitude, ISBN numbers, etc...
 
-== Relevant Discussions ==
 
-TODO
+Relevant Discussions
+--------------------
 
+*TODO*
 
