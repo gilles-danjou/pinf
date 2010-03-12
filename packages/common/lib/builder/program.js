@@ -12,6 +12,7 @@ var PACKAGE = require("../package");
 var PACKAGE_BUILDER = require("../builder/package");
 var JSON_STORE = require("json-store", "util");
 var OS = require("os");
+var FILE = require("file");
 
 
 var ProgramBuilder = exports.ProgramBuilder = function() {
@@ -286,7 +287,8 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
                 
                 
 //                path = targetBasePath.join("using", pkg.getTopLevelId());
-                path = self.targetPackage.getBuildPath().join("raw", "using", pkg.getTopLevelId());
+                path = targetPackage.getPath().join("using", pkg.getTopLevelId());
+
                 
 //            }
 
@@ -309,6 +311,7 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
             if(pkg.getVersion()) {
                 if(!path.exists()) {
                     path.dirname().mkdirs();
+print("COPY "+pkg.getPath()+" to "+path);                    
                     FILE.copyTree(pkg.getPath(), path);
                 }
                 // since we copied it to a specific version we need to update all package locators
@@ -321,6 +324,7 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
             } else
             if(!path.exists() && !path.join("package.json").exists()) {
                 path.dirname().mkdirs();
+print("LINK "+pkg.getPath()+" to "+path);                    
                 pkg.getPath().symlink(path);
             }
 
@@ -331,10 +335,13 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
         });
 
         locatorRewriteInfo.forEach(function(info) {
-            if(info.id==self[type[1].id]()) {
-                path = targetBasePath.join("package.json");
+
+print(" ***  " + info.id + " *** " + self.sourcePackage[type[1].id]());
+
+            if(info.id==self.sourcePackage[type[1].id]()) {
+                path = targetPackage.getPath().join("package.json");
             } else {
-                path = targetBasePath.join(type[1].directory, info.id).join("package.json");
+                path = targetPackage.getPath().join(type[1].directory, info.id).join("package.json");
             }
             JSON_STORE.JsonStore(path).set([type[1].property, info.name, "revision"], info.revision);
         });

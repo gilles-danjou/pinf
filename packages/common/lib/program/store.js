@@ -32,10 +32,20 @@ ProgramStore.prototype.getBasePath = function() {
 }
 
 ProgramStore.prototype.getPathForLocator = function(locator) {
-    return this.getBasePath().join(locator.getTopLevelId());
+    var pkg = this.packageStore.get(locator);
+    return this.getBasePath().join(pkg.getTopLevelId());
 }
 
 ProgramStore.prototype.has = function(locator) {
+    
+//dump(locator);
+
+//print("HAS::: " + this.packageStore.get(locator).getPath());
+//print("HAS::: " + this.getPathForLocator(locator));
+
+//    var sourcePackage = this.packageStore.get(locator);
+    
+    
     return this.getPathForLocator(locator).exists();
 }
 
@@ -50,7 +60,7 @@ ProgramStore.prototype.get = function(locator) {
     return PROGRAM.Program(programPath, locator);
 }
 
-ProgramStore.prototype.build = function(locator) {
+ProgramStore.prototype.build = function(locator, options) {
 
     var programPath = this.getPathForLocator(locator);
     
@@ -73,7 +83,7 @@ ProgramStore.prototype.build = function(locator) {
 
     try {
 
-        builder.triggerBuild();
+        builder.triggerBuild(options);
 
     } catch(e) {
         // sanity check before nuking build directory

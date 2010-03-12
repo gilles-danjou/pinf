@@ -62,7 +62,7 @@ PlatformBuilder.prototype.triggerBuild = function(options) {
                     
 print(" ... LINK BIN from "+item+" to " +targetBasePath.join("bin", item.basename()));                    
                     
-//                    item.symlink(targetBasePath.join("bin", item.basename()));
+                    item.symlink(targetBasePath.join("bin", item.basename()));
                 });
             }
         });
@@ -87,7 +87,4 @@ TODO: Call custom platform builders!!
     if(!file.exists()) {
         file.write("export PATH="+file.dirname()+":\"$PATH\"");
     }
-
-throw "stop in PlatformBuilder";
-    
 }
