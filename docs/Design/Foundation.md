@@ -9,7 +9,7 @@ Audience: [CommonJS community](http://commonjs.org/) in general and [narwhal com
 
 This design document outlines how PINF builds a namespace and dependency system on top of CommonJS. It is intended to inform CommonJS proposals concerned with providing the building blocks for package management:
 
-  * *Concern 1:* **require2 semantics for [Modules 1.0](http://wiki.commonjs.org/wiki/Modules/1.0) specification** - implementations would have the option of supporting an additional require form with semantics coupled to a packaging standard - i.e. require("<module>", "<package>")
+  * *Concern 1:* **require2 semantics for [Modules 1.0](http://wiki.commonjs.org/wiki/Modules/1.0) specification** - implementations would have the option of supporting an additional require form with semantics coupled to a packaging standard - i.e. require("module", "package")
   * *Concern 2:* **packaging standard** - a way to compose programs by means of packages and package dependencies
   * *Concern 3:* **package catalog specification** - a way to distribute packages
   * *Concern 4:* **amendments to [Packages 1.0](http://wiki.commonjs.org/wiki/Packages/1.0) specification** - to support a package catalog specification and source file referencing
