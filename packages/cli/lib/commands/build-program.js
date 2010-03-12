@@ -84,27 +84,11 @@ command.action(function (options) {
             }
         }
 
-        if(PINF.getDatabase().hasProgram(locator)) {
-            // remove the existing program first
-            var pkg = PINF.getDatabase().getProgram(locator);
-            if(pkg.getPath().join("package.json").exists()) {
-                OS.command("rm -Rf " + pkg.getPath());
-            }        
-            if(pkg.getBuildPath().join("raw", "package.json").exists()) {
-                OS.command("rm -Rf " + pkg.getBuildPath());
-            }        
-        }
-
         var pkg = PINF.getDatabase().buildProgram(locator, {
-            
-        });
-/*
-        path = pkg.build({
             "remoteProgram": remoteProgram,
             "remoteDependencies": remoteDependencies,
             "args": options.args.slice(1)
         });
-*/
 
         command.print("Built program at: " + pkg.getPath());
 

@@ -63,10 +63,6 @@ ProgramStore.prototype.get = function(locator) {
 ProgramStore.prototype.build = function(locator, options) {
 
     var programPath = this.getPathForLocator(locator);
-    
-    if(programPath.exists()) {
-        throw new Error("Program already built at path: " + programPath);
-    }
 
     var sourcePackage = this.packageStore.get(locator);
 
@@ -75,6 +71,15 @@ ProgramStore.prototype.build = function(locator, options) {
     }
 
     var programPackage = PROGRAM.Program(programPath, locator);
+
+    // remove the existing program first
+    if(programPackage.getPath().join("package.json").exists()) {
+        OS.command("rm -Rf " + programPackage.getPath());
+    }
+    if(programPackage.getBuildPath().join("raw", "package.json").exists()) {
+        OS.command("rm -Rf " + programPackage.getBuildPath());
+    }        
+
 
     var builder = PROGRAM_BUILDER.ProgramBuilder();
 

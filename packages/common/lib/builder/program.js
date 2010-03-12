@@ -28,6 +28,10 @@ ProgramBuilder.prototype.setTargetPackage = function(pkg) {
     this.targetPackage = pkg;
 }
 
+ProgramBuilder.prototype.setRawPackage = function(pkg) {
+    this.rawPackage = pkg;
+}
+
 ProgramBuilder.prototype.setTarget = function(target) {
     this.target = target;
 }
@@ -137,6 +141,8 @@ print("NUKING: " + buildBasePath);
             builder.setTarget(item[0]);
             
             builder.setSourcePackage(self.sourcePackage);
+            
+            builder.setRawPackage(buildPackage);
 
             builder.setTargetPackage(PACKAGE.Package(targetPackagePath, self.sourcePackage.getLocator()));
 
