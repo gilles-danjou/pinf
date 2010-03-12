@@ -16,7 +16,7 @@ Start with the [Quick Start Guide](http://github.com/cadorn/pinf/blob/master/doc
 You can follow PINF on [twitter](http://twitter.com/pinf), [email](http://groups.google.com/group/pinf-dev) or
 [github](http://github.com/cadorn/pinf).
 
-More information:
+More information (*Coming Soon* is referring to the documentation, the features are mostly implemented):
 
  * [Quick Start](http://github.com/cadorn/pinf/blob/master/docs/QuickStart.md) - *Coming Soon*
  * [About PINF](http://github.com/cadorn/pinf/blob/master/docs/About.md)
@@ -37,6 +37,8 @@ More information:
  * [CLI](http://github.com/cadorn/pinf/blob/master/docs/CLI.md) - *Coming Soon*
  * [Links](http://github.com/cadorn/pinf/blob/master/docs/Links.md)
  * [Notes](http://github.com/cadorn/pinf/blob/master/docs/Notes.md)
+
+ * [PINF Fundamental Design](http://github.com/cadorn/pinf/blob/master/docs/Design/Foundation.md)
 
 
 Status
