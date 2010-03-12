@@ -23,3 +23,22 @@ Toolchain Design and Automation
  * [Idempotence](http://www.aspninja.com/2010/01/21/how-to-debug-asp-net-using-firefox/)
  * [Beautiful Failure](http://github.com/raganwald/homoiconic/blob/master/2010/01/beautiful_failure.markdown#readme)
  * [Vagrant](http://vagrantup.com/)
+
+
+Tools
+-----
+
+  * [Show Slow](http://www.showslow.com/)
+
+
+Distributions
+-------------
+
+ * [PLD Linux](http://www.pld-linux.org/)
+
+
+User Interface
+--------------
+
+ * [Code Bubbles](http://codebubbles.org/)
+

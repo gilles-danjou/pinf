@@ -110,6 +110,9 @@ Package.prototype.getLauncher = function() {
     }
 }
 
+/**
+ * @deprecated
+ */
 Package.prototype.getInfoForPinfLocatorProperty = function(propertyName) {
     var descriptor = this.getDescriptor(),
         pinf = descriptor.getPinfSpec();

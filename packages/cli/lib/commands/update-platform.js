@@ -39,7 +39,7 @@ command.action(function (options) {
             command.print("No platform found for ID: " + id);
             return;
         }
-        
+
         platform.update();
 
         command.print("Updated platform at: " + platform.getPath());

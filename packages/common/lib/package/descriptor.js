@@ -83,6 +83,10 @@ PackageDescriptor.prototype.getVersion = function() {
     return this.spec.version || false;
 }
 
+PackageDescriptor.prototype.getSpec = function() {
+    return this.spec;
+}
+
 PackageDescriptor.prototype.getPinfSpec = function() {
     return this.spec.pinf || false;
 }
@@ -181,6 +185,9 @@ PackageDescriptor.prototype.getImplementsForUri = function(uri) {
     return this.spec["implements"][uri];
 }
 
+/**
+ * @deprecated
+ */
 PackageDescriptor.prototype.getPlatformLocatorForName = function(name) {
     if(!this.spec.pinf || !this.spec.pinf.platforms) {
         return false;
@@ -221,6 +228,9 @@ PackageDescriptor.prototype.everyUsing = function(callback) {
     return true;
 }
 
+/**
+ * @deprecated
+ */
 PackageDescriptor.prototype.everyPlatform = function(callback) {
     if(!this.spec.pinf || !this.spec.pinf.platforms) {
         return false;
@@ -231,6 +241,9 @@ PackageDescriptor.prototype.everyPlatform = function(callback) {
     return true;
 }
 
+/**
+ * @deprecated
+ */
 PackageDescriptor.prototype.everyProgram = function(callback) {
     if(!this.spec.pinf || !this.spec.pinf.programs) {
         return false;
@@ -272,14 +285,18 @@ PackageDescriptor.prototype.everyImplements = function(callback) {
 }
 
 
+
+/**
+ * NOTE: These methods are only really called from one place (../program.js)
+ *       and should probably be moved out of this module as the caller needs to do a lot of work too.
+ *       We can keep a simplified version for more generic use.
+ */
 PackageDescriptor.prototype.traverseEveryDependency = function(callback, options) {
     return this.traverseEveryLocator("dependencies", callback, options);
 }
-
 PackageDescriptor.prototype.traverseEveryUsing = function(callback, options) {
     return this.traverseEveryLocator("using", callback, options);
 }
-
 PackageDescriptor.prototype.traverseEveryLocator = function(property, callback, options, stacks) {
     if(!options || !options.packageStore) {
         throw new PackageDescriptorError("options.packageStore not provided");

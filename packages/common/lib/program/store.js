@@ -6,7 +6,10 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 var UTIL = require("util");
 var FILE = require("file");
 var PROGRAM = require("../program");
+var PACKAGE = require("../package");
+var PROGRAM_BUILDER = require("../builder/program");
 var PINF = require("../pinf");
+var OS = require("os");
 
 
 var ProgramStore = exports.ProgramStore = function(path) {
@@ -28,86 +31,61 @@ ProgramStore.prototype.getBasePath = function() {
     return this.path.join("programs");
 }
 
+ProgramStore.prototype.getPathForLocator = function(locator) {
+    return this.getBasePath().join(locator.getTopLevelId());
+}
+
+ProgramStore.prototype.has = function(locator) {
+    return this.getPathForLocator(locator).exists();
+}
+
 ProgramStore.prototype.get = function(locator) {
 
-    var pkg = this.packageStore.get(locator);
+    var programPath = this.getPathForLocator(locator);
 
-    if(!pkg.getPath().join("program.json").exists()) {
-        throw new Error("Package not a program at path: " + pkg.getPath());
-    }
-
-    var programPath = this.getBasePath().join(locator.getTopLevelId());
     if(!programPath.exists()) {
+        throw new Error("Program does not exist at: " + programPath);
+    }
+    
+    return PROGRAM.Program(programPath, locator);
+}
 
-        programPath.mkdirs();
+ProgramStore.prototype.build = function(locator) {
 
-        [
-            "package.json",
-            "program.json"
-        ].forEach(function(basename) {
-            if(pkg.getPath().join(basename).exists()) {
-                // if package has a version it is a release we do not want to modify.
-                // if it does not have a version it is likely linked to a workspace in which
-                // case we do want to modify program.json
-                if(pkg.getVersion()) {
-                    pkg.getPath().join(basename).copy(programPath.join(basename));
-                } else {
-                    pkg.getPath().join(basename).symlink(programPath.join(basename));
-                }
-            }
-        });
-
-        // if there are *.local.* files in the workspace for this program we link them
-        try {
-            var workspace = PINF.getWorkspaceForSelector(pkg.getUid());
-            if(workspace) {
-                var repoInfo = pkg.getDescriptor().getRepositoryInfo(),
-                    basePath = workspace.getPath();
-                if(repoInfo.path) {
-                    basePath = basePath.join(repoInfo.path);
-                }
-                [
-                    "package.local.json",
-                    "program.local.json"
-                ].forEach(function(basename) {
-                    if(basePath.join(basename).exists() && !programPath.join(basename).exists()) {
-                        basePath.join(basename).symlink(programPath.join(basename));
-                    }
-                });
-            }
-        } catch(e) {
-            // slient! - this is a flow-control try-catch which is fine as this is an edge use-case
-        }
+    var programPath = this.getPathForLocator(locator);
+    
+    if(programPath.exists()) {
+        throw new Error("Program already built at path: " + programPath);
     }
 
-/*    
-    if(pkg.getVersion() && !programPath.exists()) {
-        FILE.copyTree(pkg.getPath(), programPath);
+    var sourcePackage = this.packageStore.get(locator);
 
-        // if there are *.local.* files in the workspace for this program we link them
-        var workspace = PINF.getWorkspaceForSelector(pkg.getUid());
-        if(workspace) {
-            var repoInfo = pkg.getDescriptor().getRepositoryInfo(),
-                basePath = workspace.getPath();
-            if(repoInfo.path) {
-                basePath = basePath.join(repoInfo.path);
-            }
-            [
-                "package.local.json"
-            ].forEach(function(basename) {
-                if(basePath.join(basename).exists() && !programPath.join(basename).exists()) {
-                    basePath.join(basename).symlink(programPath.join(basename));
-                }
-            });
-        }
-    } else
-    if(!programPath.exists()) {
-        pkg.getPath().symlink(programPath);
+    if(!sourcePackage.getPath().join("program.json").exists()) {
+        throw new Error("Package not a program at path: " + sourcePackage.getPath());
     }
-*/
 
-    var program = PROGRAM.Program(programPath, locator);
-    program.setPackageStore(this.packageStore);
-    return program;
+    var programPackage = PROGRAM.Program(programPath, locator);
+
+    var builder = PROGRAM_BUILDER.ProgramBuilder();
+
+    builder.setSourcePackage(sourcePackage);
+    builder.setTargetPackage(programPackage);
+
+    try {
+
+        builder.triggerBuild();
+
+    } catch(e) {
+        // sanity check before nuking build directory
+        if(programPath.exists() &&
+           programPath.join("package.json").exists()) {
+
+print("NUKING: " + programPath);            
+            OS.command("rm -Rf " + programPath);
+        }        
+        throw e;
+    }
+
+    return programPackage;
 }
 

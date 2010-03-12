@@ -123,6 +123,12 @@ Database.prototype.getPackage = function(locator) {
 Database.prototype.getProgram = function(locator) {
     return this.programStore.get(locator);
 }
+Database.prototype.hasProgram = function(locator) {
+    return this.programStore.has(locator);
+}
+Database.prototype.buildProgram = function(locator, options) {
+    return this.programStore.build(locator, options);
+}
 
 Database.prototype.getBuildPathForPackage = function(pkg) {
     var locator = pkg.getLocator();

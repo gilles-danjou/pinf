@@ -34,28 +34,74 @@ Program.prototype.construct = function(path, locator) {
 //        throw new Error("Program descriptor file not found at: " + this.path.join("program.json"));
 //    }
 
-    if(!this.path.join("package.json").exists()) {
-        throw new Error("Program's package descriptor file not found at: " + this.path.join("package.json"));
-    }
+//    if(!this.path.join("package.json").exists()) {
+//        throw new Error("Program's package descriptor file not found at: " + this.path.join("package.json"));
+//    }
 
-    this.spec = JSON_STORE.JsonStore(this.path.join("program.json"));
+//    this.spec = JSON_STORE.JsonStore(this.path.join("program.json"));
 
-    this.localSpec = JSON_STORE.JsonStore(this.path.join("program.local.json"));
+//    this.localSpec = JSON_STORE.JsonStore(this.path.join("program.local.json"));
     
-    this.packageDescriptor = DESCRIPTOR.PackageDescriptor(this.path.join("package.json"));
+//    this.packageDescriptor = DESCRIPTOR.PackageDescriptor(this.path.join("package.json"));
 }
 
 
+
+Program.prototype.expandMacros = function(builder, contents) {
+
+    var implUri = "http://registry.pinf.org/cadorn.org/github/pinf/@meta/program/package/0.1.0",
+        impl = this.getDescriptor().getImplementsForUri(implUri);
+    if(!impl) {
+        return contents;
+    }
+
+    var locator = LOCATOR.PackageLocator(impl["builders"][builder.getTarget()]),
+        pkg;
+
+    if(!locator.getModule()) {
+        throw new Error("'builders."+builder.getTarget()+"' locator does not specify a 'module' property");
+    }
+    if(locator.isCatalog() || locator.isDirect()) {
+        // the module is located in an external package
+    } else {
+        // the module is in our own package
+        var newLocator = this.getLocator().clone();
+        newLocator.setModule(locator.getModule());
+        locator = newLocator;
+    }
+    pkg = PINF.getPackageForLocator(locator);
+
+    pkg.makeCallable();
+
+    // load actual module now that package and dependencies are registered
+
+    var macroBuilder = require(locator.getModule(), pkg.getTopLevelId()).ProgramBuilder();
+    macroBuilder.setTarget(builder.getTarget());
+    macroBuilder.setSourcePackage(builder.sourcePackage);
+    macroBuilder.setTargetPackage(builder.targetPackage);
+    return macroBuilder.expandMacros(this, contents);
+}
+
+
+/**
+ * deprecated
+ */
 Program.prototype.getName = function() {
     return this.packageDescriptor.getName();
 }
 
 
+/**
+ * deprecated
+ */
 Program.prototype.setPackageStore = function(store) {
     this.packageStore = store;
 }
 
 
+/**
+ * deprecated
+ */
 Program.prototype.clean = function() {
     var buildPath = this.getBuildPath();
     if(buildPath.exists()) {
@@ -66,6 +112,10 @@ Program.prototype.clean = function() {
     }
 }
 
+
+/**
+ * deprecated
+ */
 Program.prototype.build = function(options) {
     var self = this;
 
@@ -236,7 +286,9 @@ Program.prototype.build = function(options) {
 }
 
 
-
+/**
+ * deprecated
+ */
 Program.prototype.publish = function(options) {
     var self = this;
 
@@ -255,6 +307,9 @@ Program.prototype.publish = function(options) {
 }
 
 
+/**
+ * deprecated
+ */
 Program.prototype.launch = function(options) {
     
     var launcher = this.getLauncher({

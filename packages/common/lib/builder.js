@@ -35,6 +35,9 @@ Builder.prototype.getPackageForLocator = function(locator) {
     return PINF.getPackageForLocator(locator);
 }
 
+/**
+ * @deprecated
+ */
 Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
 
     debugStrDepth++;
@@ -99,7 +102,7 @@ Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
     });
 
     if(DEBUG) print(debugStrPrefix + "  -- build commands:");
-
+/*
     // copy all declared commands
     if(spec.commands && !buildOptions["skipWriteCommands"]) {
         var sourcePath,
@@ -163,7 +166,7 @@ Builder.prototype.triggerBuild = function(targetPackage, buildOptions) {
             targetPath.chmod(0755);
         });
     }
-
+*/
     if(DEBUG) print(debugStrPrefix + "  -- build:");
 
     this.build(targetPackage, buildOptions);

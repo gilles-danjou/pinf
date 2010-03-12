@@ -9,6 +9,7 @@ var ARGS_UTIL = require("args-util", "util");
 var VALIDATOR = require("validator", "util");
 var PINF = require("../pinf");
 var GIT = require("git", "util");
+var OS = require("os");
 
 var command = exports["build-program"] = new ARGS.Parser();
 
@@ -83,15 +84,29 @@ command.action(function (options) {
             }
         }
 
-        var pkg = PINF.getDatabase().getProgram(locator);
+        if(PINF.getDatabase().hasProgram(locator)) {
+            // remove the existing program first
+            var pkg = PINF.getDatabase().getProgram(locator);
+            if(pkg.getPath().join("package.json").exists()) {
+                OS.command("rm -Rf " + pkg.getPath());
+            }        
+            if(pkg.getBuildPath().join("raw", "package.json").exists()) {
+                OS.command("rm -Rf " + pkg.getBuildPath());
+            }        
+        }
 
+        var pkg = PINF.getDatabase().buildProgram(locator, {
+            
+        });
+/*
         path = pkg.build({
             "remoteProgram": remoteProgram,
             "remoteDependencies": remoteDependencies,
             "args": options.args.slice(1)
         });
+*/
 
-        command.print("Built program at: " + path);
+        command.print("Built program at: " + pkg.getPath());
 
     } catch(e) {
         ARGS_UTIL.printError(e);

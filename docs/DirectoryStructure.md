@@ -5,7 +5,8 @@ PINF Directory Structure
 
 PINF works by jailing everything in a directory tree rooted on a PINF home directory. By default there is one
 PINF installation per user on a system with the PINF home directory located at `~/pinf/` *(Note: Multiple users using PINF on one system has
-not been addresses as of yet)*.
+not been addresses as of yet)*. You can change the default location of the PINF home directory by setting the
+`PINF_HOME` environment variable.
 
 Once PINF is installed on a given path it **may not be relocated**. This is because the absolute path to the PINF home directory is
 compiled into many PINF-controlled files. This mode of operation is essential to allow files to be referenced

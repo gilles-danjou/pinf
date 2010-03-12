@@ -5,13 +5,21 @@ var FILE = require("file");
 var URI = require("uri");
 var SYSTEM = require("system");
 var DATABASE = require("./database");
+var UTIL = require("util");
 
 
 var database;
 
 
 exports.getDefaultDatabase = function() {
-    return DATABASE.Database(FILE.Path(SYSTEM.env["HOME"]).join("pinf"));
+    if(UTIL.has(SYSTEM.env, "PINF_HOME")) {
+        return DATABASE.Database(FILE.Path(SYSTEM.env["PINF_HOME"]));
+    } else
+    if(UTIL.has(SYSTEM.env, "HOME")) {
+        return DATABASE.Database(FILE.Path(SYSTEM.env["HOME"]).join("pinf"));
+    } else {
+        throw new PinfError("Cannot determine default PINF database path as PINF_HOME and HOME environment variables are not set!");
+    }
 }
 
 exports.setDatabase = function(obj) {

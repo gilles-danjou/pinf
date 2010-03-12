@@ -8,7 +8,7 @@
             "path": "programs/cli"
         }
     ],
-    "dependencies": {
+    "using": {
         "program": {
             "catalog": "http://registry.pinf.org/cadorn.org/github/pinf/packages/catalog.json",
             "name": "cli",

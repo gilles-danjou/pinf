@@ -5,6 +5,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 var PACKAGES = require("packages");
 var PACKAGE = require("./package");
 var LOCATOR = require("./package/locator");
+var BUILDER = require("./builder/platform");
 var PINF = require("./pinf");
 var OS = require("os");
 
@@ -31,47 +32,19 @@ Platform.prototype.init = function(locator, name) {
             throw new Error("Could not locate platform package");
         }
 
-        var path = this.getPath();
-        path.mkdirs();
-
-        // write package.json file for platform
-        var file = path.join("package.json");
-        if(file.exists()) {
-            throw new Error("Platform package may not install a package descriptor at: " + file);
+        var implUri = "http://registry.pinf.org/cadorn.org/github/pinf/@meta/platform/package/0.1.0",
+            impl = pkg.getDescriptor().getImplementsForUri(implUri);
+        if(!impl) {
+            throw new Error("Referenced platform package '"+pkg.getPath()+"' does not implement '"+implUri+"'.");
         }
-        file.write(JSON.encode({
-            "name": name,
-            "using": {
-                "platform": locator.getSpec()
-            }
-        }, null, "    "));
 
+        var builder = BUILDER.PlatformBuilder();
 
-        var builder = pkg.getBuilder({
-            "packageStore": this.getPackageStore()
-        });
+        builder.setSourcePackage(pkg);
+        builder.setTargetPackage(this);
 
-
-        // TODO: Deprecate 'path' property below
-        builder.triggerBuild(this, {
-            "path": path,
-            "platformName": name
-        });
-
-        // write empty bin/activate.bash if it does not exist
-        file = path.join("bin", "activate.bash");
-        file.dirname().mkdirs();
-        if(!file.exists()) {
-            file.write("export PATH="+file.dirname()+":\"$PATH\"");
-        }
-        
-        // link all binaries from built programs to platform
-        pkg.getDescriptor().everyProgram(function(name, locator) {
-            var programPkg = PINF.getDatabase().getProgram(locator),
-                binPath = programPkg.getPath().join("bin");
-            binPath.listPaths().forEach(function(item) {
-                item.symlink(self.getPath().join("bin", item.basename()));
-            });
+        builder.triggerBuild({
+            "targetPackageName": name
         });
 
     } catch(e) {
@@ -128,6 +101,9 @@ Platform.prototype.getControlPackage = function() {
     return pkg;
 }
 
+/**
+ * @deprecated
+ */
 Platform.prototype.expandMacros = function(context, contents) {
     return this.callService(context, "expandMacros", [contents]);
 }

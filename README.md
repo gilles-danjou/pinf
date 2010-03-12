@@ -36,6 +36,7 @@ More information:
  * [Vendors](http://github.com/cadorn/pinf/blob/master/docs/Vendors.md)
  * [CLI](http://github.com/cadorn/pinf/blob/master/docs/CLI.md) - *Coming Soon*
  * [Links](http://github.com/cadorn/pinf/blob/master/docs/Links.md)
+ * [Notes](http://github.com/cadorn/pinf/blob/master/docs/Notes.md)
 
 
 Status
