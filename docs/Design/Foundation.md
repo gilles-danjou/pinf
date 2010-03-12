@@ -29,7 +29,6 @@ The design of PINF is concerned with addressing the package management problem s
             }
         }
     }
-
     http://domain.org/path/to/myPackage/1.3.2.zip ~ /lib/myModule.js ~ {
         var THEIR_MODULE = require("myModule", "theirPackage");
         // or              require("myModule", "domain.net/another/path/to/yourPackage/1.3.2.zip");
@@ -37,7 +36,6 @@ The design of PINF is concerned with addressing the package management problem s
         var channel = THEIR_MODULE.NewChannel(module);
         channel.send(HELPER.getDependencies());
     }
-
     http://domain.org/path/to/myPackage/1.3.2.zip ~ /lib/alsoMyModule.js ~ {
         var FILE = require("file");
         exports.getDependencies = function() { return module.packages; }
@@ -47,11 +45,11 @@ The design of PINF is concerned with addressing the package management problem s
     http://domain.net/another/path/to/yourPackage/1.3.2.zip ~ /lib/myModule.js ~ {
         var TERM = require("term");
         var NewChannel = exports.NewChannel = function(callingModule) {
-          if (!(this instanceof exports.NewChannel)) return new exports.NewChannel(callingModule);
-          this.cm = callingModule;
+            if (!(this instanceof exports.NewChannel)) return new exports.NewChannel(callingModule);
+            this.cm = callingModule;
         }
         NewChannel.prototype.send - function(message) {
-          TERM.stream.print("Message from " + this.cm.id + " in package " + this.cm["package"] + " follows: \n" + message);
+            TERM.stream.print("Message from " + this.cm.id + " in package " + this.cm["package"] + " follows: \n" + message);
         }
         // this.cm["package"] == "domain.net/another/path/to/yourPackage/1.3.2.zip"
     }
@@ -107,7 +105,7 @@ The example above can be implemented with modules stored on the filesystem at:
     /using/domain.org/path/to/myPackage/1.3.2.zip/package.json
     /using/very.cool.tv/catalogPackageName/1/package.json
 
-This convention joins the ''catalog'' URL minus the protocol with the ''name'' and condensed ''revision'' property. The ''revision'' property is a release selector that is based on the semver convention. The selector assumes that package releases are backwards compatible and uses only the major version to disambiguate between "revisions". The ''revision'' also provides the minimum compatible version.
+This convention joins the *catalog* URL minus the protocol and extension with the *name* and condensed *revision* property. The *revision* property is a release selector that is based on the semver convention. The selector assumes that package releases are backwards compatible and uses only the major version to disambiguate between "revisions". The *revision* also provides the minimum compatible version.
 
 The conventions described above form a foundation that can evolve in many directions as the package namespace is not restricted to one central authority. This is considered to be desirable in encouraging innovation in the areas of modular design and dependency management. It is believed the approach presented is sufficient to scaffold all dependency resolution requirements that package managers or programs may impose.
 
