@@ -2,6 +2,7 @@
     "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/common/",
     "name": "common",
     "type": "using",
+    "preload": ["./preprocessor"],
     "using": {
         "util": {
             "catalog": "http://registry.pinf.org/cadorn.org/github/util/packages/catalog.json",
