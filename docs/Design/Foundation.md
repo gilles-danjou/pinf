@@ -203,6 +203,8 @@ or
     }
     // module["package"] == "very.cool.tv/catalogPackageName/1"
     
+    http://domain.net/another/path/to/yourPackage/1.3.2.zip ~ /packages/yourPackage/package.json
+
     /using/very.cool.tv/catalogPackageName/1/package.json
 
 
@@ -242,12 +244,13 @@ To empower development lifecycle tools the following optional extension to the c
         }
     }
 
-It is sufficient for a package to specify the following minimal repository information where the remainder of the repository properties may be systematically derived by catalog authors.
+Files can be referenced for arbitrary revisions and versions (via source control revisions and tags) by substituting `{rev}` and `{path}`.
+
+It is sufficient for a package to specify the following minimal repository information where the remainder of the repository properties may be systematically derived based on the URL's hostname.
 
     package.json ~ {
         "repositories": [
             {
-                "type": "git",
                 "url": "git://github.com/cool-tv/very.git",
                 "path": "packages/yourPackage"
             }
@@ -285,17 +288,20 @@ Sanctioned namespaces
 The namespace scheme proposed lends itself well to operate with the use of catalog registry servers. CommonJS could gain control of the top-level namespace by hosting an official registry server:
 
     http://registry.commonjs.org/                     // CommonJS Registry Server
-    http://registry.commonjs.org/domain.com/...       // User-controlled namespace (hostname based)
-    http://registry.commonjs.org/name@email.com/...   // User-controlled namespace (email based)
-    http://registry.commonjs.org/<name>/...           // CommonJS delegated namespaces
+    http://registry.commonjs.org/domain.com/...       // User-controlled namespaces (hostname based)
+    http://registry.commonjs.org/name@email.com/...   // User-controlled namespaces (email based)
+    http://registry.commonjs.org/<name>/...           // CommonJS delegated namespaces (selectively issued)
 
 Users may host registry servers as well:
 
     http://registry.domian.com/                     // User Registry Server
-    http://registry.domian.com/domain.com/...       // User-controlled namespace
-    http://registry.domian.com/name@email.com/...   // User-controlled namespace
-    // NOTE: User registry servers may only provide namespaces where the top level
-    //       name is a globally unique identifier constant across all registry servers.
+    http://registry.domian.com/domain.com/...       // User-controlled namespaces
+    http://registry.domian.com/name@email.com/...   // User-controlled namespaces
+    // NOTE: Globally unique namepsaces (email, hostname) can be mirrord across servers
+    // NOTE: User registry servers may also provide arbitrarily named top-level
+             namespaces. These are local to that registry server.
+             This could be used to mirror and modify the catalogs of other registry servers
+             if clients are configured to query the registry server first.
 
 It may be agreed on to drop the registry hostname from the namespace path to provide a more condensed path:
 
@@ -303,7 +309,7 @@ It may be agreed on to drop the registry hostname from the namespace path to pro
     /using/name@email.com/...
     /using/<name>/...
 
-Globally unique/meaningful top level names may be provided by hostnames, email addresses, IP addresses, mac addresses, phone numbers, uuids, OpenIDs, Latitude + Longitude, ISBN numbers, etc...
+Globally unique/meaningful top level names may be constrained by hostnames, email addresses, IP addresses, mac addresses, phone numbers, uuids, OpenIDs, Latitude + Longitude, ISBN numbers, etc...
 
 
 Relevant discussions
