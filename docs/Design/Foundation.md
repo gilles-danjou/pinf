@@ -105,13 +105,13 @@ The example above can be implemented with modules stored on the filesystem at:
     /using/domain.org/path/to/myPackage/1.3.2.zip/package.json
     /using/very.cool.tv/catalogPackageName/1/package.json
 
-This convention joins the *catalog* URL minus the protocol and extension with the *name* and condensed *revision* property. The *revision* property is a release selector that is based on the semver convention. The selector assumes that package releases are backwards compatible and uses only the major version to disambiguate between "revisions". The *revision* also provides the minimum compatible version.
+This convention joins the *catalog* URL minus the protocol and filename with the *name* and condensed *revision* property. The *revision* property is a release selector that is based on the semver convention. The selector assumes that package releases are backwards compatible and uses only the major version to disambiguate between "revisions". The *revision* also provides the minimum compatible version.
 
 The conventions described above form a foundation that can evolve in many directions as the package namespace is not restricted to one central authority. This is considered to be desirable in encouraging innovation in the areas of modular design and dependency management. It is believed the approach presented is sufficient to scaffold all dependency resolution requirements that package managers or programs may impose.
 
 Finally it is argued that provisions must be made to support collaborative workflows by enabling developers to share pre-stable releases of their code. To accomplish this the revision selector follows additional conventions as illustrated below:
 
-      version       directory    revision selectors
+      version    -> directory <- revision selectors
     t 0.1.0         0            0.1.0  or  0.1  or  0  or  0*
     i 0.1.1alpha    0alpha       0.1.1alpha  or  0.1alpha  or  0alpha  or  0*
     m 1.0.0         1            1.0.0  or  1.0  or  1  or  1*
@@ -124,6 +124,7 @@ Finally it is argued that provisions must be made to support collaborative workf
       3.0.0rc3      3rc          3.0alpha  or  3*  ...
       3.0.0         3            3.0alpha  or  3*  ...
       3.5.7         3            3.0alpha  or  3*  ...  
+
     --latest--
       0.1.0         0
       0.1.1alpha    0alpha
@@ -135,8 +136,12 @@ Finally it is argued that provisions must be made to support collaborative workf
       3.0.0beta15   3beta
       3.0.0rc3      3rc
       3.5.7         3
+
     --development branches--
-      0.0.0rev-<ref>   <name>    <name>
+      0.0.0rev-<ref>   <name>            <name>
+
+    --exact revisions--
+      0.0.0rev-<ref>   0.0.0rev-<ref>    0.0.0rev-<ref>
 
 
 Archives containing multiple packages
@@ -301,7 +306,7 @@ It may be agreed on to drop the registry hostname from the namespace path to pro
 Globally unique/meaningful top level names may be provided by hostnames, email addresses, IP addresses, mac addresses, phone numbers, uuids, OpenIDs, Latitude + Longitude, ISBN numbers, etc...
 
 
-Relevant Discussions
+Relevant discussions
 --------------------
 
 *TODO*
