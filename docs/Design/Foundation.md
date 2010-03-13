@@ -315,5 +315,17 @@ Globally unique/meaningful top level names may be constrained by hostnames, emai
 Relevant discussions
 --------------------
 
-*TODO*
+CommonJS:
+
+ * [Two argument require vs one argument require](http://groups.google.com/group/commonjs/browse_thread/thread/786f5a5cac0a8fee)
+ * [Confused about the motivation for absolute/top-level module IDs](http://groups.google.com/group/commonjs/browse_thread/thread/b8b3b2ab413cdb6c)
+ * [CommonJS Module Repository](http://groups.google.com/group/commonjs/browse_thread/thread/abbd7019dfb68dde)
+ * [require syntax/module identifiers](http://groups.google.com/group/commonjs/browse_thread/thread/eabc65c0b14969d9)
+ * [Call for votes: name of the system-provided "virtual" package](http://groups.google.com/group/commonjs/browse_thread/thread/17442874b369da5d)
+ * [Packages 0.1](http://groups.google.com/group/commonjs/browse_thread/thread/541633834ce2334)
+
+NodeJS:
+
+ * [Default package manager](http://groups.google.com/group/nodejs/browse_thread/thread/c6236c1fba42b9fb)
+ * [Naming of NodeJS modules: maybe we will introduce some rules?](http://groups.google.com/group/nodejs/browse_thread/thread/637598fe1a8dc599)
 
