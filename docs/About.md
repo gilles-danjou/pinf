@@ -52,7 +52,7 @@ PINF strives to be a [first class Open Source project](http://almaer.com/blog/be
 
 There is always the question of whether Contributor Licensing Agreements are necessary to ensure clean IP. We believe intellectual property is sufficiently protected by requiring each contributor to license code under MIT prior to merging. This is accomplished by placing the following line at the top of a new or modified file prior to requesting a merge:
 
-    // -- github First Last Copyright YYYY MIT License
+    // -- <username> First Last Copyright YYYY MIT License
 
 
 History
