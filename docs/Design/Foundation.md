@@ -312,6 +312,21 @@ It may be agreed on to drop the registry hostname from the namespace path to pro
 Globally unique/meaningful top level names may be constrained by hostnames, email addresses, IP addresses, mac addresses, phone numbers, uuids, OpenIDs, Latitude + Longitude, ISBN numbers, etc...
 
 
+Requirements
+------------
+
+*Work in progress*
+
+ * Flexible unique namespace (URL-based)
+ * Be able to find dependent packages based on package.json declarations (location and catalog based package locators)
+ * Be able to drop packages into place and have them work (/using/ path dictates top-level package ID)
+ * Be able to load modules from any version of any package (package ID can be alias or top-level ID which corresponds to /using/ path)
+ * Be able to support the object-capability security model (package descriptors can provide all static meta data for a package)
+ * Be able to upgrade dependencies without modifying code (catalog based package locators and revision selectors)
+ * Be able to locate the source code for a package easily (source file referencing by having sufficient data in catalogs and package descriptors)
+ * Be able to support package versions, version stream and development branches (revision selectors)
+
+
 Relevant discussions
 --------------------
 
@@ -323,6 +338,7 @@ CommonJS:
  * [require syntax/module identifiers](http://groups.google.com/group/commonjs/browse_thread/thread/eabc65c0b14969d9)
  * [Call for votes: name of the system-provided "virtual" package](http://groups.google.com/group/commonjs/browse_thread/thread/17442874b369da5d)
  * [Packages 0.1](http://groups.google.com/group/commonjs/browse_thread/thread/541633834ce2334)
+ * [module pre-processing for require()](http://groups.google.com/group/narwhaljs/browse_thread/thread/e8e8716c534e4fac)
 
 NodeJS:
 
