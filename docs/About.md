@@ -34,7 +34,7 @@ Project Links
 Sponsorship & Open Source
 -------------------------
 
-The PINF project is licensed under [MIT](http://www.opensource.org/licenses/mit-license.php) and currently exclusively sponsored by [Christoph Dorn](http://www.christophdorn.com/). To ease PINF-based development, Christoph is working on a bunch of free and for-fee tools. These tools are optional and interact with PINF via published APIs open to any tool vendor. Christoph also offers commercial support and consulting services concerning anything related to PINF.
+The PINF project is licensed under [MIT](http://www.opensource.org/licenses/mit-license.php) and currently exclusively sponsored by [Christoph Dorn](http://www.christophdorn.com/). To leverage the foundation PINF provides and fund further development Christoph is working on free and for-fee tools aimed at streamlining development workflows and lifecycles. The tools are optional and interact with PINF via published APIs open to anyone. Christoph also offers commercial support and consulting services concerning anything related to PINF.
 
 PINF strives to be a [first class Open Source project](http://almaer.com/blog/being-open-is-hard-as-we-have-seen-this-week):
 
@@ -58,8 +58,7 @@ There is always the question of whether Contributor Licensing Agreements are nec
 History
 -------
 
-[Christoph Dorn](http://www.christophdorn.com/) has been tinkering with the concept of a complete toolchain platform for a long time. While the ideas behind PINF are quite simple, translating them into a workable reality has been anything but simple. In the past Christoph has made dozens of attempts implementing such a system with varying degrees of success. His latest effort on top of CommonJS and influenced by current trends of
-collaborative open source development promises to be of great potential.
+[Christoph Dorn](http://www.christophdorn.com/) has been tinkering with the idea of a complete toolchain platform for a long time. While the ideas behind PINF are quite simple, translating them into a workable reality has been challenging. Throughout his hobby and professional work Christoph has been testing various toolchain related concepts touching on a broad range of problem areas with the eventual goal of uniting everything into a cohesive framework. The emergence of CommonJS and the collaborative open source development trend have provided the missing pieces to put together an implementation that is based on a big-picture foundation.
 
 
 License

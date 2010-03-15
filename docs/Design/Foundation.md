@@ -329,3 +329,7 @@ NodeJS:
  * [Default package manager](http://groups.google.com/group/nodejs/browse_thread/thread/c6236c1fba42b9fb)
  * [Naming of NodeJS modules: maybe we will introduce some rules?](http://groups.google.com/group/nodejs/browse_thread/thread/637598fe1a8dc599)
 
+Prior Art:
+
+ * [YUI Loader](http://developer.yahoo.com/yui/3/examples/yui/yui-loader-ext.html)
+
