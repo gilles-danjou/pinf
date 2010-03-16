@@ -7,7 +7,7 @@ To use pinf you need to install the [PINF command line tool](http://github.com/c
 
 Requirements:
 
-  * UNIX (Only Mac OSX is tested)
+  * UNIX (OSX and Ubuntu has been tested)
   * java
   * git
 
