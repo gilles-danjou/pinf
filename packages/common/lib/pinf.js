@@ -43,6 +43,7 @@ exports.getDatabase = function() {
     return database;
 }
 
+
 exports.getCredentials = function(uri, environment) {
     return exports.getDatabase().getCredentials(uri, environment);
 }

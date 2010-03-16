@@ -19,6 +19,9 @@ var CATALOGS = require("./catalogs");
 var WORKSPACES = require("./workspaces");
 var PLATFORMS = require("./platforms");
 var FS_STORE = require("http/fs-store");
+var STRUCT = require("struct");
+var MD5 = require("md5");
+
 
 
 var Database = exports.Database = function(path) {
@@ -72,6 +75,22 @@ Database.prototype.getDataPath = function(path) {
 Database.prototype.getBackupPath = function(path) {
     return this.path.join("backup", path);
 }
+
+
+/**
+ * Get a shortcut path for a shebang path
+ * 
+ * @see http://www.in-ulm.de/~mascheck/various/shebang/#results
+ */
+Database.prototype.getShebangPath = function(fullPath) {
+    var path = this.path.join("shortcuts", STRUCT.bin2hex(MD5.hash(fullPath.valueOf())));
+    if(!path.exists()) {
+        path.dirname().mkdirs();
+        fullPath.symlink(path);
+    }
+    return path;
+}
+
 
 Database.prototype.getCache = function() {
     return this.cache;
