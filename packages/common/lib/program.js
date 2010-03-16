@@ -47,6 +47,22 @@ Program.prototype.construct = function(path, locator) {
 }
 
 
+Program.prototype.getSystemPackageLocatorForName = function(names) {
+    if(!UTIL.isArrayLike(names)) {
+        names = [names];
+    }
+    names = names.concat(["@", "locator"]);
+    var key = ["packages", "system"].concat(names);
+
+    var spec = JSON_STORE.JsonStore(this.getPath().join("program.json"));
+
+    if(!spec.has(key)) {
+        throw new Error("No package declared at: " + key);
+    }
+    
+    return LOCATOR.PackageLocator(spec.get(key));
+}
+
 
 Program.prototype.expandMacros = function(builder, contents) {
 

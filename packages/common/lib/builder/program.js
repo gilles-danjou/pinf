@@ -28,6 +28,10 @@ ProgramBuilder.prototype.setTargetPackage = function(pkg) {
     this.targetPackage = pkg;
 }
 
+ProgramBuilder.prototype.setProgramPackage = function(pkg) {
+    this.programPackage = pkg;
+}
+
 ProgramBuilder.prototype.setRawPackage = function(pkg) {
     this.rawPackage = pkg;
 }
@@ -144,6 +148,8 @@ ProgramBuilder.prototype.triggerBuild = function(options) {
             var builder = require(locator.getModule(), pkg.getTopLevelId()).ProgramBuilder();
 
             builder.setTarget(item[0]);
+
+            builder.setProgramPackage(self.targetPackage);
             
             builder.setSourcePackage(self.sourcePackage);
             
