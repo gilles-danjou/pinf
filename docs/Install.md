@@ -50,3 +50,24 @@ Put it on your `PATH` in `/etc/profile`, `~/.bash_profile` or equivalent:
 Now run the test suite:
 
     pinf test
+
+
+Post install
+------------
+
+PINF integrates with github and at the moment you are required to configure a github account. This requirement will
+be removed in future and other vendors will be supported in addition to github.
+
+Place the following into `~/pinf/config/credentials.json`:
+
+    {
+        "default": {
+            "http://github.com/api/": {
+                "login": "<username>",
+                "token": "<token>"
+            }
+        }
+    }
+
+You can get your github API token from your account page: [https://github.com/account](https://github.com/account)
+
