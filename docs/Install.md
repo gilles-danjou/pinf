@@ -47,9 +47,11 @@ Put it on your `PATH` in `/etc/profile`, `~/.bash_profile` or equivalent:
 
     export PATH=~/pinf/programs/registry.pinf.org/cadorn.org/github/pinf/programs/cli/<VERSION>/bin:$PATH
 
-Now run the test suite:
+Run the test suite:
 
     pinf test
+
+Now proceed with the *Post install* steps.
 
 
 Post install
