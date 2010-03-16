@@ -18,7 +18,7 @@ You can follow PINF on [twitter](http://twitter.com/pinf), [email](http://groups
 
 More information (*Coming Soon* is referring to the documentation, the features are mostly implemented):
 
- * [Quick Start](http://github.com/cadorn/pinf/blob/master/docs/QuickStart.md) - *Coming Soon*
+ * [Quick Start](http://github.com/cadorn/pinf/blob/master/docs/QuickStart.md)
  * [About PINF](http://github.com/cadorn/pinf/blob/master/docs/About.md)
  * [Roadmap](http://github.com/cadorn/pinf/blob/master/docs/Roadmap.md)
  * [Installing PINF](http://github.com/cadorn/pinf/blob/master/docs/Install.md)
@@ -34,7 +34,7 @@ More information (*Coming Soon* is referring to the documentation, the features 
  * [Versioning](http://github.com/cadorn/pinf/blob/master/docs/Versioning.md) - *Coming Soon*
  * [Registry](http://github.com/cadorn/pinf/blob/master/docs/Registry.md)
  * [Vendors](http://github.com/cadorn/pinf/blob/master/docs/Vendors.md)
- * [CLI](http://github.com/cadorn/pinf/blob/master/docs/CLI.md) - *Coming Soon*
+ * [CLI](http://github.com/cadorn/pinf/blob/master/docs/CLI.md)
  * [Links](http://github.com/cadorn/pinf/blob/master/docs/Links.md)
  * [Notes](http://github.com/cadorn/pinf/blob/master/docs/Notes.md)
 

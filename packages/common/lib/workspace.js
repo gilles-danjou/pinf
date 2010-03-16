@@ -95,10 +95,10 @@ Workspace.prototype.setPlatform = function(platform) {
     }
     var customizations = [
         // OSX Terminal
-        'export PS1="\\e[00;35mTUSK[\\e[00;33m' + name + '\\e[00;35m]:\\e[m "'
+        'export PS1="\\e[00;35mPINF[\\e[00;33m' + name + '\\e[00;35m]:\\e[m "'
         // OSX iTerm (http://xanana.ucsc.edu/xtal/iterm_tab_customization.html)
-//        'echo -ne "\\e]1;TUSK[' + name + ']\\a"',
-//        'echo -ne "\\e]2;TUSK[' + name + '] @ ' + this.getPath().valueOf() + '\\a"'
+//        'echo -ne "\\e]1;PINF[' + name + ']\\a"',
+//        'echo -ne "\\e]2;PINF[' + name + '] @ ' + this.getPath().valueOf() + '\\a"'
     ];
     contents = contents.replace(/\n\s*__SHELL_CUSTOMIZATIONS__\s*\n/, "\n" + customizations.join("\n") + "\n");
     contents = contents.replace(/__PINF_PLATFORM_HOME__/g, platform.getPath().valueOf());

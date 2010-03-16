@@ -3,4 +3,20 @@
 Getting started with PINF
 =========================
 
-*Coming Soon*
+
+*This section is intended to contain a quick introductory tutorial. Until that is in place you can follow the
+instructions below for a preview of what is under development.*
+
+
+Step 1
+------
+
+Install PINF. See [Install](http://github.com/cadorn/pinf/blob/master/docs/Install.md).
+
+
+Step 2
+------
+
+Try a demo to get a feel for the PINF workflow and commands.
+
+See: [Pintura example program](http://github.com/cadorn/pintura/tree/master/programs/example/)
