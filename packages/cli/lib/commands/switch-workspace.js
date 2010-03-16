@@ -12,6 +12,7 @@ var command = exports["switch-workspace"] = new ARGS.Parser();
 
 command.help('Enter a workspace');
 command.arg("Selector");
+command.option("--branch").set().help("The branch to switch to");
 command.helpful();
 
 command.action(function (options) {
@@ -20,6 +21,10 @@ command.action(function (options) {
         var selector = VALIDATOR.validate("string", options.args[0]);
 
         var workspace = PINF.getWorkspaceForSelector(selector);
+
+        if(workspace.isBranched()) {
+            workspace = workspace.getBranchWorkspace(options.branch || "master");
+        }
 
         workspace.switchTo();
 

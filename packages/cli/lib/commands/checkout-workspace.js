@@ -13,6 +13,7 @@ var command = exports["checkout-workspace"] = new ARGS.Parser();
 command.help('Checkout an existing workspace');
 command.arg("URL");
 command.option("-s", "--switch").bool().help("Switch to workspace");
+command.option("--branch").set().help("The branch to checkout");
 command.helpful();
 
 command.action(function (options) {
@@ -24,6 +25,18 @@ command.action(function (options) {
         });
 
         var workspace = PINF.getWorkspaceForSelector(uri);
+        
+        if(options.branch) {
+            // if workspace is not already branched we branch it
+            if(!workspace.isBranched()) {
+                workspace.migrateToBranched();
+            }
+            workspace = workspace.getBranchWorkspace(options.branch);
+        } else
+        if(workspace.isBranched()) {
+            // if no branch specified and workspace is already branched assuming master
+            workspace = workspace.getBranchWorkspace("master");
+        }
 
         workspace.checkout();
 

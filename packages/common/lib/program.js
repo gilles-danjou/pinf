@@ -12,6 +12,7 @@ var PACKAGE = require("./package");
 var LOCATOR = require("./package/locator");
 var DESCRIPTOR = require("./package/descriptor");
 var PINF = require("./pinf");
+var ARGS = require("args");
 
 
 var Program = exports.Program = function(path, locator) {
@@ -307,14 +308,30 @@ Program.prototype.publish = function(options) {
 }
 
 
-/**
- * deprecated
- */
-Program.prototype.launch = function(options) {
+Program.prototype.launch = function(launchOptions) {
+
+    var parser = new ARGS.Parser();
+    parser.option('--bin').set().help("The command to launch");
+    var options = parser.parse(launchOptions.args);
     
+    if(options.bin) {
+        
+        var binPath = this.getPath().join("bin", options.bin);
+        if(!binPath.exists()) {
+            throw new Error("Command file not found at: " + binPath);
+        }
+
+        OS.system(binPath.valueOf());
+
+    } else {
+        throw new Error("Default launchers not supported yet! Specify --bin");
+    }
+
+/*    
     var launcher = this.getLauncher({
         "packageStore": this.packageStore
     });
 
     launcher.triggerLaunch(this, options);
+*/    
 }

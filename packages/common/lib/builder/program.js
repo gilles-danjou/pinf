@@ -43,6 +43,11 @@ ProgramBuilder.prototype.getTarget = function() {
 ProgramBuilder.prototype.triggerBuild = function(options) {
     
     options = options || {};
+    if(!options.monitor) {
+        options.monitor = {
+            "built": {}
+        };
+    }
     var self = this;
 
     TERM.stream.print("\0cyan(*** Building PROGRAM Package ***\0)");
@@ -74,8 +79,8 @@ ProgramBuilder.prototype.triggerBuild = function(options) {
             if(buildBasePath.exists() &&
                buildBasePath.join("package.json").exists()) {
 
-print("NUKING: " + buildBasePath);            
-                OS.command("rm -Rf " + buildBasePath);
+//print("NUKING: " + buildBasePath);            
+//                OS.command("rm -Rf " + buildBasePath);
             }        
             throw e;
         }
@@ -155,8 +160,8 @@ print("NUKING: " + buildBasePath);
                 if(targetPackagePath.exists() &&
                    targetPackagePath.join("../raw/package.json").exists()) {
     
-print("NUKING: " + targetPackagePath);            
-                    OS.command("rm -Rf " + targetPackagePath);
+//print("NUKING: " + targetPackagePath);            
+//                    OS.command("rm -Rf " + targetPackagePath);
                 }        
                 throw e;
             }
@@ -309,29 +314,42 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
             programDescriptor.set(key, info);
             
 
+            // only build package if not already built for program
+            if(!UTIL.has(options.monitor.built, pkg.getTopLevelId())) {
+
+                options.monitor.built[pkg.getTopLevelId()] = true;
             
-    self.buildPackage(pkg, options);
-
-
-            // if package has a version we need to copy it, otherwise we can link it (as it is likely a sources overlay)
-            if(pkg.getVersion()) {
-                if(!path.exists()) {
+                self.buildPackage(pkg, options);
+    
+    
+                // if package has a version we need to copy it, otherwise we can link it (as it is likely a sources overlay)
+                if(pkg.getVersion()) {
+                    if(!path.exists()) {
+                        path.dirname().mkdirs();
+    print("COPY "+pkg.getPath()+" to "+path);                    
+                        FILE.copyTree(pkg.getPath(), path);
+                    }
+                    // since we copied it to a specific version we need to update all package locators
+                    // to include the exact version
+                    if(!pkg.hasUid())
+                    locatorRewriteInfo.push({
+                        "id": parentPackage[type[1].id](),
+                        "name": name,
+                        "revision": pkg.getVersion()
+                    });
+                } else
+                if(!path.exists() && !path.join("package.json").exists()) {
                     path.dirname().mkdirs();
-print("COPY "+pkg.getPath()+" to "+path);                    
-                    FILE.copyTree(pkg.getPath(), path);
+    print("LINK "+pkg.getPath()+" to "+path);                    
+                    pkg.getPath().symlink(path);
                 }
-                // since we copied it to a specific version we need to update all package locators
-                // to include the exact version
-                locatorRewriteInfo.push({
-                    "id": parentPackage[type[1].id](),
-                    "name": name,
-                    "revision": pkg.getVersion()
-                });
-            } else
-            if(!path.exists() && !path.join("package.json").exists()) {
-                path.dirname().mkdirs();
-print("LINK "+pkg.getPath()+" to "+path);                    
-                pkg.getPath().symlink(path);
+    
+                if(type[0]=="system") {
+    //print("link system package from " + path + " to " + targetPackage.getPath().join("using", "packages", name));                
+                                  
+                    targetPackage.getPath().join("packages").mkdirs();
+                    path.symlink(targetPackage.getPath().join("packages", name));
+                }
             }
 
             return locator;
@@ -341,15 +359,18 @@ print("LINK "+pkg.getPath()+" to "+path);
         });
 
         locatorRewriteInfo.forEach(function(info) {
-
-print(" ***  " + info.id + " *** " + self.sourcePackage[type[1].id]());
-
             if(info.id==self.sourcePackage[type[1].id]()) {
                 path = targetPackage.getPath().join("package.json");
             } else {
                 path = targetPackage.getPath().join(type[1].directory, info.id).join("package.json");
             }
-            JSON_STORE.JsonStore(path).set([type[1].property, info.name, "revision"], info.revision);
+
+            // ensure we only update copied package.json files!
+            if(targetPackage.getPath().join("using").relative(path.canonical()).valueOf().substring(0,1)==".") {
+                // don't update as package.json file is not within built using directory
+            } else {
+                JSON_STORE.JsonStore(path).set([type[1].property, info.name, "revision"], info.revision);
+            }
         });
     });
     

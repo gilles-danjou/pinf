@@ -138,6 +138,14 @@ Database.prototype.getBuildPathForPackage = function(pkg) {
     return this.path.join("builds", locator.getTopLevelId());
 }
 
+Database.prototype.getDataPathForPackage = function(pkg) {
+    var locator = pkg.getLocator();
+    if(!locator) {
+        throw new DatabaseError("No locator in package: " + pkg.getPath());
+    }        
+    return this.path.join("data", locator.getTopLevelId());
+}
+
 Database.prototype.getTestPathForPackage = function(pkg) {
     var locator = pkg.getLocator();
     if(!locator) {
@@ -158,6 +166,7 @@ Database.prototype.getPlatformForSelector = function(selector) {
     return this.getPlatforms().getForSelector(selector);
 }
 
+// TODO: move to "workspaces" module
 Database.prototype.mapSources = function() {
     
     // TODO: Allow for reloading dirty catalogs only
@@ -168,6 +177,7 @@ Database.prototype.mapSources = function() {
         self = this;
 
     workspaces.forEach(function(workspace) {
+    
         workspace.forEachPackage(function(pkg) {
             if(pkg.hasUid()) {
                 
@@ -187,42 +197,44 @@ Database.prototype.mapSources = function() {
 
                     var catalog = getCatalog(url),
                         revisions = catalog.getRevisionsForPackage(name);
-                    
                     if(revisions) {
                         revisions.forEach(function(revision) {
                             if(revision!="*") {
 
-                                var key = [url, name, revision, "@"];
+                                if(!workspace.isBranched() || workspace.getBranchName()==revision) {
 
-                                if(sources.spec.has(key)) {
-                                    // mapping already found
-                                    // ensure existing path exists, if not update with new path
-                                    if(!FILE.Path(sources.spec.get(key).path).exists()) {
+                                    var key = [url, name, revision, "@"];
+
+                                    if(sources.spec.has(key)) {
+                                        // mapping already found
+                                        // ensure existing path exists, if not update with new path
+                                        if(!FILE.Path(sources.spec.get(key).path).exists()) {
+                                            sources.spec.set(key, {
+                                                "path": pkg.getPath().valueOf()
+                                            })
+                                        }
+                                    } else {
+                                        // mapping not found - create it
                                         sources.spec.set(key, {
                                             "path": pkg.getPath().valueOf()
                                         })
                                     }
-                                } else {
-                                    // mapping not found - create it
-                                    sources.spec.set(key, {
-                                        "path": pkg.getPath().valueOf()
-                                    })
-                                }
-
-                                // now that the mappings are updated we need to
-                                // check the packages to ensure there are no hard directories
-                                // where there should be links
-
-                                var path = packagePath.join(revision);
-                                if(path.exists()) {
-                                    if(path.isLink()) {
-                                        path.remove();
-                                    } else {
-                                        OS.command("rm -Rf " + path);
+    
+                                    // now that the mappings are updated we need to
+                                    // check the packages to ensure there are no hard directories
+                                    // where there should be links
+    
+                                    var path = packagePath.join(revision);
+                                    if(path.exists()) {
+                                        if(path.isLink()) {
+                                            path.remove();
+                                        } else {
+                                            OS.command("rm -Rf " + path);
+                                        }
                                     }
+                                    path.dirname().mkdirs();
+                                    pkg.getPath().symlink(path);
                                 }
-                                path.dirname().mkdirs();
-                                pkg.getPath().symlink(path);
                             }
                         });
                     }
@@ -259,7 +271,7 @@ Database.prototype.mapSources = function() {
     var catalogs = {};
     function getCatalog(url) {
         if(!catalogs[url]) {
-            catalogs.update(url);
+//            catalogs.update(url);
             catalogs[url] = catalogs.get(url);
         }
         return catalogs[url];

@@ -25,6 +25,10 @@ Package.prototype.getBuildPath = function() {
     return require("./pinf").getDatabase().getBuildPathForPackage(this);
 }
 
+Package.prototype.getDataPath = function() {
+    return require("./pinf").getDatabase().getDataPathForPackage(this);
+}
+
 Package.prototype.exists = function() {
     return this.path.exists();
 }

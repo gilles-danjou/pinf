@@ -89,12 +89,16 @@ Workspace.prototype.setPlatform = function(platform) {
 
     var contents = sourcePath.read();
     // named and colored prompt
+    var name = this.getName();
+    if(this.isBranched()) {
+        name = name + "/" + this.getBranchName();
+    }
     var customizations = [
         // OSX Terminal
-        'export PS1="\\e[00;35mTUSK[\\e[00;33m' + this.getName() + '\\e[00;35m]:\\e[m "',
+        'export PS1="\\e[00;35mTUSK[\\e[00;33m' + name + '\\e[00;35m]:\\e[m "'
         // OSX iTerm (http://xanana.ucsc.edu/xtal/iterm_tab_customization.html)
-        'echo -ne "\\e]1;TUSK[' + this.getName() + ']\\a"',
-        'echo -ne "\\e]2;TUSK[' + this.getName() + '] @ ' + this.getPath().valueOf() + '\\a"'
+//        'echo -ne "\\e]1;TUSK[' + name + ']\\a"',
+//        'echo -ne "\\e]2;TUSK[' + name + '] @ ' + this.getPath().valueOf() + '\\a"'
     ];
     contents = contents.replace(/\n\s*__SHELL_CUSTOMIZATIONS__\s*\n/, "\n" + customizations.join("\n") + "\n");
     contents = contents.replace(/__PINF_PLATFORM_HOME__/g, platform.getPath().valueOf());
@@ -168,7 +172,77 @@ Workspace.prototype.destroy = function() {
 }
 
 
+
+Workspace.prototype.isBranched = function() {
+    if(!this.exists()) return false;
+    if(this.getConfig().get(["branched"])) {
+        return true;
+    }
+    var parentWorkspace = Workspace(this.getPath().dirname());
+    return (parentWorkspace.getConfig().has(["branched"])==true);
+}
+
+Workspace.prototype.getBranchName = function() {
+    if(this.getConfig().get(["branched"])) {
+        throw new WorkspaceError("Cannot get branch name for a parent workspace containing branched workspaces");
+    }
+    return this.getPath().basename().valueOf();
+}
+
+Workspace.prototype.migrateToBranched = function() {
+    
+    var rc = this.getRevisionControl(),
+        branch = rc.getActiveBranch();
+
+    var workspacePath = this.getPath(),
+        tmpWorkspacePath = this.getPath().dirname().join(this.getPath().basename() + "~tmp"),
+        branchedWorkspacePath = this.getPath().join(branch);
+    
+    // rename the workspace
+    workspacePath.move(tmpWorkspacePath);
+    // re-create the workspace
+    workspacePath.mkdirs();
+    // move the renamed workspace into branched position
+    tmpWorkspacePath.move(branchedWorkspacePath);
+        
+    // write workspace info file with branch info
+    delete this.config;
+    this.getConfig().set(["branched"], true);
+
+    // if platform is set we update it to re-write the action script which now has different paths
+    var workspace = this.getBranchWorkspace(branch);
+    if(workspace.hasPlatform()) {
+        workspace.setPlatform(workspace.getPlatform());
+    }
+}
+
+Workspace.prototype.getBranchWorkspace = function(name) {
+    if(!this.isBranched()) {
+        throw new WorkspaceError("Workspace is not branched at: " + this.getPath());
+    }
+    var workspace = Workspace(this.getPath().join(name));
+    // transfer some data to the sub workspace
+    if(this.hasVendorInfo()) {
+        workspace.setVendorInfo(this.getVendorInfo());
+    }
+    return workspace;
+}
+
+Workspace.prototype.getBranchWorkspaces = function() {
+    if(!this.isBranched()) {
+        throw new WorkspaceError("Workspace is not branched at: " + this.getPath());
+    }
+    var workspaces = [],
+        self = this;
+    this.getPath().listPaths().forEach(function(item) {
+        if(!item.isDirectory()) return;
+        workspaces.push(self.getBranchWorkspace(item.basename()));
+    });
+    return workspaces;    
+}
+
 Workspace.prototype.checkout = function() {
+
     if(this.exists()) {
         throw new WorkspaceError("Workspace already exists at: " + this.getPath());
     }
@@ -184,6 +258,22 @@ Workspace.prototype.checkout = function() {
 
         var git = GIT.Git(path);
         git.clone(url);
+        
+        // try and setup tracking branch and switch to branch if this is a branched workspace and the branch exists
+        if(this.isBranched() && this.getBranchName()) {
+            var remoteBranches = this.getRevisionControl().getBranches("origin");
+            if(UTIL.has(remoteBranches, this.getBranchName())) {
+                // do not setup tracking branch for master as it already exists
+                if(this.getBranchName()!="master") {
+                    this.getRevisionControl().branch("origin/" + this.getBranchName(), {
+                        "track": this.getBranchName()
+                    });                
+                    this.getRevisionControl().checkout(this.getBranchName());
+                }
+            } else {
+                print("No remote branch with name '" + this.getBranchName() + "' found. You need to branch yourself: " + this.getPath());
+            }
+        }
 
         // TODO: pinf map-sources
 

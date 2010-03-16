@@ -37,4 +37,5 @@ var processor = {
         return text;
     }
 };
-require.loader.preprocessors.unshift(processor);
+if(require.loader.preprocessors)
+    require.loader.preprocessors.unshift(processor);
