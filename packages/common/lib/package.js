@@ -152,6 +152,9 @@ Package.prototype.getInfoForPinfLocatorProperty = function(propertyName) {
 }
 
 
+/**
+ * deprecated
+ */
 Package.prototype.makeCallable = function() {
 
     PACKAGES.registerUsingPackage(this.getLocator().getSpec(true), this.getPath().valueOf());
@@ -166,3 +169,4 @@ Package.prototype.makeCallable = function() {
         });
     }
 }
+

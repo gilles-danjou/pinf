@@ -45,13 +45,12 @@ PlatformBuilder.prototype.triggerBuild = function(options) {
 
     // a platform may declare programs it depends on.
     // we need to link all binaries from built programs to the platform bin directory.
-    // calling PINF.getDatabase().getProgram() will build the program if not already built.
     if(UTIL.has(sourcePackageImplements, "programs")) {
         UTIL.every(sourcePackageImplements["programs"], function(item) {
             
             var locator = LOCATOR.PackageLocator(item[1]);
             
-            if(!PINF.getDatabase().hasProgram(locator)) {
+            if(!PINF.getDatabase().hasProgram(locator) || options.forceBuild) {
                 PINF.getDatabase().buildProgram(locator, options);
             }
 
@@ -67,6 +66,23 @@ print(" ... LINK BIN from "+item+" to " +targetBasePath.join("bin", item.basenam
             }
         });
     }
+    
+    // link all commands from built platform
+    var binPath = this.targetPackage.getBuildPath().join("raw", "bin");
+    if(binPath.exists()) {
+        binPath.listPaths().forEach(function(item) {
+            if(item.basename().valueOf()!="activate.bash") {
+                
+                if(!targetBasePath.join("bin", item.basename()).exists()) {
+            
+print(" ... LINK BIN from "+item+" to " +targetBasePath.join("bin", item.basename()));                    
+            
+                    item.symlink(targetBasePath.join("bin", item.basename()));
+                }
+            }
+        });
+    }
+    
     
 /*
 TODO: Call custom platform builders!!
@@ -84,7 +100,6 @@ TODO: Call custom platform builders!!
 
     // write bin/activate.bash if it does not exist (i.e. was not created by custom builder)
     var file = targetBasePath.join("bin", "activate.bash");
-    if(!file.exists()) {
-        file.write("export PATH="+file.dirname()+":\"$PATH\"");
-    }
+    file.write("export PATH="+file.dirname()+":\"$PATH\"");
+
 }

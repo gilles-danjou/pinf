@@ -1,0 +1,52 @@
+#!/bin/bash
+
+INSTALL_PATH=$HOME/pinf
+
+if [ ! -n "$1" ]; then
+    if [ ! -n "$HOME" ]; then
+        echo "ERROR: Cannot use \$HOME to determine base install path. It is not set. Use 'pinf-install /target/path'."
+        exit
+    fi
+else
+    INSTALL_PATH=$1
+fi
+
+echo "Installing PINF at: $INSTALL_PATH"
+
+PARENT_DIR=`dirname $INSTALL_PATH`
+
+if [ ! -d "$PARENT_DIR" ]; then
+    echo "ERROR: Parent directory does not exist: $PARENT_DIR"
+    exit
+fi
+
+if [  -d "$INSTALL_PATH" ]; then
+    echo "ERROR: Install path already exists: $INSTALL_PATH"
+    exit
+fi
+
+INSTALL_DIR=`basename $INSTALL_PATH`
+
+
+cd $PARENT_DIR
+mkdir $INSTALL_DIR
+cd $INSTALL_DIR
+mkdir bootstraps
+cd bootstraps
+
+git clone git://github.com/cadorn/narwhal.git narwhal
+cd narwhal
+git branch --track experimental origin/experimental
+git checkout experimental
+cd ..
+
+export PATH=$INSTALL_PATH/bootstraps/narwhal/bin:$PATH
+
+git clone git://github.com/cadorn/util.git util
+git clone git://github.com/cadorn/pinf.git pinf
+
+export PATH=$INSTALL_PATH/bootstraps/pinf/bin:$PATH
+
+export PINF_HOME=$INSTALL_PATH
+
+pinf-local build-program $INSTALL_PATH/bootstraps/pinf/programs/cli

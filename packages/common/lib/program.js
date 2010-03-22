@@ -13,6 +13,7 @@ var LOCATOR = require("./package/locator");
 var DESCRIPTOR = require("./package/descriptor");
 var PINF = require("./pinf");
 var ARGS = require("args");
+var TERM = require("term");
 
 
 var Program = exports.Program = function(path, locator) {
@@ -325,19 +326,46 @@ Program.prototype.publish = function(options) {
 
 
 Program.prototype.launch = function(launchOptions) {
+    
+    // pull out all options until the package is specified
+    // TODO: The ARGS parser should have an option to stop parsing at a given argument
+    var args = {
+        "launcher": [],
+        "program": false
+    };
+    launchOptions.args.forEach(function(arg) {
+        if(arg.substr(0,1)=="-") {
+            if(args.program!==false) {
+                args.program.push(arg);
+            } else {
+                args.launcher.push(arg);
+            }
+        } else {
+            if(args.program!==false) {
+                args.program.push(arg);
+            } else {
+                args.launcher.push(arg);
+                args.program = [];
+            }
+        }
+    });
 
     var parser = new ARGS.Parser();
     parser.option('--bin').set().help("The command to launch");
-    var options = parser.parse(launchOptions.args);
-    
+    var options = parser.parse(args.launcher);
+
     if(options.bin) {
         
         var binPath = this.getPath().join("bin", options.bin);
         if(!binPath.exists()) {
             throw new Error("Command file not found at: " + binPath);
         }
+        
+        var command = binPath.valueOf() + ((args.program && args.program.length>0)?" "+args.program.join(" "):"");
 
-        OS.system(binPath.valueOf());
+        TERM.stream.print("\0cyan(Running: " + command + "\0)");
+
+        OS.system(command);
 
     } else {
         throw new Error("Default launchers not supported yet! Specify --bin");

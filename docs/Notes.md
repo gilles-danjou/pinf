@@ -74,4 +74,6 @@ Links
 **Libraries**
 
   * http://github.com/DmitryBaranovskiy/githubjs
-  
+  * http://github.com/Gozala/github
+
+

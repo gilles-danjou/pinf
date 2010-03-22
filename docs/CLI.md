@@ -32,4 +32,75 @@ The following commands have been implemented:
      --db DB: Path to PINF database
      -h --help: displays usage information (final option)
 
-A command reference is coming soon.
+
+Command Reference
+-----------------
+
+*NOTE: These docs are a work in progress.*
+
+Assumptions:
+
+    ~/pinf/workspaces/github.com/cadorn/pinf/package.json                   // PINF workspace
+    ~/pinf/workspaces/github.com/cadorn/pinf/packages/common/package.json   // PINF sub-package
+
+
+### pinf create-workspace ###
+
+    pinf create-workspace http://github.com/cadorn/pinf/
+
+Create a github project and checkout the workspace.
+
+
+### pinf switch-workspace ###
+
+    pinf switch-workspace github.com/cadorn/pinf 
+    pinf switch-workspace github.com/cadorn/pinf:packages/common
+
+Enter a new shell/virtual environment maintained by PINF for the specified package.
+
+
+### pinf register-namespace ###
+
+    pinf register-namespace http://registry.pinf.org/christoph@christophdorn.com/github/pinf/
+    pinf register-namespace --user christoph@christophdorn.com http://registry.pinf.org/cadorn.org/github/pinf/
+
+Register a namespace you control on the PINF registry server.
+
+
+### pinf register-package ###
+
+    pinf register-package cadorn.org/github/pinf ~/pinf/workspaces/github.com/cadorn/pinf
+    pinf register-package cadorn.org/github/pinf .      // from workspace (github.com/cadorn/pinf)
+
+Register a package to a namespace you control on the PINF registry server. This will insert a `uid` property
+into `package.json` for the package you registered. Registration requires you to have the following
+minimum properties set:
+
+    package.json ~ {
+        "name": "pinf",
+        "repositories": [
+            {
+                "type": "git",
+                "url": "git://github.com/cadorn/pinf.git",
+            }
+        ]
+    }
+
+### pinf announce-release ###
+
+    pinf announce-release --branch master ~/pinf/workspaces/github.com/cadorn/pinf
+    pinf announce-release .     // from workspace (github.com/cadorn/pinf)
+
+Announces a new package revision to the registry server for the given branch. This is used to collaborate during
+active development. The package may be located via:
+
+    package.json ~ {
+        "using": {
+            "pinf": {
+                "catalog": "http://registry.pinf.org/cadorn.org/github/catalog.json",
+                "name": "pinf",
+                "revison": "master"
+            }
+        }
+    }
+

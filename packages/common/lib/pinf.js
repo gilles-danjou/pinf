@@ -37,7 +37,7 @@ exports.getDatabase = function() {
         if(system.pinf && system.pinf.databasePath) {
             database = DATABASE.Database(system.pinf.databasePath);
         } else {
-            throw new PinfError("Database not set");
+            database = exports.getDefaultDatabase();
         }
     }
     return database;
@@ -58,6 +58,10 @@ exports.getPackageForLocator = function(locator) {
 
 exports.getPackageStore = function() {
     return exports.getDatabase().getPackageStore();
+}
+
+exports.getPackagesPath = function() {
+    return exports.getDatabase().getPackageStore().getPackagesPath();
 }
 
 exports.getPlatformForSelector = function(selector) {

@@ -9,6 +9,7 @@ var JSON = require("json");
 var FS_STORE = require("http/fs-store");
 var CATALOGS = require("../catalogs");
 var PACKAGE = require("../package");
+var LOCATOR = require("./locator");
 var DESCRIPTOR = require("./descriptor");
 var ZIP = require("zip");
 var URI = require("uri");
@@ -44,6 +45,9 @@ PackageStore.prototype.getSources = function() {
 }
 
 PackageStore.prototype.get = function(locator) {
+    if(!UTIL.has(locator, "__class__") || locator.__class__!="PackageLocator") {
+        locator = LOCATOR.PackageLocator(locator);
+    }
     var descriptor,
         downloadInfo,
         pkg,

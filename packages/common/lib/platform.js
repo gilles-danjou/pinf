@@ -20,12 +20,15 @@ var Platform = exports.Platform = function(path, locator) {
 Platform.prototype = PACKAGE.Package();
 
 
-Platform.prototype.init = function(locator, name) {
+Platform.prototype.init = function(locator, name, options) {
     if(this.exists()) {
         throw new Error("Platform already exists at: " + this.getPath());
     }
+    this.locator = locator;
     var self = this;
     name = name || locator.getTopLevelId();
+    options = options || {};
+    options.targetPackageName = name;
     try {
         var pkg = PINF.getPackageForLocator(locator);
         if(!pkg) {
@@ -43,9 +46,7 @@ Platform.prototype.init = function(locator, name) {
         builder.setSourcePackage(pkg);
         builder.setTargetPackage(this);
 
-        builder.triggerBuild({
-            "targetPackageName": name
-        });
+        builder.triggerBuild(options);
 
     } catch(e) {
         this.destroy();
@@ -71,7 +72,9 @@ Platform.prototype.update = function() {
         // TODO: We need to compile the platform in a new directory and
         //       only replace the existing one once we know the new one works.        
         this.destroy();
-        this.init(LOCATOR.PackageLocator(spec.using.platform), spec.name);
+        this.init(LOCATOR.PackageLocator(spec.using.platform), spec.name, {
+            "forceBuild": true
+        });
 
     } catch(e) {
         // The init failed which means we now have a broken or rather missing platform.
