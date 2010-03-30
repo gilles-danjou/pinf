@@ -77,7 +77,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         selector = "http://" + this.getPath().join("").relative(lastMatch);
     } else
     if(!/^http:\/\//.test(selector)) {
-        var parts = selector.split(":");
+        var parts = selector.split("::");
         if(parts.length==2) {
             selector = "http://" + parts[0];
             subPath = parts[1];
@@ -89,7 +89,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
     try {
         var vendor = VENDOR.getVendorForUrl(selector);
         var info = vendor.parseUrl(selector);
-        if(!info.user || !info.repository) {
+        if(!info.repository || (!info.user && !info.domain)) {
             throw new WorkspacesError("Not a valid repository URL");
         }
         path = this.getPath().join(vendor.getWorkspacePath(info));

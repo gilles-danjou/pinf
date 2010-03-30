@@ -67,11 +67,11 @@ ProgramStore.prototype.build = function(locator, options) {
     var sourcePackage = this.packageStore.get(locator);
 
     if(!sourcePackage.getPath().join("program.json").exists()) {
-        throw new Error("Package not a program at path: " + sourcePackage.getPath());
+        throw new Error("Package not a program (missing program.json) at path: " + sourcePackage.getPath());
     }
 
-    var programPackage = PROGRAM.Program(programPath, locator);
-
+    var programPackage = PROGRAM.Program(programPath, locator);    
+    
     // remove the existing program first
     if(programPackage.getPath().join("package.json").exists()) {
         OS.command("rm -Rf " + programPackage.getPath());

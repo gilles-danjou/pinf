@@ -10,6 +10,8 @@ var VALIDATOR = require("validator", "util");
 var PINF = require("../pinf");
 var GIT = require("git", "util");
 var OS = require("os");
+var REMOTE = require("remote", "common");
+
 
 var command = exports["build-program"] = new ARGS.Parser();
 
@@ -19,6 +21,7 @@ command.option("--rdep").bool().help("Build using remote dependencies instead of
 command.option("--remote").bool().help("Build using all remote releases instead of local copy");
 command.option("--revision").set().help("The revision to build (instead of the latest tag)");
 command.option("--diff").bool().help("NYI - Display packages that will be used vs packages recorded in program.json");
+command.option("--server").set().help("Specify a server to build the program on");
 command.helpful();
 
 
@@ -84,14 +87,32 @@ command.action(function (options) {
             }
         }
 
-        var pkg = PINF.getDatabase().buildProgram(locator, {
-            "remoteProgram": remoteProgram,
-            "remoteDependencies": remoteDependencies,
-            "args": options.args.slice(1)
-        });
 
-        command.print("Built program at: " + pkg.getPath());
+        if(options.server) {
+        
+            var remote = REMOTE.Remote(options.server);
+            
+            remote.buildProgram(locator, {
+                "remoteProgram": remoteProgram,
+                "remoteDependencies": remoteDependencies,
+                "args": options.args.slice(1)
+            });
 
+            command.print("Built program on remote server");
+
+        } else {
+
+            var database = PINF.getDatabase();
+    
+            var pkg = database.buildProgram(locator, {
+                "remoteProgram": remoteProgram,
+                "remoteDependencies": remoteDependencies,
+                "args": options.args.slice(1)
+            });
+    
+            command.print("Built program at: " + pkg.getPath());
+        }
+        
     } catch(e) {
         ARGS_UTIL.printError(e);
         return;

@@ -13,13 +13,25 @@ exports.getVendorForUrl = function(uri) {
     if(!(uri instanceof URI.URI)) {
         uri = URI.parse(uri);
     }
+    var m;
     if(uri.domain=="github.com") {
         return require("./vendor/github").Vendor();
+    } else
+    if(/^[^\.]*\.googlecode\.com$/.test(uri.domain)) {
+        return require("./vendor/googlecode").Vendor();
+    } else
+    if(m = uri.url.match(/^http:\/\/([^@]*)@([^:]*):(.*?)\.git$/)) {
+        return require("./vendor/default").Vendor();
     }
     return false;
 }
 
 
+
+
+/**
+ * @deprecated
+ */
 exports.validateRepositoryUrl = function(url, options) {
     var repositories = options.revisionControl.getRepositories();
     if(!repositories) {
@@ -40,6 +52,9 @@ exports.validateRepositoryUrl = function(url, options) {
 
 // TODO: Move vendor-specific code into ./vendor/*.js modules
 
+/**
+ * @deprecated
+ */
 exports.normalizeRepositoryUrl = function(url, returnCommonString) {
 
     if(!url) return false;
@@ -82,6 +97,9 @@ exports.normalizeRepositoryUrl = function(url, returnCommonString) {
     return info;
 }
 
+/**
+ * @deprecated
+ */
 exports.compareRepositoryUrlInfo = function(subject, compare, ignore) {
     subject = UTIL.copy(subject);
     compare = UTIL.copy(compare);
@@ -93,6 +111,10 @@ exports.compareRepositoryUrlInfo = function(subject, compare, ignore) {
     return UTIL.eq(subject, compare);
 }
 
+
+/**
+ * deprecated
+ */
 exports.rawUrlForRepository = function(repository) {
     
     var repositoryInfo = exports.normalizeRepositoryUrl(repository.url);
@@ -105,6 +127,9 @@ exports.rawUrlForRepository = function(repository) {
 }
 
 
+/**
+ * deprecated
+ */
 exports.downloadInfoForRepository = function(repository) {
     
     var repositoryInfo = exports.normalizeRepositoryUrl(repository.url);
@@ -120,6 +145,9 @@ exports.downloadInfoForRepository = function(repository) {
 }
 
 
+/**
+ * deprecated
+ */
 exports.normalizeCommitInfo = function(vendor, data) {
 
     if(vendor=="github.com") {
@@ -163,6 +191,9 @@ exports.normalizeCommitInfo = function(vendor, data) {
 }
 
 
+/**
+ * deprecated
+ */
 exports.getTagsForRepository = function(repository) {
 
     var repositoryInfo = exports.normalizeRepositoryUrl(repository.url || repository);

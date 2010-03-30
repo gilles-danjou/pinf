@@ -45,14 +45,18 @@ ProgramBuilder.prototype.getTarget = function() {
 }
 
 ProgramBuilder.prototype.triggerBuild = function(options) {
-    
+
     options = options || {};
     if(!options.monitor) {
         options.monitor = {
             "built": {}
         };
     }
+    if(!options.buildStack) {
+        options.buildStack = [];
+    }
     var self = this;
+        
 
     TERM.stream.print("\0cyan(*** Building PROGRAM Package ***\0)");
     TERM.stream.print("\0cyan(    source: "+this.sourcePackage.getPath()+"\0)");
@@ -223,6 +227,8 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
         targetBasePath = this.targetPackage.getPath();
     targetBasePath.mkdirs();
 
+print("ProgramBuilder.prototype.buildProgramPackage:" + sourceBasePath);
+
     var sourceDescriptor = this.sourcePackage.getDescriptor();
 
     // write package.json file (merged with package.local.json if avaiable)
@@ -246,6 +252,11 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
 
 
     var path;
+
+
+    
+    
+    
 
 
     // link all system and using packages to desired versions
@@ -272,6 +283,7 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
             }
 
             var key = ["packages", type[0]].concat(stacks.names).concat([name, "@"]);
+print(key);
             if(options.remoteProgram) {
                 if(!programDescriptor.has(key)) {
                     throw new Error("remote program.json is missing a locator for key: " + key.join(" -> "));
@@ -318,7 +330,9 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
             }
             info["locator"] = locator.getSpec(true);
             programDescriptor.set(key, info);
-            
+
+print("id: "+pkg.getTopLevelId());
+dump(options.monitor.built);            
 
             // only build package if not already built for program
             if(!UTIL.has(options.monitor.built, pkg.getTopLevelId())) {
@@ -356,6 +370,8 @@ ProgramBuilder.prototype.buildProgramPackage = function(sourcePackage, targetPac
                     targetPackage.getPath().join("packages").mkdirs();
                     path.symlink(targetPackage.getPath().join("packages", name));
                 }
+            } else {
+                return false;
             }
 
             return locator;
@@ -415,6 +431,9 @@ TODO: This shoul happen dynamically when a test is executed
 */
 
 }
+
+
+
 
 
 ProgramBuilder.prototype.buildPackage = function(sourcePackage, options) {
