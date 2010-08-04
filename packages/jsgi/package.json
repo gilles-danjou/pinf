@@ -1,0 +1,12 @@
+{
+    "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/jsgi/",
+    "name": "jsgi",
+    "type": "using",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/jsgi"
+        }
+    ]
+}
