@@ -1,0 +1,11 @@
+{
+    "uid": "http://registry.pinf.org/cadorn.org/github/pinf/packages/loader/",
+    "name": "loader",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/cadorn/pinf.git",
+            "path": "packages/loader"
+        }
+    ]
+}
