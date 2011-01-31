@@ -46,7 +46,7 @@ PackageLocator.prototype.getSpec = function(usePinnedVersion) {
 }
 
 PackageLocator.prototype.isCatalog = function() {
-    return (this.spec.catalog && this.spec.name);
+    return !!(this.spec.catalog && this.spec.name);
 }
 
 PackageLocator.prototype.isDirect = function() {

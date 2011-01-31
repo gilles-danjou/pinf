@@ -339,6 +339,11 @@ CommonJS:
  * [Call for votes: name of the system-provided "virtual" package](http://groups.google.com/group/commonjs/browse_thread/thread/17442874b369da5d)
  * [Packages 0.1](http://groups.google.com/group/commonjs/browse_thread/thread/541633834ce2334)
  * [module pre-processing for require()](http://groups.google.com/group/narwhaljs/browse_thread/thread/e8e8716c534e4fac)
+ * [require](http://groups.google.com/group/commonjs/browse_thread/thread/3bde5a1c843d9fe3)
+ * [Packages 1.1 version range definitions](http://groups.google.com/group/commonjs/browse_thread/thread/a1abe3ffb7203ef4)
+ * [Packages 1.1 Draft](http://groups.google.com/group/commonjs/browse_thread/thread/9d714a00f5591efb)
+ * [Transport & Packages](http://groups.google.com/group/commonjs/browse_thread/thread/ca0e9da69a33b519)
+ * [Packages 1.0 comments](http://groups.google.com/group/commonjs/browse_thread/thread/c70af7ad188d6082)
 
 NodeJS:
 

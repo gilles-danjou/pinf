@@ -22,6 +22,7 @@ command.option("--remote").bool().help("Build using all remote releases instead 
 command.option("--revision").set().help("The revision to build (instead of the latest tag)");
 command.option("--diff").bool().help("NYI - Display packages that will be used vs packages recorded in program.json");
 command.option("--server").set().help("Specify a server to build the program on");
+command.option("--target").set().help("Specify a target to build");
 command.helpful();
 
 
@@ -107,7 +108,8 @@ command.action(function (options) {
             var pkg = database.buildProgram(locator, {
                 "remoteProgram": remoteProgram,
                 "remoteDependencies": remoteDependencies,
-                "args": options.args.slice(1)
+                "args": options.args.slice(1),
+                "target": options.target || "raw"
             });
     
             command.print("Built program at: " + pkg.getPath());

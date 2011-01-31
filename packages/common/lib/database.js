@@ -198,66 +198,70 @@ Database.prototype.mapSources = function() {
     workspaces.forEach(function(workspace) {
     
         workspace.forEachPackage(function(pkg) {
-            if(pkg.hasUid()) {
-                
-                var uid = pkg.getUid(),
-                    uri = URI.parse(uid);
-
-                if(uri.domain=="registry.pinf.org" || uri.domain=="private-registry.appspot.com") {
-
-                    var id = uri.authorityRoot +
-                             uri.domain + "/" +
-                             uri.directories.slice(0,uri.directories.length-1).join("/"),
-                        url = uri.scheme + ":" + 
-                              id + "/" +
-                              "catalog.json",
-                        name = uri.directories.pop(),
-                        packagePath = self.packageStore.getPackagesPath().join(id, name);
-
-                    var catalog = getCatalog(url),
-                        revisions = catalog.getRevisionsForPackage(name);
-                    if(revisions) {
-                        revisions.forEach(function(revision) {
-                            if(revision!="*") {
-
-                                if(!workspace.isBranched() || workspace.getBranchName()==revision) {
-
-                                    var key = [url, name, revision, "@"];
-
-                                    if(sources.spec.has(key)) {
-                                        // mapping already found
-                                        // ensure existing path exists, if not update with new path
-                                        if(!FILE.Path(sources.spec.get(key).path).exists()) {
+            try {
+                if(pkg.hasUid()) {
+                    
+                    var uid = pkg.getUid(),
+                        uri = URI.parse(uid);
+    
+                    if(uri.domain=="registry.pinf.org" || uri.domain=="private-registry.appspot.com") {
+    
+                        var id = uri.authorityRoot +
+                                 uri.domain + "/" +
+                                 uri.directories.slice(0,uri.directories.length-1).join("/"),
+                            url = uri.scheme + ":" + 
+                                  id + "/" +
+                                  "catalog.json",
+                            name = uri.directories.pop(),
+                            packagePath = self.packageStore.getPackagesPath().join(id, name);
+    
+                        var catalog = getCatalog(url),
+                            revisions = catalog.getRevisionsForPackage(name);
+                        if(revisions) {
+                            revisions.forEach(function(revision) {
+                                if(revision!="*") {
+    
+                                    if(!workspace.isBranched() || workspace.getBranchName()==revision) {
+    
+                                        var key = [url, name, revision, "@"];
+    
+                                        if(sources.spec.has(key)) {
+                                            // mapping already found
+                                            // ensure existing path exists, if not update with new path
+                                            if(!FILE.Path(sources.spec.get(key).path).exists()) {
+                                                sources.spec.set(key, {
+                                                    "path": pkg.getPath().valueOf()
+                                                })
+                                            }
+                                        } else {
+                                            // mapping not found - create it
                                             sources.spec.set(key, {
                                                 "path": pkg.getPath().valueOf()
                                             })
                                         }
-                                    } else {
-                                        // mapping not found - create it
-                                        sources.spec.set(key, {
-                                            "path": pkg.getPath().valueOf()
-                                        })
-                                    }
-    
-                                    // now that the mappings are updated we need to
-                                    // check the packages to ensure there are no hard directories
-                                    // where there should be links
-    
-                                    var path = packagePath.join(revision);
-                                    if(path.exists()) {
-                                        if(path.isLink()) {
-                                            path.remove();
-                                        } else {
-                                            OS.command("rm -Rf " + path);
+        
+                                        // now that the mappings are updated we need to
+                                        // check the packages to ensure there are no hard directories
+                                        // where there should be links
+        
+                                        var path = packagePath.join(revision);
+                                        if(path.exists()) {
+                                            if(path.isLink()) {
+                                                path.remove();
+                                            } else {
+                                                OS.command("rm -Rf " + path);
+                                            }
                                         }
+                                        path.dirname().mkdirs();
+                                        pkg.getPath().symlink(path);
                                     }
-                                    path.dirname().mkdirs();
-                                    pkg.getPath().symlink(path);
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 }
+            } catch(e) {
+                system.log.warn(e);
             }
         });
     });

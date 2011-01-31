@@ -76,7 +76,7 @@ Workspaces.prototype.getForSelector = function(selector, useExactPath) {
         }
         selector = "http://" + this.getPath().join("").relative(lastMatch);
     } else
-    if(!/^http:\/\//.test(selector)) {
+    if(!/^https?:\/\//.test(selector)) {
         var parts = selector.split("::");
         if(parts.length==2) {
             selector = "http://" + parts[0];

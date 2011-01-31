@@ -8,5 +8,12 @@
             "url": "git://github.com/cadorn/pinf.git",
             "path": "packages/jsgi"
         }
-    ]
+    ],
+    "using": {
+        "pinf-common": {
+            "catalog": "http://registry.pinf.org/cadorn.org/github/pinf/packages/catalog.json",
+            "name": "common",
+            "revision": "master"
+        }
+    }
 }

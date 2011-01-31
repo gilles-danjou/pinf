@@ -13,6 +13,7 @@ var command = exports["create-workspace"] = new ARGS.Parser();
 command.help('Create a new workspace');
 command.arg("URL");
 command.option("-s", "--switch").bool().help("Switch to workspace");
+command.option("--skip-create-remote-repo").bool().help("Skip creation of remote repository");
 command.helpful();
 
 command.action(function (options) {
@@ -24,7 +25,7 @@ command.action(function (options) {
 
         var workspace = PINF.getWorkspaceForSelector(uri);
 
-        workspace.init();
+        workspace.init(options);
 
         command.print("Created workspace at: " + workspace.getPath());
         

@@ -45,11 +45,21 @@ Vendor.prototype.hasRepository = function(info) {
     if(!info.user || !info.repository) {
         throw new Error("Invalid argument");
     }
-    var result = callAPI("repos/show/" + info.user);
-    if(!result.repositories || result.repositories.length==0) {
+    var repos = [],
+        result,
+        page = 1;
+    while(result = callAPI("repos/show/" + info.user + ((page>1)?"?page="+page:""))) {
+        if(!result.repositories || result.repositories.length==0) {
+            break;
+        }
+        repos = repos.concat(result.repositories);
+        page++;
+    }
+    
+    if(repos.length==0) {
         return false;
     }
-    var names = UTIL.map(result.repositories, function(repository) {
+    var names = UTIL.map(repos, function(repository) {
         return repository.name;
     });
     return UTIL.has(names, info.repository);
@@ -90,7 +100,7 @@ Vendor.prototype.getWorkspacePath = function(info) {
 
 Vendor.prototype.getRepositoryUrl = function(info) {
     var credentials = PINF.getCredentials("http://github.com/api/");
-    if(!credentials || credentials.login!=info.user) {
+    if(!credentials || (credentials.login!=info.user && credentials.login!=info.apiUser)) {
         return this.getPublicRepositoryUrl(info);
     } else {
         return this.getPrivateRepositoryUrl(info);

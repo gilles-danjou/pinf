@@ -8,6 +8,7 @@ var ARGS = require("args");
 var ARGS_UTIL = require("args-util", "util");
 var VALIDATOR = require("validator", "util");
 var PINF = require("../pinf");
+var PROGRAM_PUBLISHER = require("publisher/program", "common");
 
 var command = exports["publish-program"] = new ARGS.Parser();
 
@@ -31,6 +32,8 @@ command.action(function (options) {
         var locator = PINF.locatorForDirectory(directory);
         locator.setRevision(revision);
 
+/*
+NOTE: This should still work but is DEPRECATED
         var pkg = PINF.getDatabase().getProgram(locator),
             path = PINF.getDatabase().getBuildPathForPackage(pkg);
 
@@ -39,6 +42,17 @@ command.action(function (options) {
         });
 
         command.print("Published program from: " + path);
+*/
+
+        var programPackage = PINF.getDatabase().getProgram(locator);
+
+        var publisher = PROGRAM_PUBLISHER.ProgramPublisher();
+    
+        publisher.setProgramPackage(programPackage);
+    
+        publisher.triggerPublish();
+
+        command.print("Published program: " + programPackage.getPath());
 
     } catch(e) {
         ARGS_UTIL.printError(e);

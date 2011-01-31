@@ -15,7 +15,11 @@ var PackageCatalog = exports.PackageCatalog = function(path) {
         return new exports.PackageCatalog(path);
         
     this.path = path;
-    this.spec = JSON.decode(this.path.read());
+    try {
+        this.spec = JSON.decode(this.path.read());
+    } catch(e) {
+        throw new CatalogError("Error parsing JSON from: " + this.path);
+    }
 }
 
 PackageCatalog.prototype.getPath = function() {

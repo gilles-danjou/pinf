@@ -4,6 +4,7 @@ function dump(obj) { print(require('test/jsdump').jsDump.parse(obj)) };
 
 
 var LOCATOR = require("../package/locator");
+var PACKAGE = require("../package");
 var PINF = require("../pinf");
 var TERM = require("term");
 var JSON = require("json");
@@ -133,6 +134,55 @@ PackageBuilder.prototype.triggerBuild = function(options) {
                 
                 targetPath.write(contents);
                 targetPath.chmod(0755);
+            });
+        }
+        
+        // build all targets
+        if(UTIL.has(impl, "builders")) {
+            UTIL.every(impl["builders"], function(item) {
+
+                var targetPackagePath = self.sourcePackage.getBuildPath().join(item[0]);
+                
+                if(targetPackagePath.exists() && item[0]!="raw") {
+                    return;
+                }
+    
+                var locator = LOCATOR.PackageLocator(item[1]),
+                    pkg = self.sourcePackage;
+    
+                if(!locator.getModule()) {
+                    throw new Error("'builders."+item[0]+"' locator does not specify a 'module' property");
+                }
+                if(locator.isCatalog() || locator.isDirect()) {
+                    // the module is located in an external package
+                    pkg = PINF.getPackageForLocator(locator);
+                } else {
+                    // the module is in our own package
+                    var newLocator = self.sourcePackage.getLocator().clone();
+                    newLocator.setModule(locator.getModule());
+                    locator = newLocator;
+                }
+        
+                pkg.makeCallable();
+        
+                // load actual module now that package and dependencies are registered
+
+                var builder;
+
+                try {
+                    builder = require(locator.getModule(), pkg.getTopLevelId()).PackageBuilder();
+                } catch(e) {
+                    print(pkg.getTopLevelId() + " -> " + locator.getModule());
+                    throw e;
+                }
+    
+                builder.setTarget(item[0]);
+    
+                builder.setSourcePackage(self.sourcePackage);
+    
+                builder.setTargetPackage(PACKAGE.Package(targetPackagePath, self.sourcePackage.getLocator()));
+    
+                builder.build(options);
             });
         }
     }

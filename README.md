@@ -1,5 +1,5 @@
 
-**STATUS: Not functional yet! Writing documentation and cleaning implementation. Will be ready very soon!**
+**STATUS: Writing documentation and cleaning implementation.**
 
 
 Overview

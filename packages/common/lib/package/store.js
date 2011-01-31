@@ -225,10 +225,13 @@ PackageStore.prototype.get = function(locator) {
     }
 }
 
-PackageStore.prototype.deepMappingsForPackage = function(pkg, mappings) {
+PackageStore.prototype.deepMappingsForPackage = function(pkg, mappings, monitor) {
     if(!pkg || !pkg.exists()) {
         throw new PackageStoreError("No valid package object");
     }
+    monitor = monitor || {
+        "paths": {}
+    };
     mappings = mappings || [];
     var self = this,
         descriptor,
@@ -242,12 +245,23 @@ PackageStore.prototype.deepMappingsForPackage = function(pkg, mappings) {
         pkg.getDescriptor()["every"+type](function(name, locator) {
             if(!locator) return;
             depPackage = self.get(locator);
+
+            var path = false;
+
             if(self.sources && (descriptor = self.sources.getDescriptor(locator))) {
-                mappings.push([locator.getSpec(), descriptor.getPath().dirname().valueOf(), type.toLowerCase()]);
+                path = descriptor.getPath().dirname().valueOf();
             } else {
-                mappings.push([locator.getSpec(), depPackage.getPath().valueOf(), type.toLowerCase()]);
+                path = depPackage.getPath().valueOf();
             }
-            self.deepMappingsForPackage(depPackage, mappings);
+
+            if(UTIL.has(monitor.paths, path)) {
+                return;
+            }
+            monitor.paths[path] = true;
+
+            mappings.push([locator.getSpec(), path, type.toLowerCase()]);
+
+            self.deepMappingsForPackage(depPackage, mappings, monitor);
         });
     });
 

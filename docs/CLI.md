@@ -55,8 +55,18 @@ Create a github project and checkout the workspace.
 
     pinf switch-workspace github.com/cadorn/pinf 
     pinf switch-workspace github.com/cadorn/pinf:packages/common
+    pinf switch-workspace --branch branchName ...
 
 Enter a new shell/virtual environment maintained by PINF for the specified package.
+
+
+### pinf checkout-workspace ###
+
+    pinf checkout-workspace http://github.com/cadorn/pinf/
+    pinf checkout-workspace --branch alternateBranch http://github.com/cadorn/pinf/
+
+Checkout the specified project. If a branch is specified and it exists on the origin repository the branch is checked out
+into a directory named after the branch and the branch is selected in git.
 
 
 ### pinf register-namespace ###

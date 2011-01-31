@@ -107,14 +107,21 @@ Workspace.prototype.setPlatform = function(platform) {
     targetPath.chmod(0755);
 }
 
-Workspace.prototype.init = function() {
+Workspace.prototype.init = function(options) {
     if(this.exists()) {
         throw new WorkspaceError("Workspace already exists at: " + this.getPath());
     }
+    options = options || {};
     try {
         if(this.hasVendorInfo()) {
-            if(this.getVendorInfo().vendor.hasRepository(this.getVendorInfo())) {
-                throw new WorkspaceError("Repository already exists on vendor site");
+            if(options["skip-create-remote-repo"]) {
+                if(!this.getVendorInfo().vendor.hasRepository(this.getVendorInfo())) {
+                    throw new WorkspaceError("Repository does not exist on vendor site");
+                }
+            } else {
+                if(this.getVendorInfo().vendor.hasRepository(this.getVendorInfo())) {
+                    throw new WorkspaceError("Repository already exists on vendor site");
+                }
             }
         }
         var path = this.getPath();
@@ -122,8 +129,8 @@ Workspace.prototype.init = function() {
         
         var git = GIT.Git(path);
         git.init();
-        
-        if(this.hasVendorInfo()) {
+
+        if(!options["skip-create-remote-repo"] && this.hasVendorInfo()) {
             if(!this.getVendorInfo().vendor.createRepository(this.getVendorInfo())) {
                 throw new WorkspaceError("Error creating repository on vendor site");
             }
@@ -242,7 +249,7 @@ Workspace.prototype.getBranchWorkspaces = function() {
 }
 
 Workspace.prototype.checkout = function() {
-
+    
     if(this.exists()) {
         throw new WorkspaceError("Workspace already exists at: " + this.getPath());
     }
@@ -253,7 +260,6 @@ Workspace.prototype.checkout = function() {
 
         var path = this.getPath();
         path.mkdirs();
-
         var url = this.getVendorInfo().vendor.getRepositoryUrl(this.getVendorInfo());
 
         var git = GIT.Git(path);

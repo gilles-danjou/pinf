@@ -60,20 +60,25 @@ command.action(function (options) {
     
                     var str = ["Packages:"];
                     workspace.forEachPackage(function(pkg) {
-                        if(pkg.hasUid() && pkg.getName()!=workspace.getName()) {
-                            locator = locatorForUid(pkg.getUid(), status.branch);
-                            catalog = catalogs.get(locator.getUrl());
-                            var revisions = catalog.getRevisionsForPackage(locator.getName());
-                            if(UTIL.has(revisions, status.branch)) {
-                                descriptor = catalog.getDescriptor(locator);
-    
-                                str.push("\0"+(("0.0.0rev-"+workspaceRevison==descriptor.getVersion())?"green":"red")+"(" +
-                                    pkg.getName() + 
-                                    "\0)");
-    
-                            } else {
-                                str.push(pkg.getName());
+                        
+                        try {
+                            if(pkg.hasUid() && pkg.getName()!=workspace.getName()) {
+                                locator = locatorForUid(pkg.getUid(), status.branch);
+                                catalog = catalogs.get(locator.getUrl());
+                                var revisions = catalog.getRevisionsForPackage(locator.getName());
+                                if(UTIL.has(revisions, status.branch)) {
+                                    descriptor = catalog.getDescriptor(locator);
+        
+                                    str.push("\0"+(("0.0.0rev-"+workspaceRevison==descriptor.getVersion())?"green":"red")+"(" +
+                                        pkg.getName() + 
+                                        "\0)");
+        
+                                } else {
+                                    str.push(pkg.getName());
+                                }
                             }
+                        } catch(e) {
+                            system.log.error("Error ("+e+") while showing package: " + pkg.getPath());
                         }
                     });
                     if(str.length>1) {

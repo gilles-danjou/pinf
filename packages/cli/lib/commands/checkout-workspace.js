@@ -14,6 +14,7 @@ command.help('Checkout an existing workspace');
 command.arg("URL");
 command.option("-s", "--switch").bool().help("Switch to workspace");
 command.option("--branch").set().help("The branch to checkout");
+command.option("--user").set().help("The user to use for github API and auth credentials");
 command.helpful();
 
 command.action(function (options) {
@@ -25,6 +26,11 @@ command.action(function (options) {
         });
 
         var workspace = PINF.getWorkspaceForSelector(uri);
+        
+        var vendorInfo = workspace.getVendorInfo();
+        vendorInfo["apiUser"] = options.user || false;
+        workspace.setVendorInfo(vendorInfo);
+
         
         if(options.branch) {
             // if workspace is not already branched we branch it

@@ -232,6 +232,10 @@ PackageDescriptor.prototype.everyUsing = function(callback) {
  * @deprecated
  */
 PackageDescriptor.prototype.everyPlatform = function(callback) {
+
+//throw new PackageDescriptorError("STOP!!");
+
+
     if(!this.spec.pinf || !this.spec.pinf.platforms) {
         return false;
     }
@@ -291,12 +295,21 @@ PackageDescriptor.prototype.everyImplements = function(callback) {
  *       and should probably be moved out of this module as the caller needs to do a lot of work too.
  *       We can keep a simplified version for more generic use.
  */
+/**
+ * @deprecated
+ */
 PackageDescriptor.prototype.traverseEveryDependency = function(callback, options) {
     return this.traverseEveryLocator("dependencies", callback, options);
 }
+/**
+ * @deprecated
+ */
 PackageDescriptor.prototype.traverseEveryUsing = function(callback, options) {
     return this.traverseEveryLocator("using", callback, options);
 }
+/**
+ * @deprecated
+ */
 PackageDescriptor.prototype.traverseEveryLocator = function(property, callback, options, stacks) {
     if(!options || !options.packageStore) {
         throw new PackageDescriptorError("options.packageStore not provided");

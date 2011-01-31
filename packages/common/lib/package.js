@@ -15,6 +15,20 @@ var Package = exports.Package = function(path, locator) {
         return new exports.Package(path, locator);
     this.path = path;
     this.locator = locator;
+    
+    if(typeof this.locator == "string") {
+        // convert a topLevelID to a locator
+        var parts = this.locator.split("/");
+        if(parts.length>1) {
+            var spec = {
+                "location": "http://" + this.locator + "/"
+            };
+//        dump(spec);
+            this.locator = LOCATOR.PackageLocator(spec);
+        } else {
+            this.locator = null;
+        }    
+    }
 }
 
 Package.prototype.getPath = function() {
